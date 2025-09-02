@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,22 +13,48 @@ import {
 } from "@/components/ui/card";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 
+const API_URL = import.meta.env.VITE_API_URL; // <-- from .env file
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  const navigate = useNavigate();
+
+  // Email/Password login
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const res = await axios.post(`${API_URL}/auth/login`, {
+        email,
+        password,
+      });
+
+      const { token } = res.data;
+
+      // Save JWT or session token (if backend doesn’t set httpOnly cookie)
+      localStorage.setItem("token", token);
+
+      navigate("/dashboard");
+    } catch (err: any) {
+      console.error("Login error:", err);
+      setError(
+        err.response?.data?.message || "Invalid email or password. Try again."
+      );
+    } finally {
       setIsLoading(false);
-      // Handle login logic here
-      console.log("Login attempt:", { email, password });
-    }, 2000);
+    }
+  };
+
+  // Google login (redirect)
+  const handleGoogleLogin = () => {
+    window.location.href = `${API_URL}/oauth2/authorization/google`;
   };
 
   return (
@@ -91,6 +118,10 @@ const Login = () => {
               </div>
             </div>
 
+            {error && (
+              <p className="text-red-500 text-sm text-center">{error}</p>
+            )}
+
             <div className="flex justify-end">
               <Link
                 to="/forgot-password"
@@ -120,7 +151,12 @@ const Login = () => {
               </div>
             </div>
 
-            <Button variant="outline" type="button" className="w-full">
+            <Button
+              variant="outline"
+              type="button"
+              className="w-full"
+              onClick={handleGoogleLogin}
+            >
               <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                 <path
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
