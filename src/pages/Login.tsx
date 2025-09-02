@@ -3,7 +3,13 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 
 const Login = () => {
@@ -15,7 +21,7 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
@@ -76,33 +82,27 @@ const Login = () => {
                   className="absolute right-0 top-0 h-full w-10 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="remember"
-                  className="rounded border-input"
-                />
-                <Label htmlFor="remember" className="text-sm">
-                  Remember me
-                </Label>
-              </div>
-              <Link 
-                to="/forgot-password" 
+            <div className="flex justify-end">
+              <Link
+                to="/forgot-password"
                 className="text-sm text-primary hover:underline"
               >
                 Forgot password?
               </Link>
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full" 
+            <Button
+              type="submit"
+              className="w-full"
               variant="hero"
               disabled={isLoading}
             >
@@ -114,7 +114,9 @@ const Login = () => {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                <span className="bg-card px-2 text-muted-foreground">
+                  Or continue with
+                </span>
               </div>
             </div>
 
@@ -142,8 +144,13 @@ const Login = () => {
           </form>
 
           <div className="mt-6 text-center text-sm">
-            <span className="text-muted-foreground">Don't have an account? </span>
-            <Link to="/signup" className="text-primary hover:underline font-medium">
+            <span className="text-muted-foreground">
+              Don't have an account?{" "}
+            </span>
+            <Link
+              to="/signup"
+              className="text-primary hover:underline font-medium"
+            >
               Sign up
             </Link>
           </div>
