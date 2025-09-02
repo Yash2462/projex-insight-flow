@@ -43,7 +43,7 @@ const Projects = () => {
   const fetchProjects = async () => {
     try {
       const response = await projectAPI.getProjects();
-      setProjects(response.data || []);
+      setProjects(response.data.data || []);
     } catch (error) {
       toast({
         title: "Error",
@@ -85,7 +85,7 @@ const Projects = () => {
     }
     try {
       const response = await projectAPI.searchProjects(searchTerm);
-      setProjects(response.data || []);
+      setProjects(response.data.data || []);
     } catch (error) {
       toast({
         title: "Error",

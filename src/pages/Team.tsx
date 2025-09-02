@@ -38,7 +38,7 @@ const Team = () => {
   const fetchUsers = async () => {
     try {
       const response = await userAPI.getUsers();
-      setUsers(response.data || []);
+      setUsers(response.data.data || []);
     } catch (error) {
       toast({
         title: "Error",

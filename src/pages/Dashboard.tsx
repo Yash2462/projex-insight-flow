@@ -38,7 +38,7 @@ const Dashboard = () => {
         userAPI.getUsers()
       ]);
       
-      const projectsData = projectsResponse.data || [];
+      const projectsData = projectsResponse.data.data || [];
       const usersData = usersResponse.data || [];
       
       setProjects(projectsData);

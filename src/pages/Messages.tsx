@@ -41,7 +41,7 @@ const Messages = () => {
   const fetchProjects = async () => {
     try {
       const response = await projectAPI.getProjects();
-      setProjects(response.data || []);
+      setProjects(response.data.data || []);
       if (response.data?.length > 0) {
         setSelectedProjectId(response.data[0].id);
       }
@@ -59,7 +59,7 @@ const Messages = () => {
   const fetchMessages = async (projectId: number) => {
     try {
       const response = await messageAPI.getMessagesByProjectId(projectId);
-      setMessages(response.data || []);
+      setMessages(response.data.data || []);
     } catch (error) {
       toast({
         title: "Error",
