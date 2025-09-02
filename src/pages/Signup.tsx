@@ -1,40 +1,66 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Signup = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords don't match!");
+      setError("Passwords don't match!");
       return;
     }
-    
+
     setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+    setError(null);
+
+    try {
+      const res = await axios.post(`${API_URL}/auth/signup`, {
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      // If backend returns token on signup
+      if (res.data?.token) {
+        localStorage.setItem("token", res.data.token);
+        navigate("/dashboard");
+      } else {
+        navigate("/login"); // fallback: redirect to login after signup
+      }
+    } catch (err: any) {
+      console.error("Signup error:", err);
+      setError(err.response?.data?.message || "Signup failed. Try again.");
+    } finally {
       setIsLoading(false);
-      console.log("Signup attempt:", formData);
-    }, 2000);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleGoogleSignup = () => {
+    window.location.href = `${API_URL}/oauth2/authorization/google`;
   };
 
   return (
@@ -53,6 +79,8 @@ const Signup = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+
             <div className="space-y-2">
               <Label htmlFor="fullName">Full Name</Label>
               <div className="relative">
@@ -136,12 +164,7 @@ const Signup = () => {
             </div>
 
             <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="terms"
-                className="rounded border-input"
-                required
-              />
+              <input type="checkbox" id="terms" className="rounded border-input" required />
               <Label htmlFor="terms" className="text-sm">
                 I agree to the{" "}
                 <Link to="/terms" className="text-primary hover:underline">
@@ -154,12 +177,7 @@ const Signup = () => {
               </Label>
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full" 
-              variant="hero"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" variant="hero" disabled={isLoading}>
               {isLoading ? "Creating account..." : "Create account"}
             </Button>
 
@@ -172,7 +190,7 @@ const Signup = () => {
               </div>
             </div>
 
-            <Button variant="outline" type="button" className="w-full">
+            <Button variant="outline" type="button" className="w-full" onClick={handleGoogleSignup}>
               <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                 <path
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
