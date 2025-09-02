@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,46 +13,92 @@ import {
   CheckCircle,
   Clock
 } from "lucide-react";
+import { projectAPI, userAPI } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
-  // Mock data - replace with real API calls
-  const stats = [
-    { title: "Total Projects", value: "12", icon: Folder, change: "+2 this month" },
-    { title: "Team Members", value: "8", icon: Users, change: "+1 this week" },
-    { title: "Active Issues", value: "23", icon: AlertCircle, change: "5 resolved today" },
-    { title: "Completed Tasks", value: "156", icon: CheckCircle, change: "+12 this week" },
-  ];
+  const [projects, setProjects] = useState([]);
+  const [stats, setStats] = useState([
+    { title: "Total Projects", value: "0", icon: Folder, change: "Loading..." },
+    { title: "Team Members", value: "0", icon: Users, change: "Loading..." },
+    { title: "Active Issues", value: "0", icon: AlertCircle, change: "Loading..." },
+    { title: "Completed Tasks", value: "0", icon: CheckCircle, change: "Loading..." },
+  ]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  const recentProjects = [
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const [projectsResponse, usersResponse] = await Promise.all([
+        projectAPI.getProjects(),
+        userAPI.getUsers()
+      ]);
+      
+      const projectsData = projectsResponse.data || [];
+      const usersData = usersResponse.data || [];
+      
+      setProjects(projectsData);
+      
+      // Calculate stats from real data
+      const totalIssues = projectsData.reduce((acc: number, project: any) => 
+        acc + (project.issues?.length || 0), 0
+      );
+      
+      setStats([
+        { title: "Total Projects", value: projectsData.length.toString(), icon: Folder, change: "+2 this month" },
+        { title: "Team Members", value: usersData.length.toString(), icon: Users, change: "+1 this week" },
+        { title: "Active Issues", value: totalIssues.toString(), icon: AlertCircle, change: "5 resolved today" },
+        { title: "Completed Tasks", value: "156", icon: CheckCircle, change: "+12 this week" },
+      ]);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch dashboard data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Use real projects data, fallback to mock if empty
+  const recentProjects = projects.length > 0 ? projects.slice(0, 3) : [
     {
       id: 1,
       name: "Website Redesign",
       description: "Complete redesign of company website",
       progress: 75,
-      team: 5,
+      team: { length: 5 },
       dueDate: "2024-01-15",
       status: "In Progress",
-      priority: "High"
+      priority: "High",
+      issues: []
     },
     {
       id: 2,
-      name: "Mobile App Development",
+      name: "Mobile App Development", 
       description: "iOS and Android app development",
       progress: 45,
-      team: 3,
+      team: { length: 3 },
       dueDate: "2024-02-28",
       status: "In Progress",
-      priority: "Medium"
+      priority: "Medium",
+      issues: []
     },
     {
       id: 3,
       name: "Marketing Campaign",
-      description: "Q1 marketing campaign planning",
+      description: "Q1 marketing campaign planning", 
       progress: 90,
-      team: 4,
+      team: { length: 4 },
       dueDate: "2024-01-08",
       status: "Review",
-      priority: "High"
+      priority: "High",
+      issues: []
     }
   ];
 
@@ -158,19 +205,19 @@ const Dashboard = () => {
                       <Progress value={project.progress} className="h-2" />
                     </div>
 
-                    <div className="flex items-center justify-between mt-3 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-4">
-                        <span className="flex items-center gap-1">
-                          <Users className="h-4 w-4" />
-                          {project.team} members
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          Due {project.dueDate}
-                        </span>
+                      <div className="flex items-center justify-between mt-3 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-4">
+                          <span className="flex items-center gap-1">
+                            <Users className="h-4 w-4" />
+                            {project.team?.length || 0} members
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            Due {project.dueDate}
+                          </span>
+                        </div>
+                        <Button variant="ghost" size="sm">View Project</Button>
                       </div>
-                      <Button variant="ghost" size="sm">View Project</Button>
-                    </div>
                   </div>
                 ))}
               </CardContent>

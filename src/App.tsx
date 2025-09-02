@@ -7,6 +7,11 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import Projects from "./pages/Projects";
+import Team from "./pages/Team";
+import Messages from "./pages/Messages";
+import Subscription from "./pages/Subscription";
+import Settings from "./pages/Settings";
 import Navigation from "./components/Navigation";
 import NotFound from "./pages/NotFound";
 
@@ -36,10 +41,7 @@ const App = () => (
             element={
               <>
                 <Navigation />
-                <div className="min-h-screen bg-background lg:ml-64 p-8">
-                  <h1 className="text-3xl font-bold text-foreground">Projects</h1>
-                  <p className="text-muted-foreground mt-2">Coming soon - Project management interface</p>
-                </div>
+                <Projects />
               </>
             } 
           />
@@ -48,10 +50,7 @@ const App = () => (
             element={
               <>
                 <Navigation />
-                <div className="min-h-screen bg-background lg:ml-64 p-8">
-                  <h1 className="text-3xl font-bold text-foreground">Team</h1>
-                  <p className="text-muted-foreground mt-2">Coming soon - Team management interface</p>
-                </div>
+                <Team />
               </>
             } 
           />
@@ -60,10 +59,7 @@ const App = () => (
             element={
               <>
                 <Navigation />
-                <div className="min-h-screen bg-background lg:ml-64 p-8">
-                  <h1 className="text-3xl font-bold text-foreground">Messages</h1>
-                  <p className="text-muted-foreground mt-2">Coming soon - Team chat interface</p>
-                </div>
+                <Messages />
               </>
             } 
           />
@@ -72,10 +68,7 @@ const App = () => (
             element={
               <>
                 <Navigation />
-                <div className="min-h-screen bg-background lg:ml-64 p-8">
-                  <h1 className="text-3xl font-bold text-foreground">Subscription</h1>
-                  <p className="text-muted-foreground mt-2">Coming soon - Subscription management</p>
-                </div>
+                <Subscription />
               </>
             } 
           />
@@ -84,10 +77,7 @@ const App = () => (
             element={
               <>
                 <Navigation />
-                <div className="min-h-screen bg-background lg:ml-64 p-8">
-                  <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-                  <p className="text-muted-foreground mt-2">Coming soon - User settings</p>
-                </div>
+                <Settings />
               </>
             } 
           />
