@@ -14,6 +14,7 @@ import Subscription from "./pages/Subscription";
 import Settings from "./pages/Settings";
 import Navigation from "./components/Navigation";
 import NotFound from "./pages/NotFound";
+import ProjectDetails from "./pages/ProjectDetails";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,7 @@ const App = () => (
               </>
             } 
           />
+          <Route path="/projects/:id" element={<ProjectDetails />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

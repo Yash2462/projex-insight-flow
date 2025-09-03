@@ -55,7 +55,7 @@ export const projectAPI = {
     apiClient.get('/api/projects/search', { params: { keyword } }),
   
   inviteToProject: (data: { email: string; projectId: number }) =>
-    apiClient.post('/api/projects/invite', { inviteRequest: data, project: {} }),
+    apiClient.post('/api/projects/invite', {data}),
   
   acceptInvitation: (token: string, project: any) =>
     apiClient.get('/api/projects/accept_invitation', { params: { token, project } }),
