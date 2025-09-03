@@ -1,12 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import apiClient, { issueAPI, projectAPI } from "@/services/api";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,7 +119,7 @@ const ProjectDetails = () => {
         // Assuming there's an API to get users
         // const res = await projectAPI.getUsers();
         // setUsers(res.data.data);
-        
+
         // Mock users for demonstration
         setUsers([
           { id: 1, fullName: "John Doe", email: "john@example.com" },
@@ -142,87 +137,85 @@ const ProjectDetails = () => {
     }
   }, [id]);
 
-const handleInviteUser = async () => {
-  if (!inviteEmail.trim()) {
-    toast({
-      title: "Error",
-      description: "Please enter an email address",
-      variant: "destructive",
-    });
-    return;
-  }
+  const handleInviteUser = async () => {
+    if (!inviteEmail.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter an email address",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  setLoading(true);
-  try {
-    await projectAPI.inviteToProject({
-      email: inviteEmail,
-      projectId: Number(id), // make sure `id` is a number here
-    });
+    setLoading(true);
+    try {
+      await projectAPI.inviteToProject({
+        email: inviteEmail,
+        projectId: Number(id), // make sure `id` is a number here
+      });
 
-    toast({
-      title: "Success",
-      description: "User invited successfully",
-    });
+      toast({
+        title: "Success",
+        description: "User invited successfully",
+      });
 
-    setInviteEmail("");
-    setInviteModalOpen(false);
-    // Refresh project data
-    window.location.reload();
-  } catch (error) {
-    toast({
-      title: "Error",
-      description: "Failed to invite user",
-      variant: "destructive",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+      setInviteEmail("");
+      setInviteModalOpen(false);
+      // Refresh project data
+      window.location.reload();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to invite user",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const handleCreateIssue = async () => {
+    if (!newIssue.title.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter an issue title",
+        variant: "destructive",
+      });
+      return;
+    }
 
-const handleCreateIssue = async () => {
-  if (!newIssue.title.trim()) {
-    toast({
-      title: "Error",
-      description: "Please enter an issue title",
-      variant: "destructive",
-    });
-    return;
-  }
+    setLoading(true);
+    try {
+      await issueAPI.createIssue({
+        ...newIssue,
+        projectId: Number(id), // ensure projectId is numeric
+      });
 
-  setLoading(true);
-  try {
-    await issueAPI.createIssue({
-      ...newIssue,
-      projectId: Number(id), // ensure projectId is numeric
-    });
+      toast({
+        title: "Success",
+        description: "Issue created successfully",
+      });
 
-    toast({
-      title: "Success",
-      description: "Issue created successfully",
-    });
-
-    setNewIssue({
-      title: "",
-      description: "",
-      status: "pending",
-      priority: "medium",
-      dueDate: "",
-    });
-    setIssueModalOpen(false);
-    // Refresh project data
-    window.location.reload();
-  } catch (error) {
-    toast({
-      title: "Error",
-      description: "Failed to create issue",
-      variant: "destructive",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
-
+      setNewIssue({
+        title: "",
+        description: "",
+        status: "pending",
+        priority: "medium",
+        dueDate: "",
+      });
+      setIssueModalOpen(false);
+      // Refresh project data
+      window.location.reload();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create issue",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAssignUser = async (issueId: number, userId: number) => {
     setLoading(true);
@@ -254,10 +247,8 @@ const handleCreateIssue = async () => {
 
     setLoading(true);
     try {
-      await fetch(`/api/issues/${issueId}`, {
-        method: "DELETE",
-      });
-
+        await issueAPI.deleteIssue(issueId);
+        debugger
       toast({
         title: "Success",
         description: "Issue deleted successfully",
@@ -301,13 +292,13 @@ const handleCreateIssue = async () => {
   const getPriorityColor = (priority: string) => {
     switch (priority.toLowerCase()) {
       case "high":
-        return "bg-red-100 text-red-700 border-red-200";
+        return "bg-red-100 text-red-700 border-red-200 hover:bg-red-200 hover:text-red-800 hover:border-red-300";
       case "medium":
-        return "bg-yellow-100 text-yellow-700 border-yellow-200";
+        return "bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200 hover:text-amber-800 hover:border-amber-300";
       case "low":
-        return "bg-green-100 text-green-700 border-green-200";
+        return "bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-200 hover:text-emerald-800 hover:border-emerald-300";
       default:
-        return "bg-gray-100 text-gray-700 border-gray-200";
+        return "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200 hover:text-gray-800 hover:border-gray-300";
     }
   };
 
@@ -326,14 +317,15 @@ const handleCreateIssue = async () => {
     }
   };
 
-  if (!project) return (
-    <div className="min-h-screen bg-background p-6 lg:ml-64 flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
-        <p className="text-lg text-muted-foreground">Loading project...</p>
+  if (!project)
+    return (
+      <div className="min-h-screen bg-background p-6 lg:ml-64 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-lg text-muted-foreground">Loading project...</p>
+        </div>
       </div>
-    </div>
-  );
+    );
 
   return (
     <div className="min-h-screen bg-background p-6 lg:ml-64 space-y-6">
@@ -344,18 +336,30 @@ const handleCreateIssue = async () => {
             <ArrowLeft className="h-4 w-4 mr-1" /> Back
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{project.name}</h1>
-            <p className="text-sm text-muted-foreground mt-1">Project ID: {project.id}</p>
+            <h1 className="text-3xl font-bold text-foreground">
+              {project.name}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Project ID: {project.id}
+            </p>
           </div>
         </div>
         <div className="flex gap-2 items-center flex-wrap">
           {project.category && (
-            <Badge className="bg-indigo-100 text-indigo-700 border-indigo-200">
+            <Badge
+              className="bg-indigo-100 text-indigo-700 border border-indigo-200 
+             hover:bg-indigo-200 hover:text-indigo-800 hover:border-indigo-300 
+             transition-colors duration-200 ease-in-out"
+            >
               {project.category}
             </Badge>
           )}
           {project.tags?.map((tag: string, idx: number) => (
-            <Badge key={idx} variant="secondary" className="flex items-center gap-1">
+            <Badge
+              key={idx}
+              variant="secondary"
+              className="flex items-center gap-1"
+            >
               <Tag className="h-3 w-3" /> {tag}
             </Badge>
           ))}
@@ -366,7 +370,7 @@ const handleCreateIssue = async () => {
       <div className="flex gap-3 mb-6">
         <Dialog open={inviteModalOpen} onOpenChange={setInviteModalOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700">
+            <Button className="bg-blue-400 hover:bg-blue-600">
               <UserPlus className="h-4 w-4 mr-2" />
               Invite User
             </Button>
@@ -375,7 +379,8 @@ const handleCreateIssue = async () => {
             <DialogHeader>
               <DialogTitle>Invite User to Project</DialogTitle>
               <DialogDescription>
-                Enter the email address of the user you want to invite to this project.
+                Enter the email address of the user you want to invite to this
+                project.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -391,10 +396,17 @@ const handleCreateIssue = async () => {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setInviteModalOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setInviteModalOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleInviteUser} disabled={loading}>
+              <Button
+                onClick={handleInviteUser}
+                disabled={loading}
+                className="bg-blue-400 hover:bg-blue-600"
+              >
                 {loading ? "Inviting..." : "Send Invite"}
               </Button>
             </DialogFooter>
@@ -403,7 +415,10 @@ const handleCreateIssue = async () => {
 
         <Dialog open={issueModalOpen} onOpenChange={setIssueModalOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" className="border-green-200 text-green-700 hover:bg-green-50">
+            <Button
+              variant="outline"
+              className="border-green-200 text-green-700 hover:bg-green-50"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Create Issue
             </Button>
@@ -422,7 +437,9 @@ const handleCreateIssue = async () => {
                   id="title"
                   placeholder="Issue title"
                   value={newIssue.title}
-                  onChange={(e) => setNewIssue({ ...newIssue, title: e.target.value })}
+                  onChange={(e) =>
+                    setNewIssue({ ...newIssue, title: e.target.value })
+                  }
                 />
               </div>
               <div>
@@ -431,13 +448,20 @@ const handleCreateIssue = async () => {
                   id="description"
                   placeholder="Issue description"
                   value={newIssue.description}
-                  onChange={(e) => setNewIssue({ ...newIssue, description: e.target.value })}
+                  onChange={(e) =>
+                    setNewIssue({ ...newIssue, description: e.target.value })
+                  }
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="priority">Priority</Label>
-                  <Select value={newIssue.priority} onValueChange={(value) => setNewIssue({ ...newIssue, priority: value })}>
+                  <Select
+                    value={newIssue.priority}
+                    onValueChange={(value) =>
+                      setNewIssue({ ...newIssue, priority: value })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -454,16 +478,26 @@ const handleCreateIssue = async () => {
                     id="dueDate"
                     type="date"
                     value={newIssue.dueDate}
-                    onChange={(e) => setNewIssue({ ...newIssue, dueDate: e.target.value })}
+                    onChange={(e) =>
+                      setNewIssue({ ...newIssue, dueDate: e.target.value })
+                    }
                   />
                 </div>
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIssueModalOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIssueModalOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleCreateIssue} disabled={loading}>
+              <Button
+                onClick={handleCreateIssue}
+                disabled={loading}
+                variant="outline"
+                className="border-green-200 text-green-700 hover:bg-green-50"
+              >
                 {loading ? "Creating..." : "Create Issue"}
               </Button>
             </DialogFooter>
@@ -480,7 +514,9 @@ const handleCreateIssue = async () => {
               <CardTitle className="text-lg">Overview</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-muted-foreground leading-relaxed">{project.description}</p>
+              <p className="text-muted-foreground leading-relaxed">
+                {project.description}
+              </p>
               <div className="p-3 bg-muted/50 rounded-lg">
                 <h3 className="font-semibold mb-2 flex items-center gap-2">
                   <User className="h-4 w-4 text-primary" />
@@ -489,12 +525,17 @@ const handleCreateIssue = async () => {
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                     <span className="text-sm font-medium text-primary">
-                      {project.owner.fullName.split(' ').map(n => n[0]).join('')}
+                      {project.owner.fullName
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
                     </span>
                   </div>
                   <div>
                     <p className="font-medium">{project.owner.fullName}</p>
-                    <p className="text-sm text-muted-foreground">{project.owner.email}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {project.owner.email}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -515,15 +556,25 @@ const handleCreateIssue = async () => {
               {project.team?.length > 0 ? (
                 <div className="space-y-3">
                   {project.team.map((member: User) => (
-                    <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card/50 hover:bg-card transition-colors">
+                    <div
+                      key={member.id}
+                      className="flex items-center gap-3 p-3 rounded-lg border bg-card/50 hover:bg-card transition-colors"
+                    >
                       <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
                         <span className="text-sm font-medium">
-                          {member.fullName.split(' ').map(n => n[0]).join('')}
+                          {member.fullName
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{member.fullName}</p>
-                        <p className="text-xs text-muted-foreground truncate">{member.email}</p>
+                        <p className="font-medium truncate">
+                          {member.fullName}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {member.email}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -532,7 +583,9 @@ const handleCreateIssue = async () => {
                 <div className="text-center py-8">
                   <Users className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
                   <p className="text-muted-foreground">No team members yet</p>
-                  <p className="text-sm text-muted-foreground/70">Invite users to get started</p>
+                  <p className="text-sm text-muted-foreground/70">
+                    Invite users to get started
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -555,7 +608,10 @@ const handleCreateIssue = async () => {
               {project.issues?.length > 0 ? (
                 <div className="space-y-4">
                   {project.issues.map((issue: Issue) => (
-                    <div key={issue.id} className="group p-4 rounded-lg border bg-card hover:shadow-md transition-all duration-200">
+                    <div
+                      key={issue.id}
+                      className="group p-4 rounded-lg border bg-card hover:shadow-md transition-all duration-200"
+                    >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1 min-w-0">
                           <h4 className="font-semibold text-lg mb-1 group-hover:text-primary transition-colors">
@@ -567,23 +623,33 @@ const handleCreateIssue = async () => {
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => {
-                              setSelectedIssueId(issue.id);
-                              setAssignModalOpen(true);
-                            }}>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedIssueId(issue.id);
+                                setAssignModalOpen(true);
+                              }}
+                            >
                               <UserCheck className="h-4 w-4 mr-2" />
                               Assign User
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleUpdateIssueStatus(issue.id, "completed")}>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleUpdateIssueStatus(issue.id, "completed")
+                              }
+                            >
                               <CheckCircle className="h-4 w-4 mr-2" />
                               Mark Complete
                             </DropdownMenuItem>
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               onClick={() => handleDeleteIssue(issue.id)}
                               className="text-destructive"
                             >
@@ -593,9 +659,12 @@ const handleCreateIssue = async () => {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
-                      
+
                       <div className="flex items-center gap-3 text-sm flex-wrap">
-                        <Badge variant="outline" className="flex items-center gap-1">
+                        <Badge
+                          variant="outline"
+                          className="flex items-center gap-1"
+                        >
                           {getStatusIcon(issue.status)}
                           {issue.status}
                         </Badge>
@@ -607,12 +676,15 @@ const handleCreateIssue = async () => {
                           Due: {new Date(issue.dueDate).toLocaleDateString()}
                         </span>
                       </div>
-                      
+
                       {issue.assignee && (
                         <div className="flex items-center gap-2 mt-3 pt-3 border-t border-muted">
                           <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
                             <span className="text-xs font-medium text-primary">
-                              {issue.assignee.fullName.split(' ').map(n => n[0]).join('')}
+                              {issue.assignee.fullName
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
                             </span>
                           </div>
                           <span className="text-sm text-muted-foreground">
@@ -624,11 +696,26 @@ const handleCreateIssue = async () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <AlertCircle className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
-                  <p className="text-lg text-muted-foreground mb-2">No issues found</p>
-                  <p className="text-sm text-muted-foreground/70 mb-4">Create your first issue to get started</p>
-                  <Button onClick={() => setIssueModalOpen(true)}>
+                <div
+                  className="flex flex-col items-center justify-center py-16 px-4 
+                  rounded-2xl border border-dashed border-gray-200 
+                  bg-gray-50/50 dark:bg-gray-900/20 transition-all"
+                >
+                  <AlertCircle className="h-16 w-16 text-muted-foreground/60 mb-6 animate-pulse" />
+
+                  <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                    No issues found
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Create your first issue to get started
+                  </p>
+
+                  <Button
+                    onClick={() => setIssueModalOpen(true)}
+                    className="bg-green-100 text-green-700 border border-green-200 
+                 hover:bg-green-200 hover:text-green-800 
+                 transition-colors duration-200 ease-in-out"
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Create Issue
                   </Button>
@@ -654,16 +741,24 @@ const handleCreateIssue = async () => {
                 <div
                   key={user.id}
                   className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
-                  onClick={() => selectedIssueId && handleAssignUser(selectedIssueId, user.id)}
+                  onClick={() =>
+                    selectedIssueId &&
+                    handleAssignUser(selectedIssueId, user.id)
+                  }
                 >
                   <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                     <span className="text-sm font-medium text-primary">
-                      {user.fullName.split(' ').map(n => n[0]).join('')}
+                      {user.fullName
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
                     </span>
                   </div>
                   <div>
                     <p className="font-medium">{user.fullName}</p>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {user.email}
+                    </p>
                   </div>
                 </div>
               ))}
