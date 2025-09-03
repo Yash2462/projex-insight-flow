@@ -1,27 +1,47 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  Plus, 
-  Search, 
-  Folder, 
-  Users, 
-  Calendar, 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Plus,
+  Search,
+  Folder,
+  Users,
+  Calendar,
   Filter,
   MoreHorizontal,
   Eye,
   Edit,
-  Trash2
+  Trash2,
 } from "lucide-react";
 import { projectAPI } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
@@ -32,7 +52,7 @@ const Projects = () => {
     name: "",
     description: "",
     category: "",
-    tags: ""
+    tags: "",
   });
   const { toast } = useToast();
 
@@ -59,7 +79,10 @@ const Projects = () => {
     try {
       const projectData = {
         ...newProject,
-        tags: newProject.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+        tags: newProject.tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter((tag) => tag),
       };
       await projectAPI.createProject(projectData);
       toast({
@@ -111,11 +134,18 @@ const Projects = () => {
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Projects</h1>
-            <p className="text-muted-foreground">Manage and track all your projects in one place</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Projects
+            </h1>
+            <p className="text-muted-foreground">
+              Manage and track all your projects in one place
+            </p>
           </div>
-          
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+
+          <Dialog
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button className="mt-4 lg:mt-0 bg-gradient-primary hover:opacity-90 shadow-glow">
                 <Plus className="h-4 w-4 mr-2" />
@@ -135,7 +165,12 @@ const Projects = () => {
                   <Input
                     id="name"
                     value={newProject.name}
-                    onChange={(e) => setNewProject(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={(e) =>
+                      setNewProject((prev) => ({
+                        ...prev,
+                        name: e.target.value,
+                      }))
+                    }
                     placeholder="Enter project name"
                   />
                 </div>
@@ -144,13 +179,22 @@ const Projects = () => {
                   <Textarea
                     id="description"
                     value={newProject.description}
-                    onChange={(e) => setNewProject(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) =>
+                      setNewProject((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
                     placeholder="Project description"
                   />
                 </div>
                 <div>
                   <Label htmlFor="category">Category</Label>
-                  <Select onValueChange={(value) => setNewProject(prev => ({ ...prev, category: value }))}>
+                  <Select
+                    onValueChange={(value) =>
+                      setNewProject((prev) => ({ ...prev, category: value }))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
@@ -168,11 +212,20 @@ const Projects = () => {
                   <Input
                     id="tags"
                     value={newProject.tags}
-                    onChange={(e) => setNewProject(prev => ({ ...prev, tags: e.target.value }))}
+                    onChange={(e) =>
+                      setNewProject((prev) => ({
+                        ...prev,
+                        tags: e.target.value,
+                      }))
+                    }
                     placeholder="react, typescript, ui/ux"
                   />
                 </div>
-                <Button onClick={handleCreateProject} className="w-full" variant="hero">
+                <Button
+                  onClick={handleCreateProject}
+                  className="w-full"
+                  variant="hero"
+                >
                   Create Project
                 </Button>
               </div>
@@ -188,7 +241,7 @@ const Projects = () => {
               placeholder="Search projects..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyPress={(e) => e.key === "Enter" && handleSearch()}
               className="pl-10"
             />
           </div>
@@ -207,17 +260,28 @@ const Projects = () => {
           {projects.length === 0 ? (
             <div className="col-span-full text-center py-12">
               <Folder className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">No projects found</h3>
-              <p className="text-muted-foreground">Create your first project to get started</p>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                No projects found
+              </h3>
+              <p className="text-muted-foreground">
+                Create your first project to get started
+              </p>
             </div>
           ) : (
             projects.map((project: any) => (
-              <Card key={project.id} className="shadow-elegant hover:shadow-glow transition-all duration-300">
+              <Card
+                key={project.id}
+                className="shadow-elegant hover:shadow-glow transition-all duration-300"
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle className="text-lg font-semibold text-foreground">{project.name}</CardTitle>
-                      <CardDescription className="mt-1">{project.description}</CardDescription>
+                      <CardTitle className="text-lg font-semibold text-foreground">
+                        {project.name}
+                      </CardTitle>
+                      <CardDescription className="mt-1">
+                        {project.description}
+                      </CardDescription>
                     </div>
                     <Button variant="ghost" size="icon">
                       <MoreHorizontal className="h-4 w-4" />
@@ -232,7 +296,9 @@ const Projects = () => {
                         <Badge variant="secondary">{project.category}</Badge>
                       )}
                       {project.tags?.map((tag: string, index: number) => (
-                        <Badge key={index} variant="outline">{tag}</Badge>
+                        <Badge key={index} variant="outline">
+                          {tag}
+                        </Badge>
                       ))}
                     </div>
 
@@ -240,9 +306,14 @@ const Projects = () => {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">Progress</span>
-                        <span className="text-foreground font-medium">{mockProgress(project.id)}%</span>
+                        <span className="text-foreground font-medium">
+                          {mockProgress(project.id)}%
+                        </span>
                       </div>
-                      <Progress value={mockProgress(project.id)} className="h-2" />
+                      <Progress
+                        value={mockProgress(project.id)}
+                        className="h-2"
+                      />
                     </div>
 
                     {/* Stats */}
@@ -261,12 +332,23 @@ const Projects = () => {
 
                     {/* Actions */}
                     <div className="flex gap-2 pt-2">
-                      <Button variant="outline" size="sm" className="flex-1">
-                        <Eye className="h-4 w-4 mr-1" />
-                        View
+                      <Button
+                        size="sm"
+                        className="flex-1 flex items-center justify-center gap-1 
+               bg-[linear-gradient(135deg,hsl(220.9,39.3%,11%),hsl(221.05,62.3%,23.92%))] 
+               text-white hover:opacity-90 transition-all duration-300"
+                      >
+                        <Eye className="h-4 w-4" />
+                        <Link to={`/projects/${project.id}`}>View</Link>
                       </Button>
-                      <Button variant="outline" size="sm" className="flex-1">
-                        <Edit className="h-4 w-4 mr-1" />
+
+                      <Button
+                        size="sm"
+                        className="flex-1 flex items-center justify-center gap-1 
+               bg-[linear-gradient(135deg,hsl(220.9,39.3%,11%),hsl(221.05,62.3%,23.92%))] 
+               text-white hover:opacity-90 transition-all duration-300"
+                      >
+                        <Edit className="h-4 w-4" />
                         Edit
                       </Button>
                     </div>
