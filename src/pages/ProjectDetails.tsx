@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Select,
   SelectContent,
@@ -54,6 +55,8 @@ import {
 } from "lucide-react";
 import IssueComments from "@/components/IssueComments";
 import ProjectChat from "@/components/ProjectChat";
+import UserProfile from "@/components/UserProfile";
+import DirectMessage from "@/components/DirectMessage";
 
 interface User {
   id: number;
@@ -107,6 +110,10 @@ const ProjectDetails = () => {
   const [selectedIssueId, setSelectedIssueId] = useState<number | null>(null);
   const [selectedIssueForComments, setSelectedIssueForComments] = useState<Issue | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -136,9 +143,20 @@ const ProjectDetails = () => {
       }
     };
 
+    const fetchCurrentUser = async () => {
+      try {
+        const res = await userAPI.getProfile();
+        setCurrentUser(res.data.data);
+      } catch (error) {
+        // Fallback current user
+        setCurrentUser({ id: 1, fullName: "Current User", email: "current@example.com" });
+      }
+    };
+
     if (id) {
       fetchProject();
       fetchUsers();
+      fetchCurrentUser();
     }
   }, [id]);
 
@@ -291,6 +309,16 @@ const ProjectDetails = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleViewProfile = (user: User) => {
+    setSelectedUser(user);
+    setProfileModalOpen(true);
+  };
+
+  const handleMessageUser = (user: User) => {
+    setSelectedUser(user);
+    setMessageModalOpen(true);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -701,21 +729,46 @@ const ProjectDetails = () => {
                     {project.team.map((member: User) => (
                       <div
                         key={member.id}
-                        className="flex items-center gap-4 p-4 rounded-lg border bg-background/60 hover:shadow-md transition-all duration-200"
+                        className="group flex items-center gap-4 p-4 rounded-lg border bg-background/60 hover:shadow-md transition-all duration-200"
                       >
-                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                          <span className="text-lg font-medium text-primary">
+                        <Avatar className="w-12 h-12">
+                          <AvatarImage 
+                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.email}`} 
+                          />
+                          <AvatarFallback className="bg-primary/10 text-primary font-medium text-lg">
                             {member.fullName
                               .split(" ")
                               .map((n) => n[0])
                               .join("")}
-                          </span>
-                        </div>
-                        <div className="flex-1">
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
                           <p className="font-semibold text-foreground">{member.fullName}</p>
-                          <p className="text-sm text-muted-foreground">{member.email}</p>
+                          <p className="text-sm text-muted-foreground truncate">{member.email}</p>
                         </div>
-                        <Badge variant="outline">Member</Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="bg-primary/5 border-primary/20">
+                            Member
+                          </Badge>
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewProfile(member)}
+                              className="hover:bg-primary/10"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleMessageUser(member)}
+                              className="hover:bg-primary/10"
+                            >
+                              <MessageCircle className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -801,6 +854,44 @@ const ProjectDetails = () => {
               Cancel
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* User Profile Modal */}
+      <Dialog open={profileModalOpen} onOpenChange={setProfileModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              User Profile
+            </DialogTitle>
+          </DialogHeader>
+          <div className="overflow-y-auto">
+            {selectedUser && (
+              <UserProfile 
+                userId={selectedUser.id} 
+                onMessageClick={(user) => {
+                  setProfileModalOpen(false);
+                  handleMessageUser(user);
+                }}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Direct Message Modal */}
+      <Dialog open={messageModalOpen} onOpenChange={setMessageModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
+          <div className="overflow-hidden">
+            {selectedUser && currentUser && (
+              <DirectMessage 
+                recipientUser={selectedUser}
+                currentUserId={currentUser.id}
+                onClose={() => setMessageModalOpen(false)}
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
