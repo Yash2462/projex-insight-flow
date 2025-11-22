@@ -2,6 +2,31 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:8080';
 
+// Add a global response interceptor to the default axios instance
+axios.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      const responseData = error.response.data;
+      
+      // Check if the response indicates we should redirect to login
+      if (responseData?.redirectToLogin === true) {
+        // Clear any existing auth token
+        localStorage.removeItem('token');
+        
+        // If we're not already on the login page, redirect to it
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+      }
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
 const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
@@ -20,6 +45,31 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor to handle 401 responses with redirectToLogin
+apiClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      const responseData = error.response.data;
+      
+      // Check if the response indicates we should redirect to login
+      if (responseData?.redirectToLogin === true) {
+        // Clear any existing auth token
+        localStorage.removeItem('token');
+        
+        // If we're not already on the login page, redirect to it
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+      }
+    }
+    
     return Promise.reject(error);
   }
 );
@@ -56,13 +106,10 @@ export const projectAPI = {
     apiClient.get('/api/projects/search', { params: { keyword } }),
   
   inviteToProject: (data: { email: string; projectId: number }) =>
-    apiClient.post('/api/projects/invite', {data}),
+    apiClient.post('/api/projects/invite', data),
   
-  acceptInvitation: (token: string, project: any) =>
-    apiClient.get('/api/projects/accept_invitation', { params: { token, project } }),
-  
-  getProjectChat: (projectId: number) =>
-    apiClient.get(`/api/projects/${projectId}/chat`),
+  acceptInvitation: (token: string) =>
+    axios.get(`${API_URL}/api/projects/accept_invitation`, { params: { token } }),
 };
 
 export const issueAPI = {
@@ -99,12 +146,15 @@ export const userAPI = {
     apiClient.get('/api/users/profiles'),
 };
 
-export const messageAPI = {
-  sendMessage: (data: { senderId: number; projectId: number; content: string }) =>
-    apiClient.post('/api/messages/send', data),
+export const dashboardAPI = {
+  getStatistics: () =>
+    apiClient.get('/api/dashboard/statistics'),
   
-  getMessagesByProjectId: (projectId: number) =>
-    apiClient.get(`/api/messages/chat/${projectId}`),
+  getRecentActivity: (limit?: number) =>
+    apiClient.get('/api/dashboard/recent-activity', { params: { limit } }),
+  
+  getProjectCounts: () =>
+    apiClient.get('/api/dashboard/project-counts'),
 };
 
 export const commentAPI = {

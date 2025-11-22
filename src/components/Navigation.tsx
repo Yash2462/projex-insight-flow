@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Home,
   FolderOpen,
-  Users,
-  MessageSquare,
   Settings,
   CreditCard,
   User,
   LogOut,
   Menu,
   X,
+  BarChart3,
 } from "lucide-react";
 
 const Navigation = () => {
@@ -21,8 +21,7 @@ const Navigation = () => {
   const navigationItems = [
     { icon: Home, label: "Dashboard", path: "/dashboard" },
     { icon: FolderOpen, label: "Projects", path: "/projects" },
-    { icon: Users, label: "Team", path: "/team" },
-    { icon: MessageSquare, label: "Messages", path: "/messages" },
+    { icon: BarChart3, label: "Analytics", path: "/analytics", disabled: true },
     { icon: CreditCard, label: "Subscription", path: "/subscription" },
     { icon: Settings, label: "Settings", path: "/settings" },
   ];
@@ -74,6 +73,23 @@ const Navigation = () => {
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const active = isActivePath(item.path);
+              const isDisabled = item.disabled;
+              
+              if (isDisabled) {
+                return (
+                  <div
+                    key={item.path}
+                    className="group flex items-center gap-3 px-3 py-2 rounded-lg border-l-4 border-transparent text-muted-foreground/50 cursor-not-allowed"
+                  >
+                    <Icon className="h-5 w-5" />
+                    <span>{item.label}</span>
+                    <Badge variant="outline" className="ml-auto text-xs">
+                      Soon
+                    </Badge>
+                  </div>
+                );
+              }
+              
               return (
                 <Link
                   key={item.path}
