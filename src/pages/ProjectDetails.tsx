@@ -54,6 +54,7 @@ import {
 } from "lucide-react";
 import IssueComments from "@/components/IssueComments";
 import ProjectChat from "@/components/ProjectChat";
+import InvitationLinkGenerator from "@/components/InvitationLinkGenerator";
 
 interface User {
   id: number;
@@ -504,7 +505,7 @@ const ProjectDetails = () => {
 
         {/* Main Content with Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <Eye className="h-4 w-4" />
               Overview
@@ -520,6 +521,10 @@ const ProjectDetails = () => {
             <TabsTrigger value="team" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Team ({project.team?.length || 0})
+            </TabsTrigger>
+            <TabsTrigger value="invites" className="flex items-center gap-2">
+              <UserPlus className="h-4 w-4" />
+              Invitations
             </TabsTrigger>
           </TabsList>
 
@@ -731,6 +736,22 @@ const ProjectDetails = () => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="invites">
+            <InvitationLinkGenerator 
+              projectId={project.id}
+              projectName={project.name}
+              onSendInvitation={async (email: string, inviteLink: string) => {
+                // Here you could integrate with an email service
+                console.log(`Sending invitation to ${email}: ${inviteLink}`);
+                // For now, just show success message
+                toast({
+                  title: "Invitation Ready",
+                  description: `Invitation link generated for ${email}. Copy the link to share it.`,
+                });
+              }}
+            />
           </TabsContent>
         </Tabs>
       </div>

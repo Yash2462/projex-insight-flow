@@ -8,13 +8,12 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
-import Team from "./pages/Team";
-import Messages from "./pages/Messages";
 import Subscription from "./pages/Subscription";
 import Settings from "./pages/Settings";
 import Navigation from "./components/Navigation";
 import NotFound from "./pages/NotFound";
 import ProjectDetails from "./pages/ProjectDetails";
+import AcceptInvitation from "./pages/AcceptInvitation";
 
 const queryClient = new QueryClient();
 
@@ -47,24 +46,6 @@ const App = () => (
             } 
           />
           <Route 
-            path="/team" 
-            element={
-              <>
-                <Navigation />
-                <Team />
-              </>
-            } 
-          />
-          <Route 
-            path="/messages" 
-            element={
-              <>
-                <Navigation />
-                <Messages />
-              </>
-            } 
-          />
-          <Route 
             path="/subscription" 
             element={
               <>
@@ -83,6 +64,7 @@ const App = () => (
             } 
           />
           <Route path="/projects/:id" element={<ProjectDetails />} />
+          <Route path="/accept_invitation" element={<AcceptInvitation />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

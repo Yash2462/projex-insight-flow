@@ -38,10 +38,27 @@ const Login = () => {
 
       const { token } = res.data;
 
-      // Save JWT or session token (if backend doesn’t set httpOnly cookie)
+      // Save JWT or session token (if backend doesn't set httpOnly cookie)
       localStorage.setItem("token", token);
 
-      navigate("/dashboard");
+      // Check for pending invitation token
+      const pendingInvitationToken = localStorage.getItem('pendingInvitationToken');
+      if (pendingInvitationToken) {
+        localStorage.removeItem('pendingInvitationToken');
+        // Redirect back to accept invitation with the stored token
+        navigate(`/accept_invitation?token=${pendingInvitationToken}`);
+        return;
+      }
+
+      // Check for redirect URL from query params
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectUrl = urlParams.get('redirect');
+      
+      if (redirectUrl) {
+        navigate(redirectUrl);
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err: any) {
       console.error("Login error:", err);
       setError(

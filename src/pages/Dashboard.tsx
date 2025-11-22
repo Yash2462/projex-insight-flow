@@ -19,13 +19,14 @@ import {
   CheckCircle,
   Clock,
 } from "lucide-react";
-import { projectAPI, userAPI } from "@/services/api";
+import { projectAPI, userAPI, dashboardAPI } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 
 const Dashboard = () => {
   const [projects, setProjects] = useState([]);
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+  const [recentActivity, setRecentActivity] = useState([]);
   const [stats, setStats] = useState([
     { title: "Total Projects", value: "0", icon: Folder, change: "Loading..." },
     { title: "Team Members", value: "0", icon: Users, change: "Loading..." },
@@ -41,27 +42,51 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const [projectsResponse, usersResponse] = await Promise.all([
+      const [projectsResponse, statsResponse, activityResponse] = await Promise.all([
         projectAPI.getProjects(),
-        userAPI.getUsers(),
+        dashboardAPI.getStatistics().catch(() => null), // Fallback if API not implemented yet
+        dashboardAPI.getRecentActivity(10).catch(() => null), // Fallback if API not implemented yet
       ]);
 
       const projectsData = projectsResponse.data.data || [];
-      const usersData = usersResponse.data.data || [];
-
       setProjects(projectsData);
 
-      const totalIssues = projectsData.reduce(
-        (acc: number, project: any) => acc + (project.issues?.length || 0),
-        0
-      );
+      // Use API data if available, otherwise calculate from existing data
+      if (statsResponse?.data?.data) {
+        const statsData = statsResponse.data.data;
+        setStats([
+          { title: "Total Projects", value: statsData.totalProjects.toString(), icon: Folder, change: statsData.totalProjectsChange },
+          { title: "Team Members", value: statsData.teamMembers.toString(), icon: Users, change: statsData.teamMembersChange },
+          { title: "Active Issues", value: statsData.activeIssues.toString(), icon: AlertCircle, change: statsData.activeIssuesChange },
+          { title: "Completed Tasks", value: statsData.completedTasks.toString(), icon: CheckCircle, change: statsData.completedTasksChange },
+        ]);
+      } else {
+        // Fallback calculation
+        const totalIssues = projectsData.reduce(
+          (acc: number, project: any) => acc + (project.issues?.length || 0),
+          0
+        );
 
-      setStats([
-        { title: "Total Projects", value: projectsData.length.toString(), icon: Folder, change: "+2 this month" },
-        { title: "Team Members", value: usersData.length.toString(), icon: Users, change: "+1 this week" },
-        { title: "Active Issues", value: totalIssues.toString(), icon: AlertCircle, change: "5 resolved today" },
-        { title: "Completed Tasks", value: "156", icon: CheckCircle, change: "+12 this week" },
-      ]);
+        setStats([
+          { title: "Total Projects", value: projectsData.length.toString(), icon: Folder, change: "+2 this month" },
+          { title: "Team Members", value: "8", icon: Users, change: "+1 this week" },
+          { title: "Active Issues", value: totalIssues.toString(), icon: AlertCircle, change: "5 resolved today" },
+          { title: "Completed Tasks", value: "156", icon: CheckCircle, change: "+12 this week" },
+        ]);
+      }
+
+      // Set recent activity data
+      if (activityResponse?.data?.data) {
+        setRecentActivity(activityResponse.data.data);
+      } else {
+        // Fallback activity data
+        setRecentActivity([
+          { id: 1, action: "John completed task 'UI Design'", timeAgo: "2 hours ago", type: "task_completed", userName: "John Doe" },
+          { id: 2, action: "Sarah created new issue in Website Redesign", timeAgo: "4 hours ago", type: "issue_created", userName: "Sarah Smith" },
+          { id: 3, action: "Mike joined Mobile App Development team", timeAgo: "1 day ago", type: "member_joined", userName: "Mike Johnson" },
+          { id: 4, action: "Lisa updated project deadline", timeAgo: "2 days ago", type: "project_updated", userName: "Lisa Chen" },
+        ]);
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -117,13 +142,6 @@ const Dashboard = () => {
             issues: [],
           },
         ];
-
-  const recentActivity = [
-    { action: "John completed task 'UI Design'", time: "2 hours ago", type: "completed" },
-    { action: "Sarah created new issue in Website Redesign", time: "4 hours ago", type: "created" },
-    { action: "Mike joined Mobile App Development team", time: "1 day ago", type: "joined" },
-    { action: "Lisa updated project deadline", time: "2 days ago", type: "updated" },
-  ];
 
   return (
     <div className="min-h-screen bg-background lg:ml-64">
@@ -262,20 +280,20 @@ const Dashboard = () => {
                 <CardDescription>Latest updates from your team</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
-                {recentActivity.map((activity, index) => (
+                {recentActivity.map((activity: any) => (
                   <div
-                    key={index}
+                    key={activity.id}
                     className="flex items-start gap-3 p-2 rounded-md transition-colors hover:bg-accent/40"
                   >
                     <div
                       className={`
                         w-2 h-2 rounded-full mt-2 flex-shrink-0
                         ${
-                          activity.type === "completed"
+                          activity.type === "task_completed" || activity.type === "completed"
                             ? "bg-green-500"
-                            : activity.type === "created"
+                            : activity.type === "issue_created" || activity.type === "created"
                             ? "bg-blue-500"
-                            : activity.type === "joined"
+                            : activity.type === "member_joined" || activity.type === "joined"
                             ? "bg-purple-500"
                             : "bg-yellow-500"
                         }
@@ -283,7 +301,7 @@ const Dashboard = () => {
                     />
                     <div className="flex-1">
                       <p className="text-sm text-foreground">{activity.action}</p>
-                      <p className="text-xs text-muted-foreground">{activity.time}</p>
+                      <p className="text-xs text-muted-foreground">{activity.timeAgo || activity.time}</p>
                     </div>
                   </div>
                 ))}
