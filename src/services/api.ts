@@ -74,6 +74,46 @@ apiClient.interceptors.response.use(
   }
 );
 
+// API Response Types
+export interface DashboardStatistics {
+  totalProjects: number;
+  totalProjectsChange: string;
+  teamMembers: number;
+  teamMembersChange: string;
+  activeIssues: number;
+  activeIssuesChange: string;
+  completedTasks: number;
+  completedTasksChange: string;
+}
+
+export interface ProjectCounts {
+  total: number;
+  byStatus: Record<string, number>;
+  byPriority: Record<string, number>;
+  recentlyCreated: number;
+  overdue: number;
+  dueSoon: number;
+}
+
+export interface RecentActivity {
+  id: number;
+  action: string;
+  time: string;
+  type: string;
+  userName?: string;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+  error?: {
+    code: string;
+    message: string;
+    redirectToLogin?: boolean;
+  };
+}
+
 // API Services
 export const authAPI = {
   login: (data: { email: string; password: string; otp?: string }) =>
@@ -88,28 +128,28 @@ export const authAPI = {
 
 export const projectAPI = {
   getProjects: (params?: { category?: string; tag?: string }) =>
-    apiClient.get('/api/projects', { params }),
+    apiClient.get<ApiResponse<any[]>>('/api/projects', { params }),
   
   getProjectById: (id: number) =>
-    apiClient.get(`/api/projects/${id}`),
+    apiClient.get<ApiResponse<any>>(`/api/projects/${id}`),
   
   createProject: (data: any) =>
-    apiClient.post('/api/projects', data),
+    apiClient.post<ApiResponse<any>>('/api/projects', data),
   
   updateProject: (id: number, data: any) =>
-    apiClient.put(`/api/projects/${id}`, data),
+    apiClient.put<ApiResponse<any>>(`/api/projects/${id}`, data),
   
   deleteProject: (id: number) =>
-    apiClient.delete(`/api/projects/${id}`),
+    apiClient.delete<ApiResponse<any>>(`/api/projects/${id}`),
   
   searchProjects: (keyword?: string) =>
-    apiClient.get('/api/projects/search', { params: { keyword } }),
+    apiClient.get<ApiResponse<any[]>>('/api/projects/search', { params: { keyword } }),
   
   inviteToProject: (data: { email: string; projectId: number }) =>
-    apiClient.post('/api/projects/invite', data),
+    apiClient.post<ApiResponse<any>>('/api/projects/invite', data),
   
   acceptInvitation: (token: string) =>
-    axios.get(`${API_URL}/api/projects/accept_invitation`, { params: { token } }),
+    axios.get<ApiResponse<any>>(`${API_URL}/api/projects/accept_invitation`, { params: { token } }),
 };
 
 export const issueAPI = {
@@ -120,41 +160,44 @@ export const issueAPI = {
     projectId: number;
     priority: string;
     dueDate: string;
-  }) => apiClient.post('/api/issues', data),
+  }) => apiClient.post<ApiResponse<any>>('/api/issues', data),
   
   getIssueById: (id: number) =>
-    apiClient.get(`/api/issues/${id}`),
+    apiClient.get<ApiResponse<any>>(`/api/issues/${id}`),
   
   getIssuesByProjectId: (projectId: number) =>
-    apiClient.get(`/api/issues/project/${projectId}`),
+    apiClient.get<ApiResponse<any[]>>(`/api/issues/project/${projectId}`),
   
   updateIssueStatus: (issueId: number, status: string) =>
-    apiClient.put(`/api/issues/${issueId}/status/${status}`),
+    apiClient.put<ApiResponse<any>>(`/api/issues/${issueId}/status/${status}`),
   
   assignUserToIssue: (issueId: number, userId: number) =>
-    apiClient.put(`/api/issues/${issueId}/assignee/${userId}`),
+    apiClient.put<ApiResponse<any>>(`/api/issues/${issueId}/assignee/${userId}`),
   
   deleteIssue: (id: number) =>
-    apiClient.delete(`/api/issues/${id}`),
+    apiClient.delete<ApiResponse<any>>(`/api/issues/${id}`),
 };
 
 export const userAPI = {
   getProfile: () =>
-    apiClient.get('/api/users/profile'),
+    apiClient.get<ApiResponse<any>>('/api/users/profile'),
   
   getUsers: () =>
-    apiClient.get('/api/users/profiles'),
+    apiClient.get<ApiResponse<any[]>>('/api/users/profiles'),
+
+  getUserById: (id: number) =>
+    apiClient.get<ApiResponse<any>>(`/api/users/${id}`),
 };
 
 export const dashboardAPI = {
   getStatistics: () =>
-    apiClient.get('/api/dashboard/statistics'),
+    apiClient.get<ApiResponse<DashboardStatistics>>('/api/dashboard/statistics'),
   
   getRecentActivity: (limit?: number) =>
-    apiClient.get('/api/dashboard/recent-activity', { params: { limit } }),
+    apiClient.get<ApiResponse<RecentActivity[]>>('/api/dashboard/recent-activity', { params: { limit } }),
   
   getProjectCounts: () =>
-    apiClient.get('/api/dashboard/project-counts'),
+    apiClient.get<ApiResponse<ProjectCounts>>('/api/dashboard/project-counts'),
 };
 
 export const commentAPI = {

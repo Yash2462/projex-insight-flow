@@ -1,273 +1,174 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { userAPI, projectAPI } from "@/services/api";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { 
-  User, 
   Mail, 
-  MessageCircle, 
-  Calendar,
-  Activity,
-  MapPin,
-  Phone,
-  Globe,
-  Github,
-  Linkedin
-} from 'lucide-react';
-import { userAPI } from '@/services/api';
-import { useToast } from '@/hooks/use-toast';
+  User as UserIcon, 
+  Briefcase, 
+  Calendar, 
+  MessageCircle,
+  Loader2,
+  Folder
+} from "lucide-react";
 
 interface UserProfileProps {
   userId: number;
   onMessageClick?: (user: any) => void;
-  onClose?: () => void;
 }
 
-const UserProfile = ({ userId, onMessageClick, onClose }: UserProfileProps) => {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+const UserProfile = ({ userId, onMessageClick }: UserProfileProps) => {
+  const { data: user, isLoading: isUserLoading } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
+      const response = await userAPI.getUserById(userId);
+      return response.data.data;
+    },
+    enabled: !!userId,
+  });
 
-  useEffect(() => {
-    fetchUserProfile();
-  }, [userId]);
+  const { data: projects, isLoading: isProjectsLoading } = useQuery({
+    queryKey: ["user-projects", userId],
+    queryFn: async () => {
+      const response = await projectAPI.getProjects();
+      // Filter projects where this user is a member or owner
+      return (response.data.data || []).filter((p: any) => 
+        p.owner?.id === userId || p.team?.some((m: any) => m.id === userId)
+      );
+    },
+    enabled: !!userId,
+  });
 
-  const fetchUserProfile = async () => {
-    try {
-      setLoading(true);
-      // For now, using mock data since we don't have a specific user profile API endpoint
-      const mockUser = {
-        id: userId,
-        fullName: 'John Doe',
-        email: 'john.doe@example.com',
-        bio: 'Senior Full-stack Developer with 5+ years of experience in React, Node.js, and cloud technologies.',
-        role: 'Senior Developer',
-        department: 'Engineering',
-        location: 'San Francisco, CA',
-        phone: '+1 (555) 123-4567',
-        website: 'https://johndoe.dev',
-        github: 'johndoe',
-        linkedin: 'john-doe-dev',
-        joinedDate: '2023-01-15',
-        projectsCount: 12,
-        issuesResolved: 47,
-        lastActive: '2024-01-20T10:30:00Z'
-      };
-      
-      setUser(mockUser);
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch user profile',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getInitials = (name: string) => {
-    return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const getLastActiveText = (dateString: string) => {
-    const now = new Date();
-    const lastActive = new Date(dateString);
-    const diffInHours = Math.floor((now.getTime() - lastActive.getTime()) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return 'Active now';
-    if (diffInHours < 24) return `Active ${diffInHours}h ago`;
-    if (diffInHours < 168) return `Active ${Math.floor(diffInHours / 24)}d ago`;
-    return `Active ${Math.floor(diffInHours / 168)}w ago`;
-  };
-
-  if (loading) {
+  if (isUserLoading) {
     return (
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-card/50 to-background">
-        <CardContent className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+        <p className="text-muted-foreground">Loading profile...</p>
+      </div>
     );
   }
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">User not found.</p>
+      </div>
+    );
+  }
+
+  const initials = user.fullName?.split(" ").map((n: string) => n[0]).join("").toUpperCase() || "?";
 
   return (
-    <div className="space-y-6">
-      {/* Header Card */}
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-primary/5 to-card/50">
-        <CardContent className="p-6">
-          <div className="flex items-start gap-6">
-            <Avatar className="h-20 w-20 border-4 border-primary/20">
-              <AvatarImage 
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`} 
-              />
-              <AvatarFallback className="bg-primary/10 text-primary font-bold text-xl">
-                {getInitials(user.fullName)}
-              </AvatarFallback>
-            </Avatar>
-            
-            <div className="flex-1">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h1 className="text-2xl font-bold text-foreground mb-1">{user.fullName}</h1>
-                  <p className="text-lg text-primary font-medium mb-2">{user.role}</p>
-                  <p className="text-muted-foreground mb-3">{user.department}</p>
-                  
-                  <div className="flex items-center gap-2 mb-4">
-                    <Activity className="h-4 w-4 text-success" />
-                    <span className="text-sm text-success font-medium">
-                      {getLastActiveText(user.lastActive)}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onMessageClick?.(user)}
-                    className="border-primary/20 text-primary hover:bg-primary/10"
-                  >
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    Message
-                  </Button>
-                </div>
-              </div>
-              
-              {user.bio && (
-                <p className="text-muted-foreground leading-relaxed">{user.bio}</p>
-              )}
+    <div className="space-y-6 max-w-4xl mx-auto p-4">
+      {/* Profile Header */}
+      <div className="relative mb-8">
+        <div className="h-32 w-full bg-gradient-primary rounded-t-3xl shadow-lg" />
+        <div className="absolute -bottom-12 left-8 flex items-end gap-6">
+          <Avatar className="h-24 w-24 border-4 border-background shadow-xl rounded-2xl">
+            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`} />
+            <AvatarFallback className="text-2xl font-bold bg-primary/10 text-primary">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="pb-2">
+            <h2 className="text-3xl font-black text-foreground tracking-tight">{user.fullName}</h2>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Mail className="h-3.5 w-3.5" />
+              <span className="text-sm font-medium">{user.email}</span>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+        <div className="absolute bottom-2 right-4 flex gap-2">
+          {onMessageClick && (
+            <Button 
+              onClick={() => onMessageClick(user)}
+              className="bg-white/20 backdrop-blur-md hover:bg-white/30 text-white border-0 rounded-xl"
+              size="sm"
+            >
+              <MessageCircle className="h-4 w-4 mr-2" /> Message
+            </Button>
+          )}
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Contact Information */}
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-card/50 to-background">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Mail className="h-5 w-5 text-primary" />
-              Contact Info
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Mail className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-foreground">{user.email}</span>
-            </div>
-            
-            {user.phone && (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8">
+        {/* Info Sidebar */}
+        <div className="space-y-6">
+          <Card className="border-0 shadow-elegant bg-card/60 backdrop-blur-md rounded-2xl">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <UserIcon className="h-3 w-3" /> About
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="flex items-center gap-3">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-foreground">{user.phone}</span>
+                <div className="p-2 rounded-lg bg-primary/5 text-primary">
+                  <Briefcase className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Role</p>
+                  <p className="text-sm font-semibold">Team Member</p>
+                </div>
               </div>
-            )}
-            
-            {user.location && (
               <div className="flex items-center gap-3">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-foreground">{user.location}</span>
+                <div className="p-2 rounded-lg bg-green-500/5 text-green-500">
+                  <Calendar className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Joined</p>
+                  <p className="text-sm font-semibold">Dec 2023</p>
+                </div>
               </div>
-            )}
-            
-            {user.website && (
-              <div className="flex items-center gap-3">
-                <Globe className="h-4 w-4 text-muted-foreground" />
-                <a 
-                  href={user.website} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  {user.website}
-                </a>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Social Links */}
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-card/50 to-background">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5 text-primary" />
-              Social Links
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {user.github && (
-              <div className="flex items-center gap-3">
-                <Github className="h-4 w-4 text-muted-foreground" />
-                <a 
-                  href={`https://github.com/${user.github}`}
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  @{user.github}
-                </a>
-              </div>
-            )}
-            
-            {user.linkedin && (
-              <div className="flex items-center gap-3">
-                <Linkedin className="h-4 w-4 text-muted-foreground" />
-                <a 
-                  href={`https://linkedin.com/in/${user.linkedin}`}
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  {user.linkedin}
-                </a>
-              </div>
-            )}
-            
-            <div className="flex items-center gap-3">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-foreground">
-                Joined {formatDate(user.joinedDate)}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Activity Stats */}
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-card/50 to-background">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-primary" />
-              Activity Stats
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
-              <p className="text-2xl font-bold text-primary">{user.projectsCount}</p>
-              <p className="text-sm text-muted-foreground">Projects</p>
-            </div>
-            
-            <div className="p-4 bg-success/5 rounded-lg border border-success/10">
-              <p className="text-2xl font-bold text-success">{user.issuesResolved}</p>
-              <p className="text-sm text-muted-foreground">Issues Resolved</p>
-            </div>
-            
-            <Badge variant="outline" className="w-full justify-center py-2">
-              Active Team Member
+        {/* Projects List */}
+        <div className="md:col-span-2 space-y-4">
+          <div className="flex items-center justify-between px-2">
+            <h3 className="font-bold text-lg flex items-center gap-2">
+              <Folder className="h-5 w-5 text-primary" /> Active Projects
+            </h3>
+            <Badge variant="secondary" className="rounded-md">
+              {projects?.length || 0}
             </Badge>
-          </CardContent>
-        </Card>
+          </div>
+          
+          <div className="grid gap-4">
+            {isProjectsLoading ? (
+              [...Array(2)].map((_, i) => (
+                <div key={i} className="h-20 rounded-2xl bg-muted/30 animate-pulse" />
+              ))
+            ) : projects && projects.length > 0 ? (
+              projects.map((project: any) => (
+                <div 
+                  key={project.id}
+                  className="group flex items-center justify-between p-4 rounded-2xl border bg-background/40 hover:bg-background hover:shadow-md transition-all duration-300"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-primary/10 flex items-center justify-center text-primary font-bold">
+                      {project.name[0]}
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm group-hover:text-primary transition-colors">{project.name}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{project.category || "General"}</p>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="text-[10px] font-bold border-primary/20 text-primary">
+                    {project.status || "In Progress"}
+                  </Badge>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 bg-muted/20 rounded-2xl border border-dashed">
+                <p className="text-sm text-muted-foreground">No active projects found.</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
