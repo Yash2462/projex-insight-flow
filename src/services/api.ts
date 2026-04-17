@@ -180,6 +180,25 @@ export const issueAPI = {
     apiClient.delete<ApiResponse<any>>(`/api/issues/${id}`),
 };
 
+export const attachmentAPI = {
+  upload: (file: File, issueId: number) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('issueId', issueId.toString());
+    return apiClient.post<ApiResponse<any>>('/api/attachments/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  
+  getIssueAttachments: (issueId: number) =>
+    apiClient.get<ApiResponse<any[]>>(`/api/attachments/issue/${issueId}`),
+  
+  delete: (id: number) =>
+    apiClient.delete<ApiResponse<any>>(`/api/attachments/${id}`),
+};
+
 export const userAPI = {
   getProfile: () =>
     apiClient.get<ApiResponse<any>>('/api/users/profile'),
@@ -192,6 +211,23 @@ export const userAPI = {
 
   completeOnboardingStep: (stepId: string) =>
     apiClient.post<ApiResponse<any>>(`/api/users/onboarding/step/${stepId}`),
+};
+
+export const notificationAPI = {
+  getNotifications: () =>
+    apiClient.get<ApiResponse<any[]>>('/api/notifications'),
+  
+  getUnreadNotifications: () =>
+    apiClient.get<ApiResponse<any[]>>('/api/notifications/unread'),
+  
+  markAsRead: (id: number) =>
+    apiClient.put<ApiResponse<any>>(`/api/notifications/${id}/read`),
+  
+  markAllAsRead: () =>
+    apiClient.put<ApiResponse<any>>('/api/notifications/read-all'),
+  
+  delete: (id: number) =>
+    apiClient.delete<ApiResponse<any>>(`/api/notifications/${id}`),
 };
 
 export const dashboardAPI = {

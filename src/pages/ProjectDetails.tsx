@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { issueAPI, projectAPI, userAPI } from "@/services/api";
+import { useWebSocket } from "@/hooks/use-websocket";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -83,6 +84,26 @@ const ProjectDetails = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const projectId = parseInt(id || "0", 10);
+
+  // WebSocket for real-time updates
+  const { subscribe, isConnected } = useWebSocket(projectId);
+
+  useEffect(() => {
+    if (isConnected && projectId) {
+      // Subscribe to board updates
+      subscribe(`/topic/project/${projectId}/board`, (event) => {
+        // Refresh project data when board changes
+        queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+        
+        // Optional: show toast for certain events
+        if (event.type === "ISSUE_CREATED") {
+          toast({ title: "New Issue", description: `${event.issue.title} was created.` });
+        } else if (event.type === "ISSUE_DELETED") {
+          toast({ title: "Issue Deleted", description: `An issue was removed from the board.` });
+        }
+      });
+    }
+  }, [isConnected, projectId, subscribe, queryClient, toast]);
 
   // Modal states
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
