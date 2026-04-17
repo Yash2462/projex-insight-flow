@@ -93,6 +93,8 @@ export interface ProjectCounts {
   recentlyCreated: number;
   overdue: number;
   dueSoon: number;
+  totalStoryPoints: number;
+  completedStoryPoints: number;
 }
 
 export interface RecentActivity {
@@ -187,6 +189,9 @@ export const userAPI = {
 
   getUserById: (id: number) =>
     apiClient.get<ApiResponse<any>>(`/api/users/${id}`),
+
+  completeOnboardingStep: (stepId: string) =>
+    apiClient.post<ApiResponse<any>>(`/api/users/onboarding/step/${stepId}`),
 };
 
 export const dashboardAPI = {

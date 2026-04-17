@@ -25,6 +25,7 @@ import DashboardStats from "@/components/dashboard/DashboardStats";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
 import QuickActions from "@/components/dashboard/QuickActions";
 import CreateProjectModal from "@/components/dashboard/CreateProjectModal";
+import OnboardingWidget from "@/components/dashboard/OnboardingWidget";
 
 const Dashboard = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -109,6 +110,9 @@ const Dashboard = () => {
 
         {/* Quick Actions */}
         <QuickActions />
+
+        {/* Onboarding */}
+        <OnboardingWidget />
 
         {/* Stats Grid */}
         <DashboardStats stats={stats} isLoading={isStatsLoading} />

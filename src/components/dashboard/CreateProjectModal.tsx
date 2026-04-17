@@ -44,6 +44,8 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
       queryClient.invalidateQueries({ queryKey: ["project-counts"] });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      userAPI.completeOnboardingStep("create_project");
       toast({
         title: "Success",
         description: "Project created successfully",

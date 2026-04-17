@@ -43,7 +43,7 @@ import {
   Layout
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import IssueComments from "@/components/IssueComments";
+import IssueDetail from "@/components/IssueDetail";
 import ProjectChat from "@/components/ProjectChat";
 import InvitationLinkGenerator from "@/components/InvitationLinkGenerator";
 import UserProfile from "@/components/UserProfile";
@@ -96,6 +96,17 @@ const ProjectDetails = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = useState("kanban");
 
+  // Get dynamic columns from project or fallback to defaults
+  const projectColumns = (project as any)?.statuses?.map((s: string) => ({
+    id: s,
+    title: s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g, " "),
+  })) || [
+    { id: "TODO", title: "To Do" },
+    { id: "IN_PROGRESS", title: "In Progress" },
+    { id: "REVIEW", title: "In Review" },
+    { id: "DONE", title: "Completed" },
+  ];
+
   // Form states
   const [inviteEmail, setInviteEmail] = useState("");
   const [newIssue, setNewIssue] = useState({
@@ -137,6 +148,8 @@ const ProjectDetails = () => {
     mutationFn: (data: any) => issueAPI.createIssue(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      userAPI.completeOnboardingStep("create_issue");
       toast({ title: "Success", description: "Issue created successfully" });
       setIssueModalOpen(false);
       setNewIssue({ title: "", description: "", status: "TODO", priority: "MEDIUM", dueDate: "" });
@@ -170,6 +183,8 @@ const ProjectDetails = () => {
   const inviteUserMutation = useMutation({
     mutationFn: (data: { email: string; projectId: number }) => projectAPI.inviteToProject(data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      userAPI.completeOnboardingStep("invite_member");
       toast({ title: "Success", description: "Invitation sent" });
       setInviteModalOpen(false);
       setInviteEmail("");
@@ -250,6 +265,7 @@ const ProjectDetails = () => {
 
           <TabsContent value="kanban" className="mt-0">
             <KanbanBoard 
+              columns={projectColumns}
               issues={project.issues || []}
               onDeleteIssue={(id) => {
                 if(window.confirm("Delete this issue?")) deleteIssueMutation.mutate(id);
@@ -421,8 +437,12 @@ const ProjectDetails = () => {
               </DialogTitle>
               <DialogDescription>Discussion & History</DialogDescription>
             </DialogHeader>
-            <div className="flex-1 overflow-hidden">
-              <IssueComments issueId={selectedIssueForComments.id} issueName={selectedIssueForComments.title} />
+            <div className="flex-1 overflow-hidden p-6">
+              <IssueDetail 
+                issueId={selectedIssueForComments.id} 
+                issueName={selectedIssueForComments.title} 
+                onClose={() => setSelectedIssueForComments(null)}
+              />
             </div>
           </DialogContent>
         </Dialog>
