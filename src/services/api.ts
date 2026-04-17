@@ -152,6 +152,9 @@ export const projectAPI = {
   
   acceptInvitation: (token: string) =>
     axios.get<ApiResponse<any>>(`${API_URL}/api/projects/accept_invitation`, { params: { token } }),
+
+  getProjectRole: (projectId: number) =>
+    apiClient.get<ApiResponse<string>>(`/api/projects/${projectId}/role`),
 };
 
 export const issueAPI = {
@@ -178,6 +181,9 @@ export const issueAPI = {
   
   deleteIssue: (id: number) =>
     apiClient.delete<ApiResponse<any>>(`/api/issues/${id}`),
+
+  updateIssue: (id: number, data: any) =>
+    apiClient.put<ApiResponse<any>>(`/api/issues/${id}`, data),
 };
 
 export const attachmentAPI = {
@@ -202,6 +208,9 @@ export const attachmentAPI = {
 export const userAPI = {
   getProfile: () =>
     apiClient.get<ApiResponse<any>>('/api/users/profile'),
+
+  updateProfile: (data: { fullName?: string; avatarUrl?: string; bio?: string }) =>
+    apiClient.put<ApiResponse<any>>('/api/users/profile', data),
   
   getUsers: () =>
     apiClient.get<ApiResponse<any[]>>('/api/users/profiles'),

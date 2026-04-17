@@ -59,6 +59,11 @@ const IssueDetail = ({ issueId, issueName, onClose }: IssueDetailProps) => {
   const [newSubtask, setNewSubtask] = useState('');
   const [showSubtaskInput, setShowSubtaskInput] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  
+  // Time tracking states
+  const [estimatedHours, setEstimatedHours] = useState(0);
+  const [loggedHours, setLoggedHours] = useState(0);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -76,9 +81,24 @@ const IssueDetail = ({ issueId, issueName, onClose }: IssueDetailProps) => {
     queryKey: ["issue", issueId],
     queryFn: async () => {
       const response = await issueAPI.getIssueById(issueId);
-      return response.data.data;
+      const data = response.data.data;
+      setEstimatedHours(data.estimatedHours || 0);
+      setLoggedHours(data.loggedHours || 0);
+      return data;
     },
   });
+
+  const { data: userRole } = useQuery({
+    queryKey: ["projectRole", issue?.projectId],
+    queryFn: async () => {
+      const response = await projectAPI.getProjectRole(issue?.projectId);
+      return response.data.data;
+    },
+    enabled: !!issue?.projectId,
+  });
+
+  const canEdit = userRole === 'OWNER' || userRole === 'ADMIN' || userRole === 'MEMBER';
+  const isViewer = userRole === 'VIEWER';
 
   const { data: comments, isLoading: isCommentsLoading } = useQuery({
     queryKey: ["comments", issueId],
@@ -97,6 +117,15 @@ const IssueDetail = ({ issueId, issueName, onClose }: IssueDetailProps) => {
   });
 
   // Mutations
+  const updateIssueMutation = useMutation({
+    mutationFn: (data: any) => issueAPI.updateIssue(issueId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["issue", issueId] });
+      queryClient.invalidateQueries({ queryKey: ["project"] });
+      toast({ title: "Updated", description: "Issue tracking updated" });
+    },
+  });
+
   const addCommentMutation = useMutation({
     mutationFn: (content: string) => commentAPI.createComment({ issueId, content }),
     onSuccess: () => {
@@ -188,7 +217,7 @@ const IssueDetail = ({ issueId, issueName, onClose }: IssueDetailProps) => {
               size="sm" 
               className="h-8 rounded-lg border-primary/20 text-primary hover:bg-primary/5"
               onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
+              disabled={isUploading || isViewer}
             >
               {isUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <Plus className="h-3.5 w-3.5 mr-2" />}
               Upload
@@ -226,14 +255,16 @@ const IssueDetail = ({ issueId, issueName, onClose }: IssueDetailProps) => {
                       >
                         <Download className="h-3.5 w-3.5" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-7 w-7 text-destructive hover:bg-destructive/10"
-                        onClick={() => deleteAttachmentMutation.mutate(file.id)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                      {!isViewer && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                          onClick={() => deleteAttachmentMutation.mutate(file.id)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -262,6 +293,7 @@ const IssueDetail = ({ issueId, issueName, onClose }: IssueDetailProps) => {
                 <Checkbox 
                   id={`subtask-${i}`} 
                   checked={issue.completedSubtasks?.includes(subtask)}
+                  disabled={isViewer}
                 />
                 <label className={`flex-1 text-sm font-medium leading-none cursor-pointer ${
                   issue.completedSubtasks?.includes(subtask) ? "line-through text-muted-foreground" : ""
@@ -271,6 +303,57 @@ const IssueDetail = ({ issueId, issueName, onClose }: IssueDetailProps) => {
               </div>
             ))}
           </div>
+        </section>
+
+        {/* Time Tracking Section */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2 text-primary">
+            <Clock className="h-5 w-5" />
+            <h3 className="font-bold text-lg">Time Tracking</h3>
+          </div>
+          <Card className="border-0 bg-muted/30 shadow-none rounded-2xl">
+            <CardContent className="p-4 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase text-muted-foreground">Estimated (hrs)</label>
+                  <Input 
+                    type="number" 
+                    value={estimatedHours} 
+                    onChange={e => setEstimatedHours(parseFloat(e.target.value) || 0)}
+                    className="h-9 bg-background/50"
+                    disabled={isViewer}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase text-muted-foreground">Logged (hrs)</label>
+                  <Input 
+                    type="number" 
+                    value={loggedHours} 
+                    onChange={e => setLoggedHours(parseFloat(e.target.value) || 0)}
+                    className="h-9 bg-background/50"
+                    disabled={isViewer}
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-[10px] font-bold uppercase">
+                  <span className="text-muted-foreground">Progress</span>
+                  <span className="text-primary">{Math.min(100, Math.round((loggedHours / (estimatedHours || 1)) * 100))}%</span>
+                </div>
+                <Progress value={Math.min(100, (loggedHours / (estimatedHours || 1)) * 100)} className="h-2" />
+              </div>
+
+              <Button 
+                size="sm" 
+                className="w-full bg-primary/10 text-primary hover:bg-primary/20 border-0"
+                onClick={() => updateIssueMutation.mutate({ estimatedHours, loggedHours })}
+                disabled={updateIssueMutation.isPending || isViewer}
+              >
+                {updateIssueMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Tracking"}
+              </Button>
+            </CardContent>
+          </Card>
         </section>
       </div>
 
@@ -309,12 +392,13 @@ const IssueDetail = ({ issueId, issueName, onClose }: IssueDetailProps) => {
           <Textarea 
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Write a comment..."
+            placeholder={isViewer ? "Discussion is read-only for viewers" : "Write a comment..."}
             className="min-h-[100px] rounded-2xl bg-muted/30 border-primary/5 focus:ring-primary/20 resize-none text-sm"
+            disabled={isViewer}
           />
           <Button 
             className="w-full bg-gradient-primary rounded-xl"
-            disabled={!newComment.trim() || addCommentMutation.isPending}
+            disabled={!newComment.trim() || addCommentMutation.isPending || isViewer}
             onClick={() => addCommentMutation.mutate(newComment)}
           >
             <Send className="h-4 w-4 mr-2" /> Send

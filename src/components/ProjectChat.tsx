@@ -54,6 +54,20 @@ const ProjectChat = ({ projectId, projectName, teamMembers = [] }: ProjectChatPr
     },
   });
 
+  const { data: userRole } = useQuery({
+    queryKey: ["projectRole", projectId],
+    queryFn: async () => {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:8080/api/projects/${projectId}/role`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return response.data.data;
+    },
+    enabled: !!projectId,
+  });
+
+  const isViewer = userRole === 'VIEWER';
+
   // Fetch message history
   useEffect(() => {
     const fetchMessages = async () => {
@@ -211,15 +225,15 @@ const ProjectChat = ({ projectId, projectName, teamMembers = [] }: ProjectChatPr
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Type a message..."
+              placeholder={isViewer ? "Viewers cannot send messages" : "Type a message..."}
               className="flex-1 bg-background border-primary/10 focus-visible:ring-primary/20 rounded-xl h-11"
-              disabled={!isConnected || isSending}
+              disabled={!isConnected || isSending || isViewer}
             />
             <Button 
               type="submit" 
               size="icon" 
-              className={`rounded-xl h-11 w-11 shrink-0 bg-gradient-primary shadow-glow transition-all active:scale-95 ${(!newMessage.trim() || !isConnected || isSending) && 'opacity-50'}`}
-              disabled={!newMessage.trim() || !isConnected || isSending}
+              className={`rounded-xl h-11 w-11 shrink-0 bg-gradient-primary shadow-glow transition-all active:scale-95 ${(!newMessage.trim() || !isConnected || isSending || isViewer) && 'opacity-50'}`}
+              disabled={!newMessage.trim() || !isConnected || isSending || isViewer}
             >
               {isSending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
             </Button>

@@ -148,6 +148,19 @@ const ProjectDetails = () => {
     enabled: !!projectId,
   });
 
+  const { data: userRole } = useQuery({
+    queryKey: ["projectRole", projectId],
+    queryFn: async () => {
+      const response = await projectAPI.getProjectRole(projectId);
+      return response.data.data;
+    },
+    enabled: !!projectId,
+  });
+
+  const isOwner = userRole === 'OWNER';
+  const canManage = isOwner || userRole === 'ADMIN';
+  const isViewer = userRole === 'VIEWER';
+
   const { data: users } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
@@ -265,12 +278,16 @@ const ProjectDetails = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button onClick={() => setInviteModalOpen(true)} variant="outline" className="rounded-xl border-primary/20 text-primary hover:bg-primary/5">
-              <UserPlus className="h-4 w-4 mr-2" /> Invite
-            </Button>
-            <Button onClick={() => setIssueModalOpen(true)} className="bg-gradient-primary hover:opacity-90 shadow-glow rounded-xl">
-              <Plus className="h-4 w-4 mr-2" /> New Issue
-            </Button>
+            {isOwner && (
+              <Button onClick={() => setInviteModalOpen(true)} variant="outline" className="rounded-xl border-primary/20 text-primary hover:bg-primary/5">
+                <UserPlus className="h-4 w-4 mr-2" /> Invite
+              </Button>
+            )}
+            {!isViewer && (
+              <Button onClick={() => setIssueModalOpen(true)} className="bg-gradient-primary hover:opacity-90 shadow-glow rounded-xl">
+                <Plus className="h-4 w-4 mr-2" /> New Issue
+              </Button>
+            )}
           </div>
         </div>
 
@@ -289,9 +306,19 @@ const ProjectDetails = () => {
               columns={projectColumns}
               issues={project.issues || []}
               onDeleteIssue={(id) => {
+                if (!canManage) {
+                  toast({ title: "Denied", description: "You don't have permission to delete issues", variant: "destructive" });
+                  return;
+                }
                 if(window.confirm("Delete this issue?")) deleteIssueMutation.mutate(id);
               }}
-              onUpdateIssueStatus={(id, status) => updateIssueStatusMutation.mutate({ id, status })}
+              onUpdateIssueStatus={(id, status) => {
+                if (isViewer) {
+                  toast({ title: "Denied", description: "Viewers cannot update status", variant: "destructive" });
+                  return;
+                }
+                updateIssueStatusMutation.mutate({ id, status });
+              }}
               onViewComments={(issue) => setSelectedIssueForComments(issue)}
               onCreateIssue={openCreateIssueModal}
             />
@@ -376,7 +403,13 @@ const ProjectDetails = () => {
           </TabsContent>
 
           <TabsContent value="invites">
-            <InvitationLinkGenerator projectId={project.id} projectName={project.name} onSendInvitation={() => {}} />
+            {isOwner ? (
+              <InvitationLinkGenerator projectId={project.id} projectName={project.name} onSendInvitation={() => {}} />
+            ) : (
+              <Card className="p-12 text-center text-muted-foreground italic">
+                Only the project owner can manage invitations.
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </div>

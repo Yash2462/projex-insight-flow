@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,50 +17,63 @@ import {
   Key,
   Save,
   Upload,
-  Trash2
+  Trash2,
+  Loader2
 } from "lucide-react";
 import { userAPI } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const Settings = () => {
-  const [profile, setProfile] = useState({
-    fullName: "",
-    email: "",
-    projectSize: 0
-  });
-  const [loading, setLoading] = useState(true);
+  const [fullName, setFullName] = useState("");
+  const [bio, setBio] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      const response = await userAPI.getProfile();
+      return response.data.data;
+    },
+  });
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    if (profile) {
+      setFullName(profile.fullName || "");
+      setBio(profile.bio || "");
+      setAvatarUrl(profile.avatarUrl || "");
+    }
+  }, [profile]);
 
-  const fetchProfile = async () => {
-    try {
-      const response = await userAPI.getProfile();
-      setProfile(response.data || {});
-    } catch (error) {
+  const updateProfileMutation = useMutation({
+    mutationFn: (data: { fullName: string; bio: string; avatarUrl: string }) => 
+      userAPI.updateProfile(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
+    },
+    onError: () => {
       toast({
         title: "Error",
-        description: "Failed to fetch profile",
+        description: "Failed to update profile",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
-  };
+  });
 
   const handleSaveProfile = () => {
-    toast({
-      title: "Success",
-      description: "Profile updated successfully",
-    });
+    updateProfileMutation.mutate({ fullName, bio, avatarUrl });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-background lg:ml-64 p-8">
-        <div className="text-center">Loading settings...</div>
+      <div className="min-h-screen bg-background lg:ml-64 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -125,30 +139,62 @@ const Settings = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="fullName">Full Name</Label>
+                      <Input
+                        id="fullName"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="Enter your full name"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email (Read-only)</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={profile?.email || ""}
+                        disabled
+                        className="bg-muted/50"
+                      />
+                    </div>
+                  </div>
+                  
                   <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name</Label>
-                    <Input
-                      id="fullName"
-                      value={profile.fullName}
-                      onChange={(e) => setProfile(prev => ({ ...prev, fullName: e.target.value }))}
-                      placeholder="Enter your full name"
+                    <Label htmlFor="bio">Bio</Label>
+                    <Textarea
+                      id="bio"
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      placeholder="Tell us about yourself"
+                      className="min-h-[100px]"
                     />
                   </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="avatar">Avatar URL</Label>
                     <Input
-                      id="email"
-                      type="email"
-                      value={profile.email}
-                      onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
-                      placeholder="Enter your email"
+                      id="avatar"
+                      value={avatarUrl}
+                      onChange={(e) => setAvatarUrl(e.target.value)}
+                      placeholder="https://example.com/avatar.jpg"
                     />
                   </div>
                 </div>
 
-                <Button onClick={handleSaveProfile} className="w-full md:w-auto" variant="hero">
-                  <Save className="h-4 w-4 mr-2" />
+                <Button 
+                  onClick={handleSaveProfile} 
+                  className="w-full md:w-auto" 
+                  variant="hero"
+                  disabled={updateProfileMutation.isPending}
+                >
+                  {updateProfileMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4 mr-2" />
+                  )}
                   Save Changes
                 </Button>
               </CardContent>
