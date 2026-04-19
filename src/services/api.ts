@@ -126,6 +126,9 @@ export const authAPI = {
   
   sendOtp: (email: string) =>
     axios.post(`${API_URL}/auth/send-otp?email=${email}`),
+
+  resetPassword: (data: { email: string; otp: string; newPassword: string }) =>
+    axios.post(`${API_URL}/auth/reset-password`, data),
 };
 
 export const projectAPI = {
@@ -217,6 +220,16 @@ export const userAPI = {
 
   getUserById: (id: number) =>
     apiClient.get<ApiResponse<any>>(`/api/users/${id}`),
+
+  uploadAvatar: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiClient.post<ApiResponse<any>>('/api/users/profile/avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 
   completeOnboardingStep: (stepId: string) =>
     apiClient.post<ApiResponse<any>>(`/api/users/onboarding/step/${stepId}`),
