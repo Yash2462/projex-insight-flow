@@ -14,6 +14,7 @@ import {
   Loader2,
   Folder
 } from "lucide-react";
+import { getAvatarUrl } from "@/lib/utils";
 
 interface UserProfileProps {
   userId: number;
@@ -68,7 +69,7 @@ const UserProfile = ({ userId, onMessageClick }: UserProfileProps) => {
         <div className="h-32 w-full bg-gradient-primary rounded-t-3xl shadow-lg" />
         <div className="absolute -bottom-12 left-8 flex items-end gap-6">
           <Avatar className="h-24 w-24 border-4 border-background shadow-xl rounded-2xl">
-            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`} />
+            <AvatarImage src={getAvatarUrl(user.avatarUrl, user.email)} />
             <AvatarFallback className="text-2xl font-bold bg-primary/10 text-primary">
               {initials}
             </AvatarFallback>

@@ -32,6 +32,9 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ThemeToggle } from "./ThemeToggle";
+import { getAvatarUrl } from "@/lib/utils";
 
 interface Notification {
   id: number;
@@ -126,7 +129,7 @@ const Navigation = () => {
       {/* Sidebar */}
       <nav
         className={`
-          fixed inset-y-0 left-0 z-40 w-64 bg-card/60 backdrop-blur-xl border-r border-primary/5 transform transition-all duration-500 ease-in-out
+          fixed inset-y-0 left-0 z-40 w-64 bg-card/40 backdrop-blur-2xl border-r border-primary/5 transform transition-all duration-500 ease-in-out
           ${
             isMobileMenuOpen
               ? "translate-x-0"
@@ -138,96 +141,100 @@ const Navigation = () => {
           {/* Logo */}
           <div className="p-8 flex items-center justify-between">
             <Link to="/dashboard" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow group-hover:scale-110 transition-transform duration-500">
-                <Zap className="text-white h-6 w-6 fill-current" />
+              <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow group-hover:scale-105 transition-all duration-500 group-hover:rotate-6">
+                <Zap className="text-white h-5 w-5 fill-current" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-black tracking-tighter text-foreground">PROJEX</span>
-                <span className="text-[10px] font-bold text-primary tracking-[0.2em] -mt-1 uppercase">Insight Flow</span>
+                <span className="text-xl font-black tracking-tighter text-foreground leading-none">PROJEX</span>
+                <span className="text-[10px] font-bold text-primary tracking-widest uppercase mt-0.5">Insight Flow</span>
               </div>
             </Link>
 
-            {/* Notification Bell */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-xl hover:bg-primary/10 group">
-                  <Bell className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                  {notifications.length > 0 && (
-                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white shadow-glow">
-                      {notifications.length}
-                    </span>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" side="right" className="w-80 p-0 bg-card/90 backdrop-blur-xl border-primary/10 shadow-2xl rounded-2xl overflow-hidden ml-2">
-                <div className="p-4 bg-background/50 flex items-center justify-between">
-                  <DropdownMenuLabel className="font-bold text-sm">Notifications</DropdownMenuLabel>
-                  {notifications.length > 0 && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-7 text-[10px] font-bold text-primary hover:bg-primary/10 rounded-lg"
-                      onClick={() => markAllAsReadMutation.mutate()}
-                    >
-                      MARK ALL AS READ
-                    </Button>
-                  )}
-                </div>
-                <DropdownMenuSeparator className="m-0 bg-primary/5" />
-                <ScrollArea className="h-[350px]">
-                  {notifications.length === 0 ? (
-                    <div className="p-8 text-center flex flex-col items-center gap-3">
-                      <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                        <Bell className="h-6 w-6 text-muted-foreground/30" />
-                      </div>
-                      <p className="text-xs text-muted-foreground font-medium">No new notifications</p>
-                    </div>
-                  ) : (
-                    <div className="p-2 space-y-1">
-                      {notifications.map((notif: Notification) => (
-                        <div 
-                          key={notif.id} 
-                          className="group p-3 rounded-xl hover:bg-primary/5 border border-transparent hover:border-primary/5 transition-all relative"
-                        >
-                          <div className="flex gap-3">
-                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                              <AlertCircle className="h-4 w-4 text-primary" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs text-foreground leading-relaxed">
-                                {notif.message}
-                              </p>
-                              <p className="text-[10px] text-muted-foreground mt-1">
-                                {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </p>
-                            </div>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-6 w-6 opacity-0 group-hover:opacity-100 rounded-lg hover:bg-primary/10"
-                              onClick={() => markAsReadMutation.mutate(notif.id)}
-                            >
-                              <Check className="h-3 w-3 text-primary" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </ScrollArea>
-                <DropdownMenuSeparator className="m-0 bg-primary/5" />
-                <div className="p-2 bg-background/50">
-                  <Button variant="ghost" className="w-full h-8 text-[10px] font-bold text-muted-foreground hover:text-primary rounded-lg">
-                    VIEW ALL NOTIFICATIONS
+            <div className="flex items-center gap-1">
+              <ThemeToggle />
+              {/* Notification Bell */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-xl hover:bg-primary/10 group transition-all duration-300 active:scale-90">
+                    <Bell className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                    {notifications.length > 0 && (
+                      <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                      </span>
+                    )}
                   </Button>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" side="right" className="w-80 p-0 bg-card/90 backdrop-blur-xl border-primary/10 shadow-2xl rounded-2xl overflow-hidden ml-2">
+                  <div className="p-4 bg-background/50 flex items-center justify-between">
+                    <DropdownMenuLabel className="font-bold text-sm">Notifications</DropdownMenuLabel>
+                    {notifications.length > 0 && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-7 text-[10px] font-bold text-primary hover:bg-primary/10 rounded-lg"
+                        onClick={() => markAllAsReadMutation.mutate()}
+                      >
+                        MARK ALL AS READ
+                      </Button>
+                    )}
+                  </div>
+                  <DropdownMenuSeparator className="m-0 bg-primary/5" />
+                  <ScrollArea className="h-[350px]">
+                    {notifications.length === 0 ? (
+                      <div className="p-8 text-center flex flex-col items-center gap-3">
+                        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                          <Bell className="h-6 w-6 text-muted-foreground/30" />
+                        </div>
+                        <p className="text-xs text-muted-foreground font-medium">No new notifications</p>
+                      </div>
+                    ) : (
+                      <div className="p-2 space-y-1">
+                        {notifications.map((notif: Notification) => (
+                          <div 
+                            key={notif.id} 
+                            className="group p-3 rounded-xl hover:bg-primary/5 border border-transparent hover:border-primary/5 transition-all relative"
+                          >
+                            <div className="flex gap-3">
+                              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                <AlertCircle className="h-4 w-4 text-primary" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs text-foreground leading-relaxed">
+                                  {notif.message}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground mt-1">
+                                  {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-6 w-6 opacity-0 group-hover:opacity-100 rounded-lg hover:bg-primary/10"
+                                onClick={() => markAsReadMutation.mutate(notif.id)}
+                              >
+                                <Check className="h-3 w-3 text-primary" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </ScrollArea>
+                  <DropdownMenuSeparator className="m-0 bg-primary/5" />
+                  <div className="p-2 bg-background/50">
+                    <Button variant="ghost" className="w-full h-8 text-[10px] font-bold text-muted-foreground hover:text-primary rounded-lg">
+                      VIEW ALL NOTIFICATIONS
+                    </Button>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
 
           {/* Navigation Items */}
-          <div className="flex-1 px-4 py-4 space-y-2">
-            <p className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4 opacity-50">Main Menu</p>
+          <div className="flex-1 px-4 py-4 space-y-1.5">
+            <p className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4 opacity-40">Main Menu</p>
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const active = isActivePath(item.path);
@@ -237,11 +244,11 @@ const Navigation = () => {
                 return (
                   <div
                     key={item.label}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground/40 cursor-not-allowed grayscale"
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground/30 cursor-not-allowed grayscale"
                   >
                     <Icon className="h-5 w-5" />
-                    <span className="text-sm font-medium">{item.label}</span>
-                    <Badge variant="outline" className="ml-auto text-[9px] px-1 h-4 border-muted-foreground/20">
+                    <span className="text-sm font-medium tracking-tight">{item.label}</span>
+                    <Badge variant="outline" className="ml-auto text-[8px] font-bold px-1.5 h-4 border-muted-foreground/10 bg-muted/5 uppercase tracking-wider">
                       Soon
                     </Badge>
                   </div>
@@ -254,29 +261,29 @@ const Navigation = () => {
                   to={item.path}
                   className={`
                       group flex items-center gap-3 px-4 py-3 rounded-xl
-                      transition-all duration-300 relative overflow-hidden
+                      transition-all duration-300 relative
                       ${
                         active
-                          ? "bg-primary/10 text-primary shadow-[0_0_20px_rgba(var(--primary),0.1)]"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                          ? "bg-primary text-primary-foreground shadow-glow"
+                          : "text-muted-foreground hover:text-primary hover:bg-primary/5"
                       }
                     `}
                 >
-                  {active && (
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-full" />
-                  )}
                   <Icon
                     className={`h-5 w-5 transition-all duration-500
                     ${
                       active
-                        ? "text-primary scale-110 drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]"
+                        ? "text-primary-foreground scale-110"
                         : "group-hover:scale-110 group-hover:text-primary"
                     }
                   `}
                   />
-                  <span className={`text-sm font-semibold tracking-tight transition-colors duration-300`}>
+                  <span className={`text-sm font-semibold tracking-tight`}>
                     {item.label}
                   </span>
+                  {active && (
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-foreground shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
+                  )}
                 </Link>
               );
             })}
@@ -284,41 +291,42 @@ const Navigation = () => {
 
           {/* Upgrade Card */}
           <div className="px-6 mb-6">
-            <div className="bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl p-4 border border-primary/10 relative overflow-hidden group">
-              <div className="absolute -right-4 -top-4 w-16 h-16 bg-primary/10 rounded-full blur-xl group-hover:bg-primary/20 transition-all duration-500" />
-              <ShieldCheck className="h-6 w-6 text-primary mb-2" />
-              <p className="text-xs font-bold text-foreground mb-1">Pro Plan</p>
-              <p className="text-[10px] text-muted-foreground mb-3 leading-tight">Unlock unlimited projects and advanced analytics.</p>
-              <Button size="sm" variant="outline" className="w-full h-8 text-[10px] font-bold rounded-lg border-primary/20 hover:bg-primary hover:text-white transition-all duration-300">
-                UPGRADE NOW
+            <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-3xl p-5 border border-primary/10 relative overflow-hidden group transition-all duration-500 hover:shadow-elegant">
+              <div className="absolute -right-6 -top-6 w-20 h-20 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-500" />
+              <div className="w-10 h-10 rounded-xl bg-white/50 backdrop-blur-sm flex items-center justify-center mb-4 shadow-sm">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+              </div>
+              <p className="text-sm font-bold text-foreground mb-1">Go Premium</p>
+              <p className="text-[10px] text-muted-foreground mb-4 leading-relaxed font-medium">Unlock unlimited collaboration & detailed analytics.</p>
+              <Button size="sm" className="w-full h-9 text-[11px] font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 shadow-sm transition-all duration-300 active:scale-95">
+                Upgrade Pro
               </Button>
             </div>
           </div>
 
-          {/* User Profile */}
-          <div className="p-4 mx-4 mb-8 bg-muted/40 rounded-2xl border border-primary/5">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-lg p-0.5">
-                <div className="w-full h-full bg-card rounded-[10px] flex items-center justify-center">
-                  <User className="h-5 w-5 text-primary" />
-                </div>
-              </div>
+          <div className="p-3 mx-4 mb-8 glass-panel rounded-[2rem] border-primary/5">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10 border-2 border-white shadow-sm ring-1 ring-primary/5">
+                <AvatarImage src={getAvatarUrl(profile?.avatarUrl, profile?.email)} />
+                <AvatarFallback className="bg-primary/5 text-primary font-bold text-xs uppercase">
+                  {profile?.fullName?.split(' ').map((n:any) => n[0]).join('')}
+                </AvatarFallback>
+              </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-foreground truncate">{profile?.fullName || "User"}</p>
-                <p className="text-[10px] text-muted-foreground truncate opacity-70">
+                <p className="text-xs font-bold text-foreground truncate">{profile?.fullName || "User"}</p>
+                <p className="text-[10px] text-muted-foreground truncate font-medium opacity-60">
                   {profile?.email || "user@example.com"}
                 </p>
               </div>
+              <Button
+                onClick={handleLogout}
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
             </div>
-            <Button
-              onClick={handleLogout}
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start text-[11px] font-bold text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl h-9"
-            >
-              <LogOut className="h-3.5 w-3.5 mr-2" />
-              SIGN OUT
-            </Button>
           </div>
         </div>
       </nav>

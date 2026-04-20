@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,8 @@ const Settings = () => {
   const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -66,8 +68,41 @@ const Settings = () => {
     }
   });
 
+  const uploadAvatarMutation = useMutation({
+    mutationFn: (file: File) => userAPI.uploadAvatar(file),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      setAvatarUrl(response.data.data.avatarUrl);
+      toast({ title: "Success", description: "Avatar updated" });
+    },
+    onSettled: () => setIsUploading(false)
+  });
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setIsUploading(true);
+      uploadAvatarMutation.mutate(file);
+    }
+  };
+
+  const avatarStyles = [
+    "avataaars",
+    "bottts",
+    "pixel-art",
+    "adventurer",
+    "big-smile",
+    "croodles",
+    "lorelei"
+  ];
+
   const handleSaveProfile = () => {
     updateProfileMutation.mutate({ fullName, bio, avatarUrl });
+  };
+
+  const selectPredefinedAvatar = (style: string) => {
+    const newUrl = `https://api.dicebear.com/7.x/${style}/svg?seed=${profile?.email || 'user'}`;
+    setAvatarUrl(newUrl);
   };
 
   if (isLoading) {
@@ -77,6 +112,10 @@ const Settings = () => {
       </div>
     );
   }
+
+  const effectiveAvatarUrl = avatarUrl 
+    ? (avatarUrl.startsWith('http') ? avatarUrl : `http://localhost:8080${avatarUrl}`)
+    : `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.email}`;
 
   return (
     <div className="min-h-screen bg-background lg:ml-64">
@@ -113,90 +152,153 @@ const Settings = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="h-5 w-5 text-primary" />
-                  Profile Information
+                  Profile Identity
                 </CardTitle>
                 <CardDescription>
-                  Update your personal information and profile settings
+                  Customise how you appear to your team members
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center gap-6">
-                  <Avatar className="w-20 h-20">
-                    <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.email}`} />
-                    <AvatarFallback>
-                      {profile.fullName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="space-y-2">
-                    <Button variant="outline" size="sm">
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload Photo
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-destructive">
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Remove
-                    </Button>
+              <CardContent className="space-y-10">
+                {/* Avatar Section */}
+                <div className="space-y-4">
+                  <Label className="text-xs font-black uppercase tracking-widest opacity-50">Profile Picture</Label>
+                  <div className="flex flex-col md:flex-row gap-8 items-start">
+                    <div className="relative group">
+                      <div className="absolute -inset-1 bg-gradient-to-r from-primary to-purple-500 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                      <Avatar className="w-32 h-32 border-4 border-background relative ring-1 ring-primary/10">
+                        <AvatarImage src={effectiveAvatarUrl} />
+                        <AvatarFallback className="text-2xl font-black">
+                          {profile?.fullName?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <button 
+                        onClick={() => fileInputRef.current?.click()}
+                        className="absolute bottom-0 right-0 p-2 bg-primary text-white rounded-full shadow-lg hover:scale-110 transition-transform active:scale-95"
+                      >
+                        <Upload className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <div className="flex-1 space-y-6">
+                      <div className="flex flex-wrap gap-3">
+                        <input 
+                          type="file" 
+                          ref={fileInputRef} 
+                          className="hidden" 
+                          accept="image/*" 
+                          onChange={handleFileUpload} 
+                        />
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="rounded-xl font-bold text-[10px] uppercase tracking-widest h-10 px-6 border-primary/10 hover:bg-primary/5"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploading}
+                        >
+                          {isUploading ? <Loader2 className="h-3 w-3 mr-2 animate-spin" /> : <Save className="h-3 w-3 mr-2" />}
+                          Custom Upload
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="rounded-xl font-bold text-[10px] uppercase tracking-widest h-10 px-6 text-destructive hover:bg-destructive/5"
+                          onClick={() => setAvatarUrl("")}
+                        >
+                          <Trash2 className="h-3 w-3 mr-2" />
+                          Reset to Default
+                        </Button>
+                      </div>
+
+                      <div className="space-y-3">
+                        <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Quick Select Styles</p>
+                        <div className="flex flex-wrap gap-3">
+                          {avatarStyles.map((style) => (
+                            <button
+                              key={style}
+                              onClick={() => selectPredefinedAvatar(style)}
+                              className={`w-12 h-12 rounded-xl border-2 transition-all overflow-hidden ${
+                                avatarUrl.includes(style) ? "border-primary scale-110 shadow-glow" : "border-transparent opacity-60 hover:opacity-100 hover:scale-105"
+                              }`}
+                            >
+                              <img 
+                                src={`https://api.dicebear.com/7.x/${style}/svg?seed=${profile?.email || 'user'}`} 
+                                alt={style}
+                                className="w-full h-full object-cover"
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Separator className="bg-primary/5" />
+
+                <div className="grid grid-cols-1 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="fullName">Full Name</Label>
+                      <Label htmlFor="fullName" className="text-xs font-black uppercase tracking-widest opacity-60">Full Identity</Label>
                       <Input
                         id="fullName"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         placeholder="Enter your full name"
+                        className="h-12 bg-muted/20 border-primary/5 font-bold rounded-xl focus-visible:ring-primary/20"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email (Read-only)</Label>
+                      <Label htmlFor="email" className="text-xs font-black uppercase tracking-widest opacity-60">Authentication Email</Label>
                       <Input
                         id="email"
                         type="email"
                         value={profile?.email || ""}
                         disabled
-                        className="bg-muted/50"
+                        className="h-12 bg-muted/50 border-primary/5 font-bold rounded-xl opacity-60 cursor-not-allowed"
                       />
                     </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="bio">Bio</Label>
+                    <Label htmlFor="bio" className="text-xs font-black uppercase tracking-widest opacity-60">Mission Brief (Bio)</Label>
                     <Textarea
                       id="bio"
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
-                      placeholder="Tell us about yourself"
-                      className="min-h-[100px]"
+                      placeholder="Share your expertise or current mission objective..."
+                      className="min-h-[120px] bg-muted/20 border-primary/5 font-medium rounded-2xl focus-visible:ring-primary/20 resize-none p-4"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="avatar">Avatar URL</Label>
+                    <Label htmlFor="avatar" className="text-xs font-black uppercase tracking-widest opacity-60">Direct Avatar Source (URL)</Label>
                     <Input
                       id="avatar"
                       value={avatarUrl}
                       onChange={(e) => setAvatarUrl(e.target.value)}
                       placeholder="https://example.com/avatar.jpg"
+                      className="h-12 bg-muted/20 border-primary/5 font-medium rounded-xl focus-visible:ring-primary/20"
                     />
+                    <p className="text-[9px] text-muted-foreground font-medium opacity-60 ml-1 italic">
+                      Used for integrating external profile imagery.
+                    </p>
                   </div>
                 </div>
 
-                <Button 
-                  onClick={handleSaveProfile} 
-                  className="w-full md:w-auto" 
-                  variant="hero"
-                  disabled={updateProfileMutation.isPending}
-                >
-                  {updateProfileMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Save className="h-4 w-4 mr-2" />
-                  )}
-                  Save Changes
-                </Button>
+                <div className="pt-4">
+                  <Button 
+                    onClick={handleSaveProfile} 
+                    className="w-full md:w-auto h-12 px-10 rounded-2xl bg-primary text-primary-foreground font-black uppercase tracking-widest text-[10px] shadow-glow hover:opacity-90 transition-all active:scale-95" 
+                    disabled={updateProfileMutation.isPending}
+                  >
+                    {updateProfileMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4 mr-2" />
+                    )}
+                    Synchronize Profile
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
