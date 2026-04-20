@@ -15,11 +15,13 @@ import {
 import { useWebSocket } from '@/hooks/use-websocket';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
+import { getAvatarUrl } from '@/lib/utils';
 
 interface User {
   id: number;
   fullName: string;
   email: string;
+  avatarUrl?: string;
 }
 
 interface Message {
@@ -192,7 +194,7 @@ const ProjectChat = ({ projectId, projectName, teamMembers = [] }: ProjectChatPr
                   <div key={msg.id || index} className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
                     <div className={`flex-shrink-0 w-8 ${!showAvatar && 'invisible'}`}>
                       <Avatar className="h-8 w-8 border border-primary/10 shadow-sm">
-                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.sender.email}`} />
+                        <AvatarImage src={getAvatarUrl(msg.sender.avatarUrl, msg.sender.email)} />
                         <AvatarFallback className="text-[10px]">{getInitials(msg.sender.fullName)}</AvatarFallback>
                       </Avatar>
                     </div>

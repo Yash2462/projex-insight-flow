@@ -16,6 +16,9 @@ import {
   Video
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { getAvatarUrl } from '@/lib/utils';
+import { useQuery } from '@tanstack/react-query';
+import { userAPI } from '@/services/api';
 
 interface DirectMessage {
   id: number;
@@ -31,6 +34,7 @@ interface DirectMessageProps {
     id: number;
     fullName: string;
     email: string;
+    avatarUrl?: string;
   };
   currentUserId: number;
   onClose?: () => void;
@@ -42,6 +46,14 @@ const DirectMessage = ({ recipientUser, currentUserId, onClose }: DirectMessageP
   const [loading, setLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  const { data: currentUser } = useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      const response = await userAPI.getProfile();
+      return response.data.data;
+    },
+  });
 
   useEffect(() => {
     fetchMessages();
@@ -178,7 +190,7 @@ const DirectMessage = ({ recipientUser, currentUserId, onClose }: DirectMessageP
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
               <AvatarImage 
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${recipientUser.email}`} 
+                src={getAvatarUrl(recipientUser.avatarUrl, recipientUser.email)} 
               />
               <AvatarFallback className="bg-primary/10 text-primary font-medium">
                 {getInitials(recipientUser.fullName)}
@@ -239,7 +251,7 @@ const DirectMessage = ({ recipientUser, currentUserId, onClose }: DirectMessageP
                   {!isCurrentUser(message.senderId) && (
                     <Avatar className="h-8 w-8">
                       <AvatarImage 
-                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${recipientUser.email}`} 
+                        src={getAvatarUrl(recipientUser.avatarUrl, recipientUser.email)} 
                       />
                       <AvatarFallback className="bg-primary/10 text-primary font-medium">
                         {getInitials(recipientUser.fullName)}
@@ -290,8 +302,9 @@ const DirectMessage = ({ recipientUser, currentUserId, onClose }: DirectMessageP
 
                   {isCurrentUser(message.senderId) && (
                     <Avatar className="h-8 w-8">
+                      <AvatarImage src={getAvatarUrl(currentUser?.avatarUrl, currentUser?.email)} />
                       <AvatarFallback className="bg-primary text-primary-foreground font-medium">
-                        {getInitials('Current User')}
+                        {getInitials(currentUser?.fullName || 'Me')}
                       </AvatarFallback>
                     </Avatar>
                   )}
