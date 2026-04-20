@@ -14,71 +14,77 @@ import Navigation from "./components/Navigation";
 import NotFound from "./pages/NotFound";
 import ProjectDetails from "./pages/ProjectDetails";
 import AcceptInvitation from "./pages/AcceptInvitation";
+import ForgotPassword from "./pages/ForgotPassword";
+
+import { ThemeProvider } from "./components/theme-provider";
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route 
-            path="/dashboard" 
-            element={
-              <>
-                <Navigation />
-                <Dashboard />
-              </>
-            } 
-          />
-          <Route 
-            path="/projects" 
-            element={
-              <>
-                <Navigation />
-                <Projects />
-              </>
-            } 
-          />
-          <Route 
-            path="/subscription" 
-            element={
-              <>
-                <Navigation />
-                <Subscription />
-              </>
-            } 
-          />
-          <Route 
-            path="/settings" 
-            element={
-              <>
-                <Navigation />
-                <Settings />
-              </>
-            } 
-          />
-          <Route 
-            path="/projects/:id" 
-            element={
-              <>
-                <Navigation />
-                <ProjectDetails />
-              </>
-            } 
-          />
-          <Route path="/accept_invitation" element={<AcceptInvitation />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ThemeProvider defaultTheme="light" storageKey="projex-theme">
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route 
+              path="/dashboard" 
+              element={
+                <>
+                  <Navigation />
+                  <Dashboard />
+                </>
+              } 
+            />
+            <Route 
+              path="/projects" 
+              element={
+                <>
+                  <Navigation />
+                  <Projects />
+                </>
+              } 
+            />
+            <Route 
+              path="/subscription" 
+              element={
+                <>
+                  <Navigation />
+                  <Subscription />
+                </>
+              } 
+            />
+            <Route 
+              path="/settings" 
+              element={
+                <>
+                  <Navigation />
+                  <Settings />
+                </>
+              } 
+            />
+            <Route 
+              path="/projects/:id" 
+              element={
+                <>
+                  <Navigation />
+                  <ProjectDetails />
+                </>
+              } 
+            />
+            <Route path="/accept_invitation" element={<AcceptInvitation />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;
