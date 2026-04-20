@@ -63,26 +63,28 @@ const DashboardStats = ({ stats, isLoading }: DashboardStatsProps) => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       {statItems.map((item, index) => {
         const Icon = item.icon;
         return (
-          <Card key={index} className="group overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-card/50 hover:shadow-xl transition-all duration-300">
+          <Card key={index} className="group overflow-hidden border border-primary/5 shadow-sm bg-card hover:border-primary/20 hover:shadow-glow transition-all duration-500 rounded-3xl relative">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{item.title}</CardTitle>
-              <div className={`p-2 rounded-lg ${item.bg} ${item.color} group-hover:scale-110 transition-transform duration-300`}>
+              <CardTitle className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest opacity-70">{item.title}</CardTitle>
+              <div className={`p-2 rounded-xl ${item.bg} ${item.color} group-hover:scale-110 transition-transform duration-500`}>
                 <Icon className="h-4 w-4" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">{item.value}</div>
-              <p className="text-xs text-muted-foreground flex items-center mt-1">
-                <TrendingUp className="h-3 w-3 mr-1 text-primary" />
-                {item.change}
-              </p>
+            <CardContent className="pt-2">
+              <div className="text-3xl font-black text-foreground tracking-tighter">{item.value}</div>
+              <div className="flex items-center mt-2 group-hover:translate-x-1 transition-transform duration-500">
+                 <div className="px-2 py-0.5 rounded-full bg-primary/5 border border-primary/10">
+                    <span className="text-[10px] font-bold text-primary">{item.change}</span>
+                 </div>
+              </div>
             </CardContent>
-            {/* Background decoration */}
-            <div className={`absolute -right-4 -bottom-4 w-24 h-24 rounded-full ${item.bg} blur-3xl opacity-50 group-hover:opacity-100 transition-opacity duration-500`}></div>
+            
+            {/* Soft Glow Background */}
+            <div className={`absolute -right-4 -bottom-4 w-24 h-24 rounded-full ${item.bg} blur-[40px] opacity-20 group-hover:opacity-40 transition-opacity duration-700`}></div>
           </Card>
         );
       })}

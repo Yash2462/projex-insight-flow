@@ -25,14 +25,14 @@ interface DashboardChartsProps {
   isLoading: boolean;
 }
 
-const COLORS = ["#8B5CF6", "#3B82F6", "#F59E0B", "#EF4444", "#10B981", "#6B7280"];
+const COLORS = ["#6366f1", "#8b5cf6", "#ec4899", "#f43f5e", "#10b981", "#f59e0b"];
 
 const DashboardCharts = ({ counts, isLoading }: DashboardChartsProps) => {
   if (isLoading || !counts) {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {[...Array(2)].map((_, i) => (
-          <Card key={i} className="animate-pulse h-[400px]">
+          <Card key={i} className="animate-pulse h-[400px] rounded-3xl bg-card/50">
             <CardHeader>
               <div className="h-6 w-48 bg-muted rounded mb-2"></div>
               <div className="h-4 w-64 bg-muted rounded"></div>
@@ -65,21 +65,21 @@ const DashboardCharts = ({ counts, isLoading }: DashboardChartsProps) => {
     : 0;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
       {/* Project Status Distribution */}
-      <Card className="border-0 shadow-elegant bg-gradient-to-br from-card to-card/50 overflow-hidden relative group">
-        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-          <TrendingUp className="h-24 w-24" />
+      <Card className="border border-primary/5 shadow-elegant bg-card/50 backdrop-blur-xl overflow-hidden relative group rounded-3xl">
+        <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-700">
+          <TrendingUp className="h-32 w-32" />
         </div>
-        <CardHeader>
-          <div className="flex justify-between items-center">
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-start">
             <div>
-              <CardTitle>Work Distribution</CardTitle>
-              <CardDescription>Project status and volume</CardDescription>
+              <CardTitle className="text-xl font-bold tracking-tight">Status Metrics</CardTitle>
+              <CardDescription className="text-xs font-medium uppercase tracking-wider opacity-60">Volume by status</CardDescription>
             </div>
-            <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">
-              {counts.total} Total Projects
-            </Badge>
+            <div className="px-3 py-1 rounded-full bg-primary/5 border border-primary/10">
+              <span className="text-[10px] font-black text-primary">{counts.total} ACTIVE</span>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="h-[300px]">
@@ -89,96 +89,95 @@ const DashboardCharts = ({ counts, isLoading }: DashboardChartsProps) => {
                 data={statusData}
                 cx="50%"
                 cy="50%"
-                innerRadius={70}
-                outerRadius={90}
-                paddingAngle={8}
+                innerRadius={75}
+                outerRadius={95}
+                paddingAngle={6}
                 dataKey="value"
+                stroke="none"
               >
                 {statusData.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} className="hover:opacity-80 transition-opacity cursor-pointer" />
                 ))}
               </Pie>
               <Tooltip 
                 contentStyle={{ 
                   backgroundColor: "hsl(var(--card))", 
-                  borderColor: "hsl(var(--border))",
-                  borderRadius: "12px",
-                  boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
+                  borderColor: "hsl(var(--primary) / 0.1)",
+                  borderRadius: "16px",
+                  boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+                  borderWidth: "1px"
                 }}
+                itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
               />
-              <Legend verticalAlign="bottom" height={36} iconType="circle" />
+              <Legend 
+                verticalAlign="bottom" 
+                height={36} 
+                iconType="circle" 
+                formatter={(value) => <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{value}</span>}
+              />
             </PieChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
       {/* Project Velocity / Health */}
-      <Card className="border-0 shadow-elegant bg-gradient-to-br from-card to-card/50 overflow-hidden relative group">
-        <CardHeader>
-          <div className="flex justify-between items-center">
+      <Card className="border border-primary/5 shadow-elegant bg-card/50 backdrop-blur-xl overflow-hidden relative group rounded-3xl">
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-start">
             <div>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-amber-500" />
-                Workspace Velocity
+              <CardTitle className="text-xl font-bold tracking-tight flex items-center gap-2">
+                Performance
               </CardTitle>
-              <CardDescription>Story points completion trend</CardDescription>
+              <CardDescription className="text-xs font-medium uppercase tracking-wider opacity-60">Completion Velocity</CardDescription>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-black text-primary">{completionRate}%</div>
-              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Overall Progress</div>
+              <div className="text-3xl font-black text-primary tracking-tighter">{completionRate}%</div>
+              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Progress</div>
             </div>
           </div>
         </CardHeader>
         <CardContent className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={velocityData}>
+            <AreaChart data={velocityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorPoints" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2}/>
                   <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted-foreground))" opacity={0.05} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--primary))" opacity={0.05} />
               <XAxis 
                 dataKey="name" 
                 axisLine={false} 
                 tickLine={false} 
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10, fontWeight: 600 }}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10, fontWeight: 700 }}
               />
               <YAxis hide />
               <Tooltip 
                 contentStyle={{ 
                   backgroundColor: "hsl(var(--card))", 
-                  borderColor: "hsl(var(--border))",
-                  borderRadius: "12px",
-                  boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
+                  borderColor: "hsl(var(--primary) / 0.1)",
+                  borderRadius: "16px",
+                  boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+                  borderWidth: "1px"
                 }}
               />
               <Area 
                 type="monotone" 
                 dataKey="completed" 
                 stroke="hsl(var(--primary))" 
-                strokeWidth={3}
+                strokeWidth={4}
                 fillOpacity={1} 
                 fill="url(#colorPoints)" 
                 name="Points Completed"
-              />
-              <Area 
-                type="monotone" 
-                dataKey="total" 
-                stroke="hsl(var(--muted-foreground))" 
-                strokeWidth={1}
-                strokeDasharray="5 5"
-                fill="none" 
-                name="Total Scope"
               />
             </AreaChart>
           </ResponsiveContainer>
         </CardContent>
         {counts.overdue > 0 && (
-          <div className="absolute bottom-4 right-6 flex items-center gap-1.5 text-destructive animate-pulse">
-            <AlertTriangle className="h-3.5 w-3.5" />
-            <span className="text-[10px] font-bold uppercase">{counts.overdue} Tasks Overdue</span>
+          <div className="absolute bottom-6 right-8 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-destructive/5 border border-destructive/10 text-destructive animate-pulse">
+            <AlertTriangle className="h-4 w-4" />
+            <span className="text-[10px] font-black uppercase tracking-widest">{counts.overdue} Overdue</span>
           </div>
         )}
       </Card>
