@@ -2,79 +2,79 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:8080';
 
-// Add a global response interceptor to the default axios instance
-axios.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    if (error.response?.status === 401) {
-      const responseData = error.response.data;
-      
-      // Check if the response indicates we should redirect to login
-      if (responseData?.redirectToLogin === true) {
-        // Clear any existing auth token
-        localStorage.removeItem('token');
-        
-        // If we're not already on the login page, redirect to it
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
-        }
-      }
-    }
-    
-    return Promise.reject(error);
-  }
-);
+// API Interfaces
+export interface User {
+  id: number;
+  fullName: string;
+  email: string;
+  avatarUrl?: string;
+  bio?: string;
+  projectSize: number;
+  onboardingCompleted: boolean;
+}
 
-const apiClient = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true, // Include cookies for session management
-});
+export interface Project {
+  id: number;
+  name: string;
+  description: string;
+  category?: string;
+  tags?: string[];
+  owner: User;
+  team?: User[];
+  issues?: Issue[];
+  statuses?: string[];
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
-// Add request interceptor to include auth token
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+export interface Issue {
+  id: number;
+  title: string;
+  description: string;
+  status: string;
+  priority: string;
+  dueDate: string;
+  projectId: number;
+  assignee?: User;
+  storyPoints: number;
+  estimatedHours: number;
+  loggedHours: number;
+  milestone?: string;
+  subtasks?: string[];
+  completedSubtasks?: string[];
+  attachments?: Attachment[];
+  comments?: Comment[];
+}
 
-// Add response interceptor to handle 401 responses with redirectToLogin
-apiClient.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    if (error.response?.status === 401) {
-      const responseData = error.response.data;
-      
-      // Check if the response indicates we should redirect to login
-      if (responseData?.redirectToLogin === true) {
-        // Clear any existing auth token
-        localStorage.removeItem('token');
-        
-        // If we're not already on the login page, redirect to it
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
-        }
-      }
-    }
-    
-    return Promise.reject(error);
-  }
-);
+export interface Attachment {
+  id: number;
+  fileName: string;
+  fileType: string;
+  fileUrl: string;
+  fileSize: number;
+  uploadedAt: string;
+  uploadedBy: User;
+}
 
-// API Response Types
+export interface Comment {
+  id: number;
+  content: string;
+  createdAt: string;
+  author: User;
+}
+
+export interface Notification {
+  id: number;
+  message: string;
+  type: string;
+  isRead: boolean;
+  createdAt: string;
+  projectId?: number;
+  issueId?: number;
+  sender?: User;
+}
+
 export interface DashboardStatistics {
   totalProjects: number;
   totalProjectsChange: string;
@@ -109,12 +109,34 @@ export interface ApiResponse<T> {
   success: boolean;
   data: T;
   message?: string;
-  error?: {
-    code: string;
-    message: string;
-    redirectToLogin?: boolean;
-  };
+  status?: number;
 }
+
+// Axios Config
+const apiClient = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true,
+});
+
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+apiClient.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401 && window.location.pathname !== '/login') {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(err);
+  }
+);
 
 // API Services
 export const authAPI = {
@@ -133,22 +155,22 @@ export const authAPI = {
 
 export const projectAPI = {
   getProjects: (params?: { category?: string; tag?: string }) =>
-    apiClient.get<ApiResponse<any[]>>('/api/projects', { params }),
+    apiClient.get<ApiResponse<Project[]>>('/api/projects', { params }),
   
   getProjectById: (id: number) =>
-    apiClient.get<ApiResponse<any>>(`/api/projects/${id}`),
+    apiClient.get<ApiResponse<Project>>(`/api/projects/${id}`),
   
-  createProject: (data: any) =>
-    apiClient.post<ApiResponse<any>>('/api/projects', data),
+  createProject: (data: Partial<Project>) =>
+    apiClient.post<ApiResponse<Project>>('/api/projects', data),
   
-  updateProject: (id: number, data: any) =>
-    apiClient.put<ApiResponse<any>>(`/api/projects/${id}`, data),
+  updateProject: (id: number, data: Partial<Project>) =>
+    apiClient.put<ApiResponse<Project>>(`/api/projects/${id}`, data),
   
   deleteProject: (id: number) =>
     apiClient.delete<ApiResponse<any>>(`/api/projects/${id}`),
   
   searchProjects: (keyword?: string) =>
-    apiClient.get<ApiResponse<any[]>>('/api/projects/search', { params: { keyword } }),
+    apiClient.get<ApiResponse<Project[]>>('/api/projects/search', { params: { keyword } }),
   
   inviteToProject: (data: { email: string; projectId: number }) =>
     apiClient.post<ApiResponse<any>>('/api/projects/invite', data),
@@ -158,35 +180,32 @@ export const projectAPI = {
 
   getProjectRole: (projectId: number) =>
     apiClient.get<ApiResponse<string>>(`/api/projects/${projectId}/role`),
+
+  addMemberToProject: (projectId: number, userId: number) =>
+    apiClient.put<ApiResponse<any>>(`/api/projects/${projectId}/addMember/${userId}`),
 };
 
 export const issueAPI = {
-  createIssue: (data: {
-    title: string;
-    description: string;
-    status: string;
-    projectId: number;
-    priority: string;
-    dueDate: string;
-  }) => apiClient.post<ApiResponse<any>>('/api/issues', data),
+  createIssue: (data: Partial<Issue>) => 
+    apiClient.post<ApiResponse<Issue>>('/api/issues', data),
   
   getIssueById: (id: number) =>
-    apiClient.get<ApiResponse<any>>(`/api/issues/${id}`),
+    apiClient.get<ApiResponse<Issue>>(`/api/issues/${id}`),
   
   getIssuesByProjectId: (projectId: number) =>
-    apiClient.get<ApiResponse<any[]>>(`/api/issues/project/${projectId}`),
+    apiClient.get<ApiResponse<Issue[]>>(`/api/issues/project/${projectId}`),
   
   updateIssueStatus: (issueId: number, status: string) =>
-    apiClient.put<ApiResponse<any>>(`/api/issues/${issueId}/status/${status}`),
+    apiClient.put<ApiResponse<Issue>>(`/api/issues/${issueId}/status/${status}`),
   
   assignUserToIssue: (issueId: number, userId: number) =>
-    apiClient.put<ApiResponse<any>>(`/api/issues/${issueId}/assignee/${userId}`),
+    apiClient.put<ApiResponse<Issue>>(`/api/issues/${issueId}/assignee/${userId}`),
   
   deleteIssue: (id: number) =>
     apiClient.delete<ApiResponse<any>>(`/api/issues/${id}`),
 
-  updateIssue: (id: number, data: any) =>
-    apiClient.put<ApiResponse<any>>(`/api/issues/${id}`, data),
+  updateIssue: (id: number, data: Partial<Issue>) =>
+    apiClient.put<ApiResponse<Issue>>(`/api/issues/${id}`, data),
 };
 
 export const attachmentAPI = {
@@ -194,15 +213,13 @@ export const attachmentAPI = {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('issueId', issueId.toString());
-    return apiClient.post<ApiResponse<any>>('/api/attachments/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    return apiClient.post<ApiResponse<Attachment>>('/api/attachments/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
   
   getIssueAttachments: (issueId: number) =>
-    apiClient.get<ApiResponse<any[]>>(`/api/attachments/issue/${issueId}`),
+    apiClient.get<ApiResponse<Attachment[]>>(`/api/attachments/issue/${issueId}`),
   
   delete: (id: number) =>
     apiClient.delete<ApiResponse<any>>(`/api/attachments/${id}`),
@@ -210,37 +227,27 @@ export const attachmentAPI = {
 
 export const userAPI = {
   getProfile: () =>
-    apiClient.get<ApiResponse<any>>('/api/users/profile'),
+    apiClient.get<ApiResponse<User>>('/api/users/profile'),
 
-  updateProfile: (data: { fullName?: string; avatarUrl?: string; bio?: string }) =>
-    apiClient.put<ApiResponse<any>>('/api/users/profile', data),
+  updateProfile: (data: Partial<User>) =>
+    apiClient.put<ApiResponse<User>>('/api/users/profile', data),
   
   getUsers: () =>
-    apiClient.get<ApiResponse<any[]>>('/api/users/profiles'),
+    apiClient.get<ApiResponse<User[]>>('/api/users/profiles'),
 
   getUserById: (id: number) =>
-    apiClient.get<ApiResponse<any>>(`/api/users/${id}`),
-
-  uploadAvatar: (file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    return apiClient.post<ApiResponse<any>>('/api/users/profile/avatar', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-  },
+    apiClient.get<ApiResponse<User>>(`/api/users/${id}`),
 
   completeOnboardingStep: (stepId: string) =>
-    apiClient.post<ApiResponse<any>>(`/api/users/onboarding/step/${stepId}`),
+    apiClient.post<ApiResponse<User>>(`/api/users/onboarding/step/${stepId}`),
 };
 
 export const notificationAPI = {
   getNotifications: () =>
-    apiClient.get<ApiResponse<any[]>>('/api/notifications'),
+    apiClient.get<ApiResponse<Notification[]>>('/api/notifications'),
   
   getUnreadNotifications: () =>
-    apiClient.get<ApiResponse<any[]>>('/api/notifications/unread'),
+    apiClient.get<ApiResponse<Notification[]>>('/api/notifications/unread'),
   
   markAsRead: (id: number) =>
     apiClient.put<ApiResponse<any>>(`/api/notifications/${id}/read`),
@@ -265,26 +272,34 @@ export const dashboardAPI = {
 
 export const commentAPI = {
   createComment: (data: { issueId: number; content: string }) =>
-    apiClient.post('/api/comments', data),
+    apiClient.post<ApiResponse<Comment>>('/api/comments', data),
   
   getCommentsByIssueId: (issueId: number) =>
-    apiClient.get(`/api/comments/${issueId}`),
+    apiClient.get<ApiResponse<Comment[]>>(`/api/comments/${issueId}`),
   
   deleteComment: (commentId: number) =>
-    apiClient.delete(`/api/comments/${commentId}`),
+    apiClient.delete<ApiResponse<any>>(`/api/comments/${commentId}`),
+};
+
+export const messageAPI = {
+  sendDirectMessage: (data: { senderId: number; receiverId: number; content: string }) =>
+    apiClient.post<ApiResponse<Message>>('/api/messages/direct/send', data),
+  
+  getDirectMessages: (userId: number) =>
+    apiClient.get<ApiResponse<Message[]>>(`/api/messages/direct/${userId}`),
 };
 
 export const subscriptionAPI = {
   getUserSubscription: () =>
-    apiClient.get('/api/subscription/user'),
+    apiClient.get<ApiResponse<any>>('/api/subscription/user'),
   
   upgradeSubscription: (planType: 'FREE' | 'MONTHLY' | 'ANNUALLY') =>
-    apiClient.put('/api/subscription/upgrade', null, { params: { planType } }),
+    apiClient.put<ApiResponse<any>>('/api/subscription/upgrade', null, { params: { planType } }),
 };
 
 export const paymentAPI = {
   createPaymentLink: (planType: 'FREE' | 'MONTHLY' | 'ANNUALLY') =>
-    apiClient.post(`/api/payment/${planType}`),
+    apiClient.post<ApiResponse<any>>(`/api/payment/${planType}`),
 };
 
 export default apiClient;

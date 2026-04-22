@@ -96,7 +96,7 @@ const Navigation = () => {
   const navigationItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { icon: FolderOpen, label: "Projects", path: "/projects" },
-    { icon: BarChart3, label: "Analytics", path: "/analytics", disabled: true },
+    { icon: BarChart3, label: "Analytics", path: "/analytics" },
     { icon: CreditCard, label: "Subscription", path: "/subscription" },
     { icon: Settings, label: "Settings", path: "/settings" },
   ];
