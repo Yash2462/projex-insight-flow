@@ -8,44 +8,31 @@ import { Badge } from '@/components/ui/badge';
 import { 
   MessageCircle, 
   Send, 
-  User,
   Clock,
   Paperclip,
   Smile,
   Phone,
-  Video
+  Video,
+  Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getAvatarUrl } from '@/lib/utils';
-import { useQuery } from '@tanstack/react-query';
-import { userAPI } from '@/services/api';
-
-interface DirectMessage {
-  id: number;
-  content: string;
-  timestamp: string;
-  senderId: number;
-  receiverId: number;
-  isRead: boolean;
-}
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { userAPI, messageAPI, Message, User } from '@/services/api';
+import { useWebSocket } from '@/hooks/use-websocket';
 
 interface DirectMessageProps {
-  recipientUser: {
-    id: number;
-    fullName: string;
-    email: string;
-    avatarUrl?: string;
-  };
+  recipientUser: User;
   currentUserId: number;
   onClose?: () => void;
 }
 
 const DirectMessage = ({ recipientUser, currentUserId, onClose }: DirectMessageProps) => {
-  const [messages, setMessages] = useState<DirectMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [loading, setLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { subscribe, isConnected } = useWebSocket();
 
   const { data: currentUser } = useQuery({
     queryKey: ["profile"],
@@ -55,117 +42,63 @@ const DirectMessage = ({ recipientUser, currentUserId, onClose }: DirectMessageP
     },
   });
 
+  const { data: messages = [], isLoading } = useQuery({
+    queryKey: ["direct-messages", recipientUser.id],
+    queryFn: async () => {
+      const response = await messageAPI.getDirectMessages(recipientUser.id);
+      return response.data.data || [];
+    },
+    enabled: !!recipientUser.id,
+  });
+
+  // Subscribe to real-time direct messages
   useEffect(() => {
-    fetchMessages();
-    // Auto-scroll to bottom when component loads
-    setTimeout(() => {
-      if (scrollAreaRef.current) {
-        scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-      }
-    }, 100);
-  }, [recipientUser.id]);
+    if (isConnected && currentUser?.email) {
+      const subscription = subscribe(`/user/${currentUser.email}/queue/direct-messages`, (msg: Message) => {
+        // Only care if it's from the person we're chatting with
+        if (msg.sender?.id === recipientUser.id || msg.receiver?.id === recipientUser.id) {
+          queryClient.setQueryData(["direct-messages", recipientUser.id], (prev: Message[] | undefined) => {
+             if (prev?.some(m => m.id === msg.id)) return prev;
+             return [...(prev || []), msg];
+          });
+        }
+      });
+      return () => {};
+    }
+  }, [isConnected, currentUser?.email, recipientUser.id, subscribe, queryClient]);
 
   useEffect(() => {
-    // Auto-scroll to bottom when new messages are added
+    // Auto-scroll to bottom when messages change
     if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+      const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (viewport) {
+        viewport.scrollTop = viewport.scrollHeight;
+      }
     }
   }, [messages]);
 
-  const fetchMessages = async () => {
-    try {
-      setLoading(true);
-      // Mock messages for demonstration - in real app, this would fetch from API
-      const mockMessages: DirectMessage[] = [
-        {
-          id: 1,
-          content: "Hey! How's the project going?",
-          timestamp: '2024-01-20T09:00:00Z',
-          senderId: recipientUser.id,
-          receiverId: currentUserId,
-          isRead: true
-        },
-        {
-          id: 2,
-          content: "Going well! Just finished the authentication module. Working on the dashboard now.",
-          timestamp: '2024-01-20T09:15:00Z',
-          senderId: currentUserId,
-          receiverId: recipientUser.id,
-          isRead: true
-        },
-        {
-          id: 3,
-          content: "That's great! Let me know if you need any help with the UI components.",
-          timestamp: '2024-01-20T09:30:00Z',
-          senderId: recipientUser.id,
-          receiverId: currentUserId,
-          isRead: true
-        },
-        {
-          id: 4,
-          content: "Thanks! Actually, I have a question about the design system. Could we hop on a quick call?",
-          timestamp: '2024-01-20T10:00:00Z',
-          senderId: currentUserId,
-          receiverId: recipientUser.id,
-          isRead: false
-        }
-      ];
-      
-      setMessages(mockMessages);
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch messages',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSendMessage = async () => {
-    if (!newMessage.trim()) {
-      toast({
-        title: 'Error',
-        description: 'Please enter a message',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    try {
-      setLoading(true);
-      
-      // Create new message
-      const message: DirectMessage = {
-        id: messages.length + 1,
-        content: newMessage,
-        timestamp: new Date().toISOString(),
-        senderId: currentUserId,
-        receiverId: recipientUser.id,
-        isRead: false
-      };
-      
-      setMessages(prev => [...prev, message]);
+  const sendMutation = useMutation({
+    mutationFn: (content: string) => messageAPI.sendDirectMessage({
+      senderId: currentUserId,
+      receiverId: recipientUser.id,
+      content
+    }),
+    onSuccess: (response) => {
+      const sentMsg = response.data.data;
+      queryClient.setQueryData(["direct-messages", recipientUser.id], (prev: Message[] | undefined) => [
+        ...(prev || []),
+        sentMsg
+      ]);
       setNewMessage('');
-      
-      toast({
-        title: 'Success',
-        description: 'Message sent successfully',
-      });
-      
-      // In real app, this would call the API to send the message
-      // await messageAPI.sendDirectMessage({ ... });
-      
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to send message',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
+    },
+    onError: () => {
+      toast({ title: 'Error', description: 'Failed to send message', variant: 'destructive' });
     }
+  });
+
+  const handleSendMessage = () => {
+    if (!newMessage.trim() || sendMutation.isPending) return;
+    sendMutation.mutate(newMessage.trim());
   };
 
   const getInitials = (name: string) => {
@@ -179,182 +112,122 @@ const DirectMessage = ({ recipientUser, currentUserId, onClose }: DirectMessageP
     });
   };
 
-  const isCurrentUser = (senderId: number) => {
-    return currentUserId === senderId;
-  };
-
   return (
-    <Card className="h-full border-0 shadow-lg bg-gradient-to-br from-card/50 to-background">
-      <CardHeader className="pb-4 border-b">
+    <Card className="h-full border-0 shadow-2xl bg-card rounded-[2.5rem] overflow-hidden flex flex-col">
+      <CardHeader className="pb-4 border-b bg-muted/5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-12 w-12 border-2 border-white shadow-sm ring-1 ring-primary/5">
               <AvatarImage 
                 src={getAvatarUrl(recipientUser.avatarUrl, recipientUser.email)} 
               />
-              <AvatarFallback className="bg-primary/10 text-primary font-medium">
+              <AvatarFallback className="bg-primary/5 text-primary font-black">
                 {getInitials(recipientUser.fullName)}
               </AvatarFallback>
             </Avatar>
             
             <div>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <MessageCircle className="h-5 w-5 text-primary" />
+              <CardTitle className="text-lg font-black tracking-tight flex items-center gap-2">
                 {recipientUser.fullName}
+                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
               </CardTitle>
-              <p className="text-sm text-muted-foreground">{recipientUser.email}</p>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">{recipientUser.email}</p>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="hover:bg-primary/10">
-              <Phone className="h-4 w-4" />
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-primary/5">
+              <Phone className="h-4 w-4 text-primary/60" />
             </Button>
-            <Button variant="ghost" size="sm" className="hover:bg-primary/10">
-              <Video className="h-4 w-4" />
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-primary/5">
+              <Video className="h-4 w-4 text-primary/60" />
             </Button>
-            <Badge variant="outline" className="bg-success/10 text-success border-success/20">
-              <div className="w-2 h-2 bg-success rounded-full mr-2"></div>
-              Online
-            </Badge>
           </div>
         </div>
       </CardHeader>
       
-      <CardContent className="flex flex-col h-[500px] p-0">
-        {/* Messages */}
+      <CardContent className="flex-1 flex flex-col min-h-0 p-0">
         <ScrollArea 
           ref={scrollAreaRef}
-          className="flex-1 p-4"
+          className="flex-1 p-6"
         >
-          {loading && messages.length === 0 ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          {isLoading && messages.length === 0 ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
             </div>
           ) : messages.length === 0 ? (
-            <div className="text-center py-12">
-              <MessageCircle className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-              <h3 className="font-semibold text-foreground mb-2">No messages yet</h3>
-              <p className="text-muted-foreground text-sm">
-                Start the conversation with {recipientUser.fullName}!
-              </p>
+            <div className="text-center py-20 opacity-20">
+              <MessageCircle className="h-16 w-16 mx-auto mb-4" />
+              <p className="text-[10px] font-black uppercase tracking-[0.3em]">No transmission history</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex gap-3 ${
-                    isCurrentUser(message.senderId) ? 'justify-end' : ''
-                  }`}
-                >
-                  {!isCurrentUser(message.senderId) && (
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage 
-                        src={getAvatarUrl(recipientUser.avatarUrl, recipientUser.email)} 
-                      />
-                      <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                        {getInitials(recipientUser.fullName)}
-                      </AvatarFallback>
-                    </Avatar>
-                  )}
-                  
-                  <div 
-                    className={`max-w-[70%] ${
-                      isCurrentUser(message.senderId) 
-                        ? 'order-first' 
-                        : ''
-                    }`}
+            <div className="space-y-6">
+              {messages.map((message) => {
+                const isMe = message.sender?.id === currentUserId;
+                return (
+                  <div
+                    key={message.id}
+                    className={`flex gap-3 ${isMe ? 'justify-end' : 'justify-start'}`}
                   >
-                    <div className="flex items-baseline gap-2 mb-1">
-                      <span 
-                        className={`text-sm font-medium ${
-                          isCurrentUser(message.senderId) 
-                            ? 'text-primary' 
-                            : 'text-foreground'
-                        }`}
-                      >
-                        {isCurrentUser(message.senderId) 
-                          ? 'You' 
-                          : recipientUser.fullName
-                        }
-                      </span>
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {formatTime(message.timestamp)}
-                      </span>
-                    </div>
-                    <div 
-                      className={`p-3 rounded-lg ${
-                        isCurrentUser(message.senderId)
-                          ? 'bg-primary text-primary-foreground ml-auto'
-                          : 'bg-background/80 border'
-                      }`}
-                    >
-                      <p className="text-sm whitespace-pre-wrap">
-                        {message.content}
-                      </p>
-                    </div>
-                    {isCurrentUser(message.senderId) && !message.isRead && (
-                      <p className="text-xs text-muted-foreground text-right mt-1">Delivered</p>
+                    {!isMe && (
+                      <Avatar className="h-8 w-8 shrink-0 self-end mb-1">
+                        <AvatarImage src={getAvatarUrl(recipientUser.avatarUrl, recipientUser.email)} />
+                        <AvatarFallback className="text-[10px] font-bold">{recipientUser.fullName[0]}</AvatarFallback>
+                      </Avatar>
                     )}
+                    
+                    <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]`}>
+                      <div className={`p-4 rounded-2xl text-sm font-medium shadow-sm leading-relaxed ${
+                        isMe 
+                          ? 'bg-primary text-primary-foreground rounded-tr-none' 
+                          : 'bg-muted/30 border border-primary/5 rounded-tl-none'
+                      }`}>
+                        {message.content}
+                      </div>
+                      <span className="text-[9px] font-bold text-muted-foreground uppercase opacity-40 mt-1.5 px-1">
+                        {formatTime(message.createdAt)}
+                      </span>
+                    </div>
                   </div>
-
-                  {isCurrentUser(message.senderId) && (
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={getAvatarUrl(currentUser?.avatarUrl, currentUser?.email)} />
-                      <AvatarFallback className="bg-primary text-primary-foreground font-medium">
-                        {getInitials(currentUser?.fullName || 'Me')}
-                      </AvatarFallback>
-                    </Avatar>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </ScrollArea>
 
-        {/* Message Input */}
-        <div className="p-4 border-t bg-background/50">
-          <div className="flex gap-2">
-            <div className="flex-1 relative">
+        <div className="p-4 bg-background/50 border-t border-primary/5">
+          <div className="flex gap-3">
+            <div className="flex-1 relative group">
               <Input
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                placeholder={`Message ${recipientUser.fullName}...`}
-                onKeyPress={(e) => {
+                placeholder={`Deploy message to ${recipientUser.fullName.split(' ')[0]}...`}
+                onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     handleSendMessage();
                   }
                 }}
-                className="pr-20 focus:ring-2 focus:ring-primary/20"
+                className="h-12 bg-muted/20 border-primary/5 rounded-xl px-4 font-medium focus-visible:ring-primary/10 transition-all"
+                disabled={sendMutation.isPending}
               />
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
-                <Button variant="ghost" size="icon" className="h-6 w-6">
-                  <Paperclip className="h-3 w-3" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-6 w-6">
-                  <Smile className="h-3 w-3" />
-                </Button>
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-0.5 opacity-0 group-focus-within:opacity-100 transition-opacity">
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/5"><Paperclip className="h-4 w-4 opacity-40" /></Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/5"><Smile className="h-4 w-4 opacity-40" /></Button>
               </div>
             </div>
             <Button 
               onClick={handleSendMessage}
-              disabled={loading || !newMessage.trim()}
-              variant="hero"
-              size="sm"
+              disabled={!newMessage.trim() || sendMutation.isPending}
+              className="h-12 w-12 rounded-xl bg-primary text-primary-foreground shadow-glow transition-all active:scale-95 shrink-0"
             >
-              {loading ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+              {sendMutation.isPending ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
-                <Send className="h-4 w-4" />
+                <Send className="h-5 w-5" />
               )}
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            Press Enter to send, Shift+Enter for new line
-          </p>
         </div>
       </CardContent>
     </Card>
