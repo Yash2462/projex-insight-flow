@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { issueAPI, projectAPI, userAPI } from "@/services/api";
 import { useWebSocket } from "@/hooks/use-websocket";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -52,45 +52,7 @@ import UserProfile from "@/components/UserProfile";
 import DirectMessage from "@/components/DirectMessage";
 import KanbanBoard from "@/components/kanban/KanbanBoard";
 import { getAvatarUrl } from "@/lib/utils";
-
-interface User {
-  id: number;
-  fullName: string;
-  email: string;
-  avatarUrl?: string;
-}
-
-interface Issue {
-  id: number;
-  title: string;
-  description: string;
-  status: string;
-  priority: string;
-  dueDate: string;
-  assignee?: User;
-  attachments?: any[];
-  comments?: any[];
-  subtasks?: string[];
-  completedSubtasks?: string[];
-}
-
-interface Project {
-  id: number;
-  name: string;
-  description: string;
-  category?: string;
-  tags?: string[];
-  owner: User;
-  team?: User[];
-  issues?: Issue[];
-}
-
-const projectColumns = [
-  { id: "TODO", title: "To Do" },
-  { id: "IN_PROGRESS", title: "In Progress" },
-  { id: "REVIEW", title: "Review" },
-  { id: "DONE", title: "Done" },
-];
+import { Project, User, Issue } from "@/services/api";
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -98,6 +60,32 @@ const ProjectDetails = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const projectId = parseInt(id || "0", 10);
+
+  // Queries
+  const { data: project, isLoading: isProjectLoading, error: projectError } = useQuery({
+    queryKey: ["project", projectId],
+    queryFn: async () => {
+      const response = await projectAPI.getProjectById(projectId);
+      return response.data.data as Project;
+    },
+    enabled: !!projectId,
+  });
+
+  // Dynamic columns from project statuses
+  const dynamicColumns = useMemo(() => {
+    if (!project?.statuses || project.statuses.length === 0) {
+      return [
+        { id: "TODO", title: "To Do" },
+        { id: "IN_PROGRESS", title: "In Progress" },
+        { id: "REVIEW", title: "Review" },
+        { id: "DONE", title: "Done" },
+      ];
+    }
+    return project.statuses.map(status => ({
+      id: status,
+      title: status.replace(/_/g, ' ').toLowerCase().split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ')
+    }));
+  }, [project?.statuses]);
 
   // WebSocket for real-time updates
   const { subscribe, isConnected } = useWebSocket(projectId);
@@ -140,16 +128,6 @@ const ProjectDetails = () => {
     dueDate: "",
   });
   const [activeTab, setActiveTab] = useState("kanban");
-
-  // Queries
-  const { data: project, isLoading: isProjectLoading, error: projectError } = useQuery({
-    queryKey: ["project", projectId],
-    queryFn: async () => {
-      const response = await projectAPI.getProjectById(projectId);
-      return response.data.data as Project;
-    },
-    enabled: !!projectId,
-  });
 
   const { data: userRole } = useQuery({
     queryKey: ["projectRole", projectId],
@@ -344,6 +322,13 @@ const ProjectDetails = () => {
             </div>
             
             <div className="flex items-center gap-2">
+              <Button 
+                onClick={() => navigate(`/projects/${projectId}/analytics`)}
+                variant="outline" 
+                className="rounded-xl border-primary/20 text-primary hover:bg-primary/5 font-bold h-11 px-5 transition-all"
+              >
+                <BarChart3 className="h-4 w-4 mr-2" /> Analytics
+              </Button>
               {isOwner && (
                 <Button onClick={() => setInviteModalOpen(true)} variant="outline" className="rounded-xl border-primary/20 text-primary hover:bg-primary/5 font-bold h-11 px-5 transition-all">
                   <UserPlus className="h-4 w-4 mr-2" /> Invite
@@ -382,7 +367,7 @@ const ProjectDetails = () => {
 
           <TabsContent value="kanban" className="mt-0 outline-none">
             <KanbanBoard 
-              columns={projectColumns}
+              columns={dynamicColumns}
               issues={project.issues || []}
               onDeleteIssue={(id) => {
                 if (!canManage) {

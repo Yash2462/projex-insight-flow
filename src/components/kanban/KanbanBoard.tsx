@@ -4,26 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, MoreHorizontal, AlertCircle, CheckCircle2, CircleDashed, PlayCircle, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
-
-interface User {
-  id: number;
-  fullName: string;
-  email: string;
-}
-
-interface Issue {
-  id: number;
-  title: string;
-  description: string;
-  status: string;
-  priority: string;
-  dueDate: string;
-  assignee?: User;
-  attachments?: any[];
-  comments?: any[];
-  subtasks?: string[];
-  completedSubtasks?: string[];
-}
+import { Issue } from "@/services/api";
 
 interface KanbanColumn {
   id: string;

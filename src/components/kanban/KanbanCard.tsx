@@ -11,27 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Draggable } from "@hello-pangea/dnd";
 import { getAvatarUrl } from "@/lib/utils";
-
-interface User {
-  id: number;
-  fullName: string;
-  email: string;
-  avatarUrl?: string;
-}
-
-interface Issue {
-  id: number;
-  title: string;
-  description: string;
-  status: string;
-  priority: string;
-  dueDate: string;
-  assignee?: User;
-  attachments?: any[];
-  comments?: any[];
-  subtasks?: string[];
-  completedSubtasks?: string[];
-}
+import { Issue } from "@/services/api";
 
 interface KanbanCardProps {
   issue: Issue;
