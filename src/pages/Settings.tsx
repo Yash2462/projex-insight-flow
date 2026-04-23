@@ -114,7 +114,7 @@ const Settings = () => {
   }
 
   const effectiveAvatarUrl = avatarUrl 
-    ? (avatarUrl.startsWith('http') ? avatarUrl : `http://localhost:8080${avatarUrl}`)
+    ? (avatarUrl.startsWith('http') ? avatarUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}${avatarUrl}`)
     : `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.email}`;
 
   return (

@@ -49,7 +49,7 @@ const ProjectChat = ({ projectId, projectName, teamMembers = [] }: ProjectChatPr
     queryKey: ["profile"],
     queryFn: async () => {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:8080/api/users/profile', {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/users/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return response.data.data as User;
@@ -60,7 +60,7 @@ const ProjectChat = ({ projectId, projectName, teamMembers = [] }: ProjectChatPr
     queryKey: ["projectRole", projectId],
     queryFn: async () => {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:8080/api/projects/${projectId}/role`, {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/projects/${projectId}/role`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return response.data.data;
@@ -75,7 +75,7 @@ const ProjectChat = ({ projectId, projectName, teamMembers = [] }: ProjectChatPr
     const fetchMessages = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`http://localhost:8080/api/messages/chat/${projectId}`, {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/messages/chat/${projectId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (response.data.data) {
@@ -125,7 +125,7 @@ const ProjectChat = ({ projectId, projectName, teamMembers = [] }: ProjectChatPr
     setIsSending(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:8080/api/messages/send', {
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/messages/send`, {
         projectId,
         senderId: currentUser.id,
         content: newMessage.trim()

@@ -214,7 +214,7 @@ const IssueDetail = ({ issueId, issueName, onClose, initialTab = "details" }: Is
   };
 
   const handleDownload = (attachment: Attachment) => {
-    window.open(`http://localhost:8080${attachment.fileUrl}`, '_blank');
+    window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}${attachment.fileUrl}`, '_blank');
   };
 
   if (isIssueLoading) {
@@ -499,7 +499,7 @@ const IssueDetail = ({ issueId, issueName, onClose, initialTab = "details" }: Is
                 ) : (
                   attachments.map((file: Attachment) => {
                     const isImage = file.fileType.startsWith('image/');
-                    const imageUrl = `http://localhost:8080${file.fileUrl}`;
+                    const imageUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}${file.fileUrl}`;
                     
                     return (
                       <div key={file.id} className="group flex flex-col glass-panel rounded-3xl hover:border-primary/20 hover:shadow-glow transition-all duration-500 overflow-hidden">

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
-const SOCKET_URL = 'http://localhost:8080/ws';
+const SOCKET_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/ws`;
 
 export interface WebSocketMessage {
   type: string;
