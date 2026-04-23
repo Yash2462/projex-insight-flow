@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { projectAPI, dashboardAPI } from "@/services/api";
+import { projectAPI, dashboardAPI, Project, Issue, RecentActivity } from "@/services/api";
 import { 
   Card, 
   CardContent, 
@@ -62,7 +62,7 @@ const AnalyticsDashboard = () => {
   }
 
   // Process aggregate data
-  const projectStatusData = projects.reduce((acc: any[], project: any) => {
+  const projectStatusData = projects.reduce((acc: { name: string, value: number }[], project: Project) => {
     const status = project.category || "General";
     const existing = acc.find(d => d.name === status);
     if (existing) {
@@ -73,9 +73,9 @@ const AnalyticsDashboard = () => {
     return acc;
   }, []);
 
-  const totalIssues = projects.reduce((sum: number, p: any) => sum + (p.issues?.length || 0), 0);
-  const completedIssues = projects.reduce((sum: number, p: any) => 
-    sum + (p.issues?.filter((i: any) => i.status === 'DONE').length || 0), 0
+  const totalIssues = projects.reduce((sum: number, p: Project) => sum + (p.issues?.length || 0), 0);
+  const completedIssues = projects.reduce((sum: number, p: Project) => 
+    sum + (p.issues?.filter((i: Issue) => i.status === 'DONE').length || 0), 0
   );
 
   return (

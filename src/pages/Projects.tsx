@@ -24,7 +24,7 @@ import {
   LayoutGrid,
   ArrowRight
 } from "lucide-react";
-import { projectAPI } from "@/services/api";
+import { projectAPI, Project, Issue } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -54,14 +54,14 @@ const Projects = () => {
     },
   });
 
-  const filteredProjects = projects?.filter((p: any) => 
+  const filteredProjects = projects?.filter((p: Project) => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.description?.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
-  const calculateProgress = (project: any) => {
+  const calculateProgress = (project: Project) => {
     if (!project.issues || project.issues.length === 0) return 0;
-    const completed = project.issues.filter((i: any) => i.status?.toLowerCase() === "done").length;
+    const completed = project.issues.filter((i: Issue) => i.status?.toLowerCase() === "done").length;
     return Math.round((completed / project.issues.length) * 100);
   };
 
@@ -112,7 +112,7 @@ const Projects = () => {
           </div>
         ) : filteredProjects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProjects.map((project: any) => (
+            {filteredProjects.map((project: Project) => (
               <Card
                 key={project.id}
                 className="group relative border-0 shadow-elegant bg-gradient-to-br from-card to-card/50 hover:shadow-glow transition-all duration-500 overflow-hidden"

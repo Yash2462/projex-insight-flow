@@ -25,7 +25,7 @@ import DashboardCharts from "@/components/dashboard/DashboardCharts";
 import QuickActions from "@/components/dashboard/QuickActions";
 import CreateProjectModal from "@/components/dashboard/CreateProjectModal";
 import OnboardingWidget from "@/components/dashboard/OnboardingWidget";
-import { projectAPI, dashboardAPI, issueAPI, userAPI } from "@/services/api";
+import { projectAPI, dashboardAPI, issueAPI, userAPI, Project, Issue, RecentActivity } from "@/services/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -84,8 +84,8 @@ const Dashboard = () => {
       // Find issues assigned to current user across all projects
       const response = await projectAPI.getProjects();
       const allProjects = response.data.data || [];
-      const assigned = allProjects.flatMap((p: any) => 
-        (p.issues || []).filter((i: any) => 
+      const assigned = allProjects.flatMap((p: Project) => 
+        (p.issues || []).filter((i: Issue) => 
           i.assignee?.id === currentUser.id && i.status !== 'DONE'
         )
       );
@@ -160,9 +160,9 @@ const Dashboard = () => {
                 {isProjectsLoading ? (
                   [1, 2, 3].map(i => <div key={i} className="h-24 bg-muted animate-pulse rounded-3xl" />)
                 ) : projects.length > 0 ? (
-                  projects.slice(0, 4).map((project: any) => {
+                  projects.slice(0, 4).map((project: Project) => {
                     const totalIssues = project.issues?.length || 0;
-                    const doneIssues = project.issues?.filter((i: any) => i.status === 'DONE').length || 0;
+                    const doneIssues = project.issues?.filter((i: Issue) => i.status === 'DONE').length || 0;
                     const progress = totalIssues > 0 ? Math.round((doneIssues / totalIssues) * 100) : 0;
                     const pendingIssues = totalIssues - doneIssues;
 
@@ -216,7 +216,7 @@ const Dashboard = () => {
                 {isMyIssuesLoading ? (
                   [1, 2].map(i => <div key={i} className="h-16 bg-muted animate-pulse rounded-2xl" />)
                 ) : myIssues.length > 0 ? (
-                  myIssues.map((issue: any) => (
+                  myIssues.map((issue: Issue) => (
                     <div key={issue.id} className="p-4 glass-panel rounded-2xl flex items-center justify-between group hover:border-primary/20 transition-all">
                       <div className="flex items-center gap-4 min-w-0">
                         <div className={`h-10 w-1 rounded-full ${
@@ -303,7 +303,7 @@ const Dashboard = () => {
                   {isActivityLoading ? (
                     [1, 2, 3, 4].map(i => <div key={i} className="h-10 w-full bg-muted animate-pulse rounded-xl" />)
                   ) : recentActivity.length > 0 ? (
-                    recentActivity.slice(0, 8).map((activity: any) => (
+                    recentActivity.slice(0, 8).map((activity: RecentActivity) => (
                       <div key={activity.id} className="flex gap-3 group">
                         <div className="shrink-0 w-1 bg-primary/10 rounded-full group-hover:bg-primary/30 transition-colors" />
                         <div className="min-w-0">
