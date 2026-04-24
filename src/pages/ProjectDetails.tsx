@@ -1,6 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
-import { issueAPI, projectAPI, userAPI } from "@/services/api";
+import { issueAPI } from "@/services/issueService";
+import { projectAPI } from "@/services/projectService";
+import { userAPI } from "@/services/userService";
 import { useWebSocket } from "@/hooks/use-websocket";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -52,7 +54,7 @@ import UserProfile from "@/components/UserProfile";
 import DirectMessage from "@/components/DirectMessage";
 import KanbanBoard from "@/components/kanban/KanbanBoard";
 import { getAvatarUrl } from "@/lib/utils";
-import { Project, User, Issue } from "@/services/api";
+import { Project, User, Issue } from "@/services/types";
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();

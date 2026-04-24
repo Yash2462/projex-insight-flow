@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL;
+import { authAPI } from "@/services/authService";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -34,7 +34,7 @@ const Signup = () => {
     setError(null);
 
     try {
-      const res = await axios.post(`${API_URL}/auth/signup`, {
+      const res = await authAPI.signup({
         fullName: formData.fullName,
         email: formData.email,
         password: formData.password,

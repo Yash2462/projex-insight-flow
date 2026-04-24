@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 
-const API_URL = import.meta.env.VITE_API_URL; // <-- from .env file
+import { authAPI } from "@/services/authService";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -31,7 +31,7 @@ const Login = () => {
     setError(null);
 
     try {
-      const res = await axios.post(`${API_URL}/auth/login`, {
+      const res = await authAPI.login({
         email,
         password,
       });

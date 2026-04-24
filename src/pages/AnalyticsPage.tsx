@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { projectAPI, dashboardAPI, Project, Issue, RecentActivity } from "@/services/api";
+import { projectAPI } from "@/services/projectService";
+import { dashboardAPI } from "@/services/dashboardService";
+import { Project, Issue, RecentActivity } from "@/services/types";
 import { 
   Card, 
   CardContent, 
