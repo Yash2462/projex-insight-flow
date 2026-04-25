@@ -21,5 +21,6 @@ export default defineConfig(({ mode }) => ({
   },
   define: {
     global: 'window',
+    'process.env': {},
   },
 }));

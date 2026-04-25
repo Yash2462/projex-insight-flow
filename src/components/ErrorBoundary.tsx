@@ -45,7 +45,7 @@ class ErrorBoundary extends Component<Props, State> {
                 The application encountered an unexpected error. Don't worry, your data is safe.
               </p>
               
-              {process.env.NODE_ENV === 'development' && (
+              {import.meta.env.MODE === 'development' && (
                 <div className="p-4 bg-muted/50 rounded-xl text-left overflow-auto max-h-40">
                   <p className="text-[10px] font-mono text-destructive break-all">{this.state.error?.toString()}</p>
                 </div>

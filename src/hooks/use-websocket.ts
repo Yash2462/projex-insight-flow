@@ -21,7 +21,7 @@ export const useWebSocket = (projectId?: number) => {
     const client = new Client({
       webSocketFactory: () => socket,
       debug: (msg) => {
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.MODE === 'development') {
           console.log('STOMP: ' + msg);
         }
       },
