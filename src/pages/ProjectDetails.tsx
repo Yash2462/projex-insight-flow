@@ -44,6 +44,7 @@ import {
   Loader2,
   AlertTriangle,
   Layout,
+  BarChart3,
   ShieldCheck
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -337,7 +338,7 @@ const ProjectDetails = () => {
                 </Button>
               )}
               {!isViewer && (
-                <Button onClick={() => setIssueModalOpen(true)} className="bg-primary text-primary-foreground hover:opacity-90 shadow-glow rounded-xl font-bold h-11 px-6 transition-all active:scale-95">
+                <Button onClick={() => setIssueModalOpen(true)} variant="hero" className="rounded-xl font-bold h-11 px-6 transition-all active:scale-95">
                   <Plus className="h-5 w-5 mr-2 stroke-[3px]" /> New Task
                 </Button>
               )}
@@ -530,12 +531,16 @@ const ProjectDetails = () => {
                 </div>
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Deadline</Label>
-                  <Input type="date" value={newIssue.dueDate} onChange={e => setNewIssue({...newIssue, dueDate: e.target.value})} className="bg-background/50 border-primary/5 h-12 rounded-xl" />
-                </div>
-              </div>
+                  <Input 
+                   type="date" 
+                   value={newIssue.dueDate} 
+                   onChange={e => setNewIssue({...newIssue, dueDate: e.target.value})} 
+                   className="bg-background/50 border-primary/10 h-12 rounded-xl dark:color-scheme-dark" 
+                  />
+                </div>              </div>
             </div>
             <DialogFooter className="pt-4">
-              <Button onClick={handleCreateIssue} disabled={createIssueMutation.isPending} className="w-full bg-primary text-primary-foreground h-12 rounded-xl font-bold shadow-glow hover:opacity-90 active:scale-95 transition-all">
+              <Button onClick={handleCreateIssue} disabled={createIssueMutation.isPending} variant="hero" className="w-full h-12 rounded-xl font-bold active:scale-95 transition-all">
                 {createIssueMutation.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : "Deploy Task"}
               </Button>
             </DialogFooter>
