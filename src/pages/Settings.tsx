@@ -29,6 +29,13 @@ const Settings = () => {
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  
+  // Notification States
+  const [emailNotifs, setEmailNotifs] = useState(true);
+  const [projectNotifs, setProjectNotifs] = useState(true);
+  const [messageNotifs, setMessageNotifs] = useState(true);
+  const [taskNotifs, setTaskNotifs] = useState(true);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -46,6 +53,10 @@ const Settings = () => {
       setFullName(profile.fullName || "");
       setBio(profile.bio || "");
       setAvatarUrl(profile.avatarUrl || "");
+      setEmailNotifs(profile.emailNotificationsEnabled ?? true);
+      setProjectNotifs(profile.projectUpdateNotificationsEnabled ?? true);
+      setMessageNotifs(profile.messageNotificationsEnabled ?? true);
+      setTaskNotifs(profile.taskAssignmentNotificationsEnabled ?? true);
     }
   }, [profile]);
 
@@ -67,6 +78,26 @@ const Settings = () => {
       });
     }
   });
+
+  const updatePreferencesMutation = useMutation({
+    mutationFn: (data: any) => userAPI.updatePreferences(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      toast({
+        title: "Preferences Saved",
+        description: "Your notification settings have been updated.",
+      });
+    },
+  });
+
+  const handleSavePreferences = () => {
+    updatePreferencesMutation.mutate({
+      emailNotificationsEnabled: emailNotifs,
+      projectUpdateNotificationsEnabled: projectNotifs,
+      messageNotificationsEnabled: messageNotifs,
+      taskAssignmentNotificationsEnabled: taskNotifs
+    });
+  };
 
   const uploadAvatarMutation = useMutation({
     mutationFn: (file: File) => userAPI.uploadAvatar(file),
@@ -288,7 +319,8 @@ const Settings = () => {
                 <div className="pt-4">
                   <Button 
                     onClick={handleSaveProfile} 
-                    className="w-full md:w-auto h-12 px-10 rounded-2xl bg-primary text-primary-foreground font-black uppercase tracking-widest text-[10px] shadow-glow hover:opacity-90 transition-all active:scale-95" 
+                    variant="hero"
+                    className="w-full md:w-auto h-12 px-10 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all active:scale-95" 
                     disabled={updateProfileMutation.isPending}
                   >
                     {updateProfileMutation.isPending ? (
@@ -324,7 +356,10 @@ const Settings = () => {
                         Receive notifications via email
                       </p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch 
+                      checked={emailNotifs} 
+                      onCheckedChange={setEmailNotifs} 
+                    />
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between">
@@ -334,7 +369,10 @@ const Settings = () => {
                         Get notified when projects are updated
                       </p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch 
+                      checked={projectNotifs} 
+                      onCheckedChange={setProjectNotifs} 
+                    />
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between">
@@ -344,7 +382,10 @@ const Settings = () => {
                         Receive notifications for new messages
                       </p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch 
+                      checked={messageNotifs} 
+                      onCheckedChange={setMessageNotifs} 
+                    />
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between">
@@ -354,8 +395,27 @@ const Settings = () => {
                         Get notified when you're assigned to tasks
                       </p>
                     </div>
-                    <Switch />
+                    <Switch 
+                      checked={taskNotifs} 
+                      onCheckedChange={setTaskNotifs} 
+                    />
                   </div>
+                </div>
+
+                <div className="pt-4">
+                  <Button 
+                    onClick={handleSavePreferences} 
+                    variant="hero"
+                    className="w-full md:w-auto h-12 px-10 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all active:scale-95" 
+                    disabled={updatePreferencesMutation.isPending}
+                  >
+                    {updatePreferencesMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4 mr-2" />
+                    )}
+                    Save Preferences
+                  </Button>
                 </div>
               </CardContent>
             </Card>

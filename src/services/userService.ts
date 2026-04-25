@@ -16,4 +16,7 @@ export const userAPI = {
 
   completeOnboardingStep: (stepId: string) =>
     apiClient.post<ApiResponse<User>>(`/api/users/onboarding/step/${stepId}`),
+
+  updatePreferences: (preferences: Partial<User>) =>
+    apiClient.put<ApiResponse<User>>('/api/users/preferences', preferences),
 };

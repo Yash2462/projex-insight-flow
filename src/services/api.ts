@@ -9,7 +9,6 @@ export * from './notificationService';
 export * from './commentService';
 export * from './attachmentService';
 export * from './messageService';
-export * from './subscriptionService';
 export * from './paymentService';
 
 import apiClient from './client';
