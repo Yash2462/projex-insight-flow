@@ -134,7 +134,8 @@ const Dashboard = () => {
           <div className="flex items-center gap-3">
             <Button 
               onClick={() => setIsCreateModalOpen(true)}
-              className="bg-primary text-primary-foreground hover:opacity-90 shadow-glow rounded-2xl px-6 h-12 font-bold transition-all active:scale-95"
+              variant="hero"
+              className="rounded-2xl px-6 h-12 font-bold transition-all active:scale-95"
             >
               <Plus className="h-5 w-5 mr-2 stroke-[3px]" />
               New Project
@@ -143,7 +144,7 @@ const Dashboard = () => {
         </header>
 
         {/* Onboarding */}
-        <OnboardingWidget />
+        {/* <OnboardingWidget /> */}
 
         {/* Stats Grid */}
         <DashboardStats stats={stats} isLoading={isStatsLoading} />
@@ -180,14 +181,14 @@ const Dashboard = () => {
                                     {project.category}
                                  </Badge>
                               </div>
-                              <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest opacity-60">
+                              <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
                                  {doneIssues}/{totalIssues} TASKS COMPLETE • {pendingIssues} PENDING
                               </p>
                            </div>
 
                            <div className="flex-1 max-w-xs w-full space-y-2">
                               <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-tighter">
-                                 <span className="opacity-40">Velocity</span>
+                                 <span className="opacity-70">Velocity</span>
                                  <span className="text-primary">{progress}%</span>
                               </div>
                               <Progress value={progress} className="h-1.5 bg-primary/5" />
@@ -228,7 +229,7 @@ const Dashboard = () => {
                         }`} />
                         <div className="min-w-0">
                           <p className="text-sm font-bold truncate">{issue.title}</p>
-                          <p className="text-[10px] text-muted-foreground uppercase font-black opacity-50 tracking-widest">{issue.status}</p>
+                          <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{issue.status}</p>
                         </div>
                       </div>
                       <Button variant="ghost" size="sm" asChild className="rounded-xl font-bold text-[10px] uppercase opacity-0 group-hover:opacity-100">
@@ -238,7 +239,7 @@ const Dashboard = () => {
                   ))
                 ) : (
                   <div className="p-8 text-center glass-panel rounded-3xl border-dashed">
-                    <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest opacity-50">No urgent assignments</p>
+                    <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">No urgent assignments</p>
                   </div>
                 )}
               </div>

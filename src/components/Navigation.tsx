@@ -97,7 +97,7 @@ const Navigation = () => {
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { icon: FolderOpen, label: "Projects", path: "/projects" },
     { icon: BarChart3, label: "Analytics", path: "/analytics" },
-    { icon: CreditCard, label: "Subscription", path: "/subscription" },
+    // { icon: CreditCard, label: "Subscription", path: "/subscription" },
     { icon: Settings, label: "Settings", path: "/settings" },
   ];
 
@@ -234,7 +234,7 @@ const Navigation = () => {
 
           {/* Navigation Items */}
           <div className="flex-1 px-4 py-4 space-y-1.5">
-            <p className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4 opacity-40">Main Menu</p>
+            <p className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4 opacity-70">Main Menu</p>
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const active = isActivePath(item.path);
@@ -290,7 +290,7 @@ const Navigation = () => {
           </div>
 
           {/* Upgrade Card */}
-          <div className="px-6 mb-6">
+          {/* <div className="px-6 mb-6">
             <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-3xl p-5 border border-primary/10 relative overflow-hidden group transition-all duration-500 hover:shadow-elegant">
               <div className="absolute -right-6 -top-6 w-20 h-20 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-500" />
               <div className="w-10 h-10 rounded-xl bg-white/50 backdrop-blur-sm flex items-center justify-center mb-4 shadow-sm">
@@ -302,7 +302,7 @@ const Navigation = () => {
                 Upgrade Pro
               </Button>
             </div>
-          </div>
+          </div> */}
 
           <div className="p-3 mx-4 mb-8 glass-panel rounded-[2rem] border-primary/5">
             <div className="flex items-center gap-3">
@@ -314,7 +314,7 @@ const Navigation = () => {
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-foreground truncate">{profile?.fullName || "User"}</p>
-                <p className="text-[10px] text-muted-foreground truncate font-medium opacity-60">
+                <p className="text-[10px] text-muted-foreground truncate font-medium opacity-80">
                   {profile?.email || "user@example.com"}
                 </p>
               </div>

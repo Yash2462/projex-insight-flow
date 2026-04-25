@@ -75,7 +75,7 @@ const DashboardCharts = ({ counts, isLoading }: DashboardChartsProps) => {
           <div className="flex justify-between items-start">
             <div>
               <CardTitle className="text-xl font-bold tracking-tight">Status Metrics</CardTitle>
-              <CardDescription className="text-xs font-medium uppercase tracking-wider opacity-60">Volume by status</CardDescription>
+              <CardDescription className="text-xs font-medium uppercase tracking-wider opacity-80">Volume by status</CardDescription>
             </div>
             <div className="px-3 py-1 rounded-full bg-primary/5 border border-primary/10">
               <span className="text-[10px] font-black text-primary">{counts.total} ACTIVE</span>
@@ -128,11 +128,11 @@ const DashboardCharts = ({ counts, isLoading }: DashboardChartsProps) => {
               <CardTitle className="text-xl font-bold tracking-tight flex items-center gap-2">
                 Performance
               </CardTitle>
-              <CardDescription className="text-xs font-medium uppercase tracking-wider opacity-60">Completion Velocity</CardDescription>
+              <CardDescription className="text-xs font-medium uppercase tracking-wider opacity-80">Completion Velocity</CardDescription>
             </div>
             <div className="text-right">
               <div className="text-3xl font-black text-primary tracking-tighter">{completionRate}%</div>
-              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Progress</div>
+              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-80">Progress</div>
             </div>
           </div>
         </CardHeader>

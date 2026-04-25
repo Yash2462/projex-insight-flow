@@ -22,10 +22,10 @@
     --secondary-foreground: 222 47% 11.2%;
 
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted-foreground: 215.4 25% 40%;
 
-    --accent: 243 75% 59%;
-    --accent-foreground: 222 47% 11.2%;
+    --accent: 243 75% 97%;
+    --accent-foreground: 243 75% 35%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
@@ -63,51 +63,52 @@
   }
 
   .dark {
+    color-scheme: dark;
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 222.2 84% 6.5%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 222.2 84% 6.5%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 243 75% 59%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --primary-glow: 258 90% 66%;
+    --primary: 243 75% 65%;
+    --primary-foreground: 222.2 47.4% 5%;
+    --primary-glow: 258 90% 70%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted-foreground: 215 25% 75%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 217.2 32.6% 25%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 35%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 243 75% 59%;
+    --border: 217.2 32.6% 25%;
+    --input: 217.2 32.6% 25%;
+    --ring: 243 75% 65%;
     
     /* ProjeX Dark Design System - Modernized */
-    --gradient-primary: linear-gradient(135deg, hsl(243 75% 59%), hsl(258 90% 66%));
-    --gradient-hero: linear-gradient(135deg, hsl(222.2 84% 4.9%), hsl(217.2 32.6% 17.5%));
-    --gradient-card: linear-gradient(145deg, hsl(222.2 84% 4.9%), hsl(217.2 32.6% 12%));
+    --gradient-primary: linear-gradient(135deg, hsl(243 75% 65%), hsl(258 90% 70%));
+    --gradient-hero: linear-gradient(135deg, hsl(222.2 84% 6.5%), hsl(217.2 32.6% 20%));
+    --gradient-card: linear-gradient(145deg, hsl(222.2 84% 7%), hsl(217.2 32.6% 15%));
     
-    --shadow-elegant: 0 20px 40px -15px hsl(0 0% 0% / 0.5);
-    --shadow-glow: 0 0 30px hsl(243 75% 59% / 0.25);
+    --shadow-elegant: 0 25px 50px -12px hsl(0 0% 0% / 0.7);
+    --shadow-glow: 0 0 35px hsl(243 75% 65% / 0.3);
     
     --sidebar-background: 222.2 84% 4.9%;
-    --sidebar-foreground: 215 20.2% 65.1%;
-    --sidebar-primary: 243 75% 59%;
+    --sidebar-foreground: 215 25% 75%;
+    --sidebar-primary: 243 75% 65%;
     --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent: 217.2 32.6% 22%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217.2 32.6% 17.5%;
-    --sidebar-ring: 243 75% 59%;
+    --sidebar-border: 217.2 32.6% 25%;
+    --sidebar-ring: 243 75% 65%;
   }
 }
 
@@ -142,10 +143,10 @@
   }
   
   .dark .glass-panel {
-    @apply bg-black/40 backdrop-blur-xl border-white/5 shadow-elegant;
+    @apply bg-white/[0.03] backdrop-blur-xl border-white/[0.08] shadow-elegant;
   }
 
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-hero font-black;
+    @apply bg-clip-text text-transparent bg-gradient-primary font-black;
   }
 }

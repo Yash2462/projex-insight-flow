@@ -69,7 +69,7 @@ const DashboardStats = ({ stats, isLoading }: DashboardStatsProps) => {
         return (
           <Card key={index} className="group overflow-hidden border border-primary/5 shadow-sm bg-card hover:border-primary/20 hover:shadow-glow transition-all duration-500 rounded-3xl relative">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest opacity-70">{item.title}</CardTitle>
+              <CardTitle className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{item.title}</CardTitle>
               <div className={`p-2 rounded-xl ${item.bg} ${item.color} group-hover:scale-110 transition-transform duration-500`}>
                 <Icon className="h-4 w-4" />
               </div>

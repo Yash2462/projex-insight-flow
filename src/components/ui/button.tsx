@@ -9,18 +9,18 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm active:scale-[0.98] transition-all",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:scale-[0.98] transition-all",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground active:scale-[0.98] transition-all",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80 active:scale-[0.98] transition-all",
+        ghost: "hover:bg-accent hover:text-accent-foreground active:scale-[0.98] transition-all",
         link: "text-primary underline-offset-4 hover:underline",
-        hero: "bg-gradient-primary text-white hover:opacity-90 shadow-glow transition-all duration-300",
-        premium: "bg-gradient-hero text-white hover:opacity-90 shadow-elegant transition-all duration-300",
-        success: "bg-green-600 text-green-50 hover:bg-green-700 shadow-sm",
+        hero: "bg-gradient-primary text-white hover:brightness-110 hover:shadow-glow transition-all duration-300 active:scale-[0.98]",
+        premium: "bg-gradient-hero text-white hover:brightness-110 hover:shadow-elegant transition-all duration-300 active:scale-[0.98]",
+        success: "bg-green-600 text-white hover:bg-green-700 shadow-sm active:scale-[0.98] transition-all",
       },
       size: {
         default: "h-10 px-4 py-2",
