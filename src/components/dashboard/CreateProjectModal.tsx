@@ -220,7 +220,8 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
           <div className="flex flex-col gap-3 pt-4">
             <Button
               onClick={handleCreateProject}
-              className="w-full h-14 bg-primary text-primary-foreground hover:opacity-90 shadow-glow text-base font-black rounded-2xl transition-all active:scale-[0.98]"
+              variant="hero"
+              className="w-full h-14 text-base font-black rounded-2xl transition-all active:scale-[0.98]"
               disabled={mutation.isPending}
             >
               {mutation.isPending ? (

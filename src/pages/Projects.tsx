@@ -20,23 +20,35 @@ import {
   MoreHorizontal,
   Eye,
   Trash2,
+  Pencil,
   Tag,
   LayoutGrid,
   ArrowRight
 } from "lucide-react";
-import { projectAPI, Project, Issue } from "@/services/api";
+import { projectAPI, userAPI, Project, Issue } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import CreateProjectModal from "@/components/dashboard/CreateProjectModal";
+import EditProjectModal from "@/components/dashboard/EditProjectModal";
 
 const Projects = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Queries
+  const { data: profile } = useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      const response = await userAPI.getProfile();
+      return response.data.data;
+    },
+  });
+
   const { data: projects, isLoading } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
@@ -55,8 +67,8 @@ const Projects = () => {
   });
 
   const filteredProjects = projects?.filter((p: Project) => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    (p.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (p.description?.toLowerCase() || "").includes(searchTerm.toLowerCase())
   ) || [];
 
   const calculateProgress = (project: Project) => {
@@ -79,7 +91,8 @@ const Projects = () => {
           </div>
           <Button 
             onClick={() => setIsCreateModalOpen(true)}
-            className="bg-gradient-primary hover:opacity-90 shadow-glow rounded-xl px-6"
+            variant="hero"
+            className="rounded-xl px-6"
           >
             <Plus className="h-5 w-5 mr-2" />
             New Project
@@ -156,24 +169,44 @@ const Projects = () => {
                         {project.issues?.length || 0}
                       </span>
                     </div>
-                    <div className="flex gap-2">
-                      <Button asChild size="sm" variant="ghost" className="h-8 w-8 p-0 rounded-lg hover:bg-primary/10 text-primary transition-all">
-                        <Link to={`/projects/${project.id}`}><Eye className="h-4 w-4" /></Link>
+                    <div className="flex gap-1">
+                      <Button asChild size="sm" variant="ghost" className="h-9 w-9 p-0 rounded-xl hover:bg-primary/10 text-primary transition-all" title="View Project">
+                        <Link to={`/projects/${project.id}`}><Eye className="h-4.5 w-4.5" /></Link>
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        className="h-8 w-8 p-0 rounded-lg hover:bg-destructive/10 text-destructive opacity-0 group-hover:opacity-100 transition-all"
-                        onClick={() => {
-                          if(window.confirm("Delete project?")) deleteMutation.mutate(project.id);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      
+                      {project.owner?.id === profile?.id && (
+                        <>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="h-9 w-9 p-0 rounded-xl hover:bg-primary/10 text-primary transition-all"
+                            title="Edit Project"
+                            onClick={() => {
+                              setSelectedProject(project);
+                              setIsEditModalOpen(true);
+                            }}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="h-9 w-9 p-0 rounded-xl hover:bg-destructive/10 text-destructive group-hover:opacity-100 transition-all"
+                            title="Delete Project"
+                            onClick={() => {
+                              if(window.confirm("Are you sure you want to archive this project? It will no longer be visible in your active workspace.")) {
+                                deleteMutation.mutate(project.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
 
-                  <Button asChild className="w-full mt-4 bg-primary/5 text-primary border border-primary/10 hover:bg-primary hover:text-white transition-all duration-300 rounded-xl">
+                  <Button asChild variant="outline" className="w-full mt-4 border-primary/10 hover:border-primary/30 rounded-xl">
                     <Link to={`/projects/${project.id}`}>
                       Open Workspace <ArrowRight className="h-4 w-4 ml-2" />
                     </Link>
@@ -202,6 +235,14 @@ const Projects = () => {
         open={isCreateModalOpen} 
         onOpenChange={setIsCreateModalOpen} 
       />
+
+      {selectedProject && (
+        <EditProjectModal
+          open={isEditModalOpen}
+          onOpenChange={setIsEditModalOpen}
+          project={selectedProject}
+        />
+      )}
     </div>
   );
 };
