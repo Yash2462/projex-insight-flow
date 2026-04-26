@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from '@/components/ui/separator';
 import { 
   MessageCircle, 
   Send, 
@@ -18,13 +18,18 @@ import {
   History,
   Info,
   Paperclip,
+  Smile,
+  FileImage,
   Download,
   FileText,
   FileIcon,
   Loader2,
   ChevronDown,
   Layout,
-  Flag
+  Flag,
+  Calendar,
+  User as UserIcon,
+  Target
 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { commentAPI, userAPI, issueAPI, attachmentAPI, projectAPI } from '@/services/api';
@@ -38,7 +43,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { getAvatarUrl } from '@/lib/utils';
+import CommentRenderer from './CommentRenderer';
+import GifPicker from './GifPicker';
+import EmojiPicker, { Theme as EmojiTheme } from 'emoji-picker-react';
+import { useTheme } from "./theme-provider";
 
 interface Attachment {
   id: number;
@@ -57,6 +71,7 @@ interface Comment {
     id: number;
     fullName: string;
     email: string;
+    avatarUrl?: string;
   };
 }
 
@@ -64,32 +79,24 @@ interface IssueDetailProps {
   issueId: number;
   issueName: string;
   onClose?: () => void;
-  initialTab?: string;
 }
 
-const IssueDetail = ({ issueId, issueName, onClose, initialTab = "details" }: IssueDetailProps) => {
+const IssueDetail = ({ issueId, issueName, onClose }: IssueDetailProps) => {
   const [newComment, setNewComment] = useState('');
-  const [activeTab, setActiveTab] = useState(initialTab);
   const [isUploading, setIsUploading] = useState(false);
-  
-  // Time tracking states
   const [estimatedHours, setEstimatedHours] = useState(0);
   const [loggedHours, setLoggedHours] = useState(0);
+  const [logTimeAmount, setLogTimeAmount] = useState<string>("");
+  const [newSubtask, setNewSubtask] = useState("");
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [gifPickerOpen, setGifPickerOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
+  const discussionScrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    if (activeTab === "discussion" && commentInputRef.current) {
-      commentInputRef.current.focus();
-    }
-  }, [activeTab]);
-
-  useEffect(() => {
-    setActiveTab(initialTab);
-  }, [initialTab, issueId]);
+  const { theme } = useTheme();
 
   // Queries
   const { data: currentUser } = useQuery({
@@ -131,16 +138,16 @@ const IssueDetail = ({ issueId, issueName, onClose, initialTab = "details" }: Is
 
   const isViewer = userRole === 'VIEWER';
 
-  const { data: comments = [], isLoading: isCommentsLoading } = useQuery({
+  const { data: comments = [] } = useQuery({
     queryKey: ["comments", issueId],
     queryFn: async () => {
       const response = await commentAPI.getCommentsByIssueId(issueId);
       return response.data.data || [];
     },
-    refetchInterval: 5000, // Poll for updates every 5 seconds
+    refetchInterval: 5000,
   });
 
-  const { data: attachments = [], isLoading: isAttachmentsLoading } = useQuery({
+  const { data: attachments = [] } = useQuery({
     queryKey: ["attachments", issueId],
     queryFn: async () => {
       const response = await attachmentAPI.getIssueAttachments(issueId);
@@ -148,29 +155,20 @@ const IssueDetail = ({ issueId, issueName, onClose, initialTab = "details" }: Is
     },
   });
 
+  // Auto-scroll to bottom of discussion
+  useEffect(() => {
+    if (discussionScrollRef.current) {
+      discussionScrollRef.current.scrollTop = discussionScrollRef.current.scrollHeight;
+    }
+  }, [comments]);
+
   // Mutations
-  const updateIssueMutation = useMutation({
-    mutationFn: (data: any) => issueAPI.updateIssue(issueId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["issue", issueId] });
-      queryClient.invalidateQueries({ queryKey: ["project"] });
-      toast({ title: "Updated", description: "Issue successfully updated" });
-    },
-  });
-
-  const assignIssueMutation = useMutation({
-    mutationFn: (userId: number) => issueAPI.assignUserToIssue(issueId, userId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["issue", issueId] });
-      toast({ title: "Assigned", description: "Team member assigned to task" });
-    },
-  });
-
   const addCommentMutation = useMutation({
-    mutationFn: (content: string) => commentAPI.createComment({ issueId, content }),
+    mutationFn: (content: string) => commentAPI.createComment({ content, issueId, userId: currentUser?.id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments", issueId] });
       setNewComment('');
+      toast({ title: "Sent", description: "Your insight has been posted." });
     },
   });
 
@@ -178,16 +176,30 @@ const IssueDetail = ({ issueId, issueName, onClose, initialTab = "details" }: Is
     mutationFn: (file: File) => attachmentAPI.upload(file, issueId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["attachments", issueId] });
-      toast({ title: "Success", description: "File uploaded" });
+      setIsUploading(false);
+      toast({ title: "Uploaded", description: "Resource added to archive." });
     },
-    onSettled: () => setIsUploading(false),
+    onError: () => setIsUploading(false),
   });
 
-  const deleteAttachmentMutation = useMutation({
-    mutationFn: (id: number) => attachmentAPI.delete(id),
+  const addSubtaskMutation = useMutation({
+    mutationFn: (subtask: string) => issueAPI.addSubtask(issueId, subtask),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["attachments", issueId] });
-      toast({ title: "Deleted", description: "File removed" });
+      queryClient.invalidateQueries({ queryKey: ["issue", issueId] });
+      setNewSubtask("");
+    },
+  });
+
+  const toggleSubtaskMutation = useMutation({
+    mutationFn: (subtask: string) => issueAPI.toggleSubtask(issueId, subtask),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["issue", issueId] }),
+  });
+
+  const updateIssueMutation = useMutation({
+    mutationFn: (data: any) => issueAPI.updateIssue(issueId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["issue", issueId] });
+      toast({ title: "Updated", description: "Metrics deployed." });
     },
   });
 
@@ -199,370 +211,331 @@ const IssueDetail = ({ issueId, issueName, onClose, initialTab = "details" }: Is
     }
   };
 
-  const getFileIcon = (type: string) => {
-    if (type.includes('image')) return <FileIcon className="h-4 w-4 text-blue-500" />;
-    if (type.includes('pdf')) return <FileText className="h-4 w-4 text-red-500" />;
-    return <Paperclip className="h-4 w-4 text-slate-500" />;
-  };
-
-  const formatSize = (bytes: number) => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-  };
-
-  const handleDownload = (attachment: Attachment) => {
-    window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}${attachment.fileUrl}`, '_blank');
+  const getPriorityColor = (priority: string) => {
+    switch (priority?.toUpperCase()) {
+      case 'HIGH': return 'text-destructive bg-destructive/10 border-destructive/20';
+      case 'MEDIUM': return 'text-amber-500 bg-amber-500/10 border-amber-500/20';
+      case 'LOW': return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
+      default: return 'text-primary bg-primary/10 border-primary/20';
+    }
   };
 
   if (isIssueLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
+      <div className="flex flex-col items-center justify-center h-[600px] gap-4">
+        <Loader2 className="h-12 w-12 animate-spin text-primary opacity-20" />
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Synchronising Data</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-background/50">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex items-center justify-between mb-8">
-           <TabsList className="bg-muted/30 p-1 rounded-xl h-12">
-            <TabsTrigger value="details" className="rounded-lg px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm font-bold text-[10px] uppercase tracking-widest">
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="discussion" className="rounded-lg px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm font-bold text-[10px] uppercase tracking-widest flex gap-2">
-              Discussion
-              {comments.length > 0 && <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded-full text-[8px]">{comments.length}</span>}
-            </TabsTrigger>
-            <TabsTrigger value="attachments" className="rounded-lg px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm font-bold text-[10px] uppercase tracking-widest flex gap-2">
-              Resources
-              {attachments.length > 0 && <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded-full text-[8px]">{attachments.length}</span>}
-            </TabsTrigger>
-          </TabsList>
+    <div className="flex flex-col h-full max-h-[85vh]">
+      {/* Header */}
+      <div className="p-8 border-b border-primary/5 flex items-center justify-between bg-card/30 backdrop-blur-xl sticky top-0 z-10">
+        <div className="flex items-center gap-4 flex-1">
+          <div className={`p-2.5 rounded-xl ${getPriorityColor(issue?.priority)} shadow-sm`}>
+            <Target className="h-5 w-5" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-2xl font-black tracking-tight text-foreground line-clamp-1">{issue?.title}</h2>
+            <div className="flex items-center gap-2 mt-1">
+              <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-primary/10 bg-primary/5 text-primary h-5">
+                {issue?.status?.replace(/_/g, ' ')}
+              </Badge>
+              <span className="text-[10px] text-muted-foreground font-bold opacity-40 uppercase tracking-tighter">ID: #{issue?.id}</span>
+            </div>
+          </div>
+        </div>
+        <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full hover:bg-destructive/5 hover:text-destructive transition-colors ml-4">
+          <X className="h-5 w-5" />
+        </Button>
+      </div>
 
-          <div className="flex items-center gap-4">
-             <div className="flex flex-col items-end">
-               <Label className="text-[9px] font-black uppercase text-muted-foreground opacity-40 mb-1">Priority</Label>
-               <Badge className={`${
-                 issue?.priority === 'HIGH' ? 'bg-destructive/10 text-destructive border-destructive/20' : 'bg-primary/10 text-primary border-primary/20'
-               } border uppercase font-black text-[9px] tracking-widest px-3 py-1`}>
-                 {issue?.priority}
-               </Badge>
-             </div>
-             <div className="flex flex-col items-end border-l pl-4 border-primary/5">
-               <Label className="text-[9px] font-black uppercase text-muted-foreground opacity-40 mb-1">Status</Label>
-               <DropdownMenu>
-                <DropdownMenuTrigger asChild disabled={isViewer}>
-                  <Button variant="ghost" size="sm" className="h-7 px-3 bg-primary/5 text-primary font-black text-[9px] uppercase rounded-lg">
-                    {issue?.status?.replace('_', ' ')}
-                    <ChevronDown className="h-3 w-3 ml-2 opacity-50" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="rounded-xl border-primary/10 w-40 p-1">
-                  {['TODO', 'IN_PROGRESS', 'REVIEW', 'DONE'].map(status => (
-                    <DropdownMenuItem 
-                      key={status} 
-                      onClick={() => updateIssueMutation.mutate({ status })}
-                      className="font-bold text-[10px] uppercase py-2.5 rounded-lg"
-                    >
-                      {status.replace('_', ' ')}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-             </div>
+      <div className="flex flex-1 overflow-hidden">
+        {/* Main Content (Left) */}
+        <div className="flex-1 overflow-y-auto scrollbar-hide border-r border-primary/5 bg-background/50">
+          <div className="p-8 space-y-12">
+            {/* Description Section */}
+            <section className="space-y-4">
+              <div className="flex items-center gap-2 text-foreground/80">
+                <Info className="h-4 w-4 text-primary" />
+                <h3 className="font-black text-[11px] uppercase tracking-widest">Core Documentation</h3>
+              </div>
+              <div className="p-6 bg-card border border-primary/5 rounded-[2rem] shadow-sm">
+                <div className="whitespace-pre-wrap font-medium text-sm leading-relaxed text-foreground/70">
+                  {issue?.description || "No description provided."}
+                </div>
+              </div>
+            </section>
 
-             <div className="flex flex-col items-end border-l pl-4 border-primary/5">
-               <Label className="text-[9px] font-black uppercase text-muted-foreground opacity-40 mb-1">Assignee</Label>
-               <DropdownMenu>
-                <DropdownMenuTrigger asChild disabled={isViewer}>
-                  <Button variant="ghost" size="sm" className="h-7 px-2 bg-primary/5 text-primary font-black text-[9px] uppercase rounded-lg flex gap-2">
-                    <Avatar className="h-4 w-4">
-                      <AvatarImage src={getAvatarUrl(issue?.assignee?.avatarUrl, issue?.assignee?.email)} />
-                      <AvatarFallback className="text-[6px]">{issue?.assignee?.fullName?.[0] || '?'}</AvatarFallback>
-                    </Avatar>
-                    <span className="max-w-[80px] truncate">{issue?.assignee?.fullName || 'Unassigned'}</span>
-                    <ChevronDown className="h-3 w-3 opacity-50" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="rounded-xl border-primary/10 w-56 p-1">
-                  <DropdownMenuItem 
-                    onClick={() => assignIssueMutation.mutate(0)}
-                    className="font-bold text-[10px] uppercase py-2.5 rounded-lg flex gap-2"
+            {/* Checklist Section */}
+            <section className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-foreground/80">
+                  <CheckSquare className="h-4 w-4 text-primary" />
+                  <h3 className="font-black text-[11px] uppercase tracking-widest">Mission Progress</h3>
+                </div>
+                <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
+                  {Math.round(((issue?.completedSubtasks?.length || 0) / (issue?.subtasks?.length || 1)) * 100)}% COMPLETE
+                </span>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <Input 
+                    value={newSubtask}
+                    onChange={(e) => setNewSubtask(e.target.value)}
+                    placeholder="New objective..."
+                    className="h-11 bg-muted/20 border-primary/5 rounded-xl text-sm px-4 focus-visible:ring-primary/20"
+                    onKeyDown={(e) => e.key === 'Enter' && newSubtask.trim() && addSubtaskMutation.mutate(newSubtask)}
+                    disabled={isViewer}
+                  />
+                  <Button 
+                    onClick={() => addSubtaskMutation.mutate(newSubtask)} 
+                    disabled={!newSubtask.trim() || isViewer}
+                    className="h-11 w-11 rounded-xl bg-primary shadow-glow"
                   >
-                    <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center">
-                      <X className="h-3 w-3" />
-                    </div>
-                    Unassigned
-                  </DropdownMenuItem>
-                  {project?.team?.map((member: any) => (
-                    <DropdownMenuItem 
-                      key={member.id} 
-                      onClick={() => assignIssueMutation.mutate(member.id)}
-                      className="font-bold text-[10px] uppercase py-2.5 rounded-lg flex gap-2"
-                    >
-                      <Avatar className="h-6 w-6">
-                        <AvatarImage src={getAvatarUrl(member.avatarUrl, member.email)} />
-                        <AvatarFallback className="text-[8px]">{member.fullName?.[0]}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col">
-                        <span className="truncate">{member.fullName}</span>
-                        <span className="text-[8px] opacity-40 lowercase font-medium">{member.email}</span>
+                    <Plus className="h-5 w-5" />
+                  </Button>
+                </div>
+                
+                <div className="space-y-2.5">
+                  {issue?.subtasks?.map((task: string, idx: number) => {
+                    const done = issue.completedSubtasks?.includes(task);
+                    return (
+                      <div key={idx} className={`flex items-center gap-3 p-4 rounded-2xl border transition-all ${
+                        done ? "bg-primary/[0.02] border-primary/10 opacity-50" : "bg-card border-primary/5 hover:border-primary/20 shadow-sm"
+                      }`}>
+                        <Checkbox 
+                          checked={done} 
+                          onCheckedChange={() => toggleSubtaskMutation.mutate(task)}
+                          className="h-5 w-5 rounded-md border-primary/20 data-[state=checked]:bg-primary"
+                        />
+                        <span className={`text-sm font-medium ${done ? "line-through text-muted-foreground" : "text-foreground/80"}`}>{task}</span>
                       </div>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-             </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </section>
+
+            {/* Discussion Section */}
+            <section className="space-y-6">
+              <div className="flex items-center gap-2 text-foreground/80">
+                <MessageCircle className="h-4 w-4 text-primary" />
+                <h3 className="font-black text-[11px] uppercase tracking-widest">Intelligence Hub</h3>
+              </div>
+
+              <div 
+                ref={discussionScrollRef}
+                className="space-y-6 max-h-[500px] overflow-y-auto pr-4 scrollbar-hide"
+              >
+                {comments.length === 0 ? (
+                  <div className="text-center py-16 opacity-30 bg-muted/5 rounded-[2rem] border-2 border-dashed border-primary/5">
+                    <p className="text-[10px] font-black uppercase tracking-widest">No transmissions recorded</p>
+                  </div>
+                ) : (
+                  comments.map((comment: Comment) => {
+                    const isOwn = comment.user?.id === currentUser?.id;
+                    return (
+                      <div key={comment.id} className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
+                        <Avatar className="h-8 w-8 ring-2 ring-background shrink-0 shadow-sm">
+                          <AvatarImage src={getAvatarUrl(comment.user?.avatarUrl, comment.user?.email)} />
+                          <AvatarFallback className="text-[10px] font-bold bg-primary/5 text-primary">{comment.user?.fullName?.[0]}</AvatarFallback>
+                        </Avatar>
+                        <div className={`space-y-1.5 max-w-[85%] ${isOwn ? 'items-end' : 'items-start'}`}>
+                          <div className={`flex items-center gap-2 px-1 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
+                            <span className="text-[10px] font-black text-foreground/60">{isOwn ? 'You' : comment.user?.fullName}</span>
+                            <span className="text-[8px] font-bold text-muted-foreground uppercase opacity-40">{new Date(comment.createdDateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                          <div className={`p-4 shadow-sm text-sm font-medium leading-relaxed ${
+                            isOwn 
+                              ? 'bg-primary text-primary-foreground rounded-[1.25rem] rounded-tr-none' 
+                              : 'bg-card border border-primary/5 rounded-[1.25rem] rounded-tl-none text-foreground/80'
+                          }`}>
+                            <CommentRenderer content={comment.content} />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Chat Input */}
+              <div className="bg-card border border-primary/10 p-3 rounded-[1.5rem] shadow-elegant flex flex-col gap-2">
+                <Textarea 
+                  value={newComment}
+                  onChange={e => setNewComment(e.target.value)}
+                  placeholder="Share data..."
+                  className="min-h-[80px] border-0 focus-visible:ring-0 resize-none bg-transparent p-2 text-sm"
+                  onKeyDown={e => e.key === 'Enter' && !e.shiftKey && newComment.trim() && addCommentMutation.mutate(newComment)}
+                />
+                <div className="flex items-center justify-between pt-2 border-t border-primary/5">
+                  <div className="flex items-center gap-1">
+                    <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
+                      <PopoverTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 text-muted-foreground">
+                          <Smile className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent side="top" align="start" className="p-0 border-0">
+                        <EmojiPicker 
+                          onEmojiClick={e => {setNewComment(p => p + e.emoji); setEmojiPickerOpen(false)}}
+                          theme={theme === 'dark' ? EmojiTheme.DARK : EmojiTheme.LIGHT}
+                          width={280} height={350}
+                        />
+                      </PopoverContent>
+                    </Popover>
+
+                    <Popover open={gifPickerOpen} onOpenChange={setGifPickerOpen}>
+                      <PopoverTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 text-muted-foreground">
+                          <FileImage className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent side="top" align="start" className="p-0 border-0">
+                        <GifPicker onSelect={url => {setGifPickerOpen(false); addCommentMutation.mutate(url)}} />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <Button 
+                    onClick={() => addCommentMutation.mutate(newComment)} 
+                    disabled={!newComment.trim() || addCommentMutation.isPending}
+                    size="sm" className="rounded-xl h-9 px-5 bg-primary font-bold text-[10px] uppercase tracking-widest shadow-glow"
+                  >
+                    Post <Send className="ml-2 h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            </section>
           </div>
         </div>
 
-        <div className="flex-1 overflow-hidden relative">
-          <TabsContent value="details" className="h-full m-0 data-[state=active]:flex flex-col gap-8 overflow-y-auto pr-4 custom-scrollbar">
-            <section className="space-y-4">
-              <div className="flex items-center gap-2 text-foreground/80">
-                <Info className="h-5 w-5 text-primary" />
-                <h3 className="font-black text-xs uppercase tracking-widest">Context & Strategy</h3>
-              </div>
-              <Card className="border border-primary/5 bg-muted/5 shadow-none rounded-[1.5rem]">
-                <CardContent className="p-8">
-                  <p className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap font-medium">
-                    {issue?.description || "No description provided."}
-                  </p>
-                </CardContent>
-              </Card>
-            </section>
-
-            <section className="space-y-4 pb-8">
-              <div className="flex items-center gap-2 text-foreground/80">
-                <Clock className="h-5 w-5 text-primary" />
-                <h3 className="font-black text-xs uppercase tracking-widest">Velocity Metrics</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="border border-primary/5 bg-card shadow-sm rounded-2xl overflow-hidden">
-                  <CardContent className="p-6 space-y-5">
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60 ml-1">Estimate</Label>
-                        <div className="relative">
-                          <Input 
-                            type="number" 
-                            value={estimatedHours} 
-                            onChange={e => setEstimatedHours(parseFloat(e.target.value) || 0)}
-                            className="h-11 bg-muted/20 border-primary/5 font-black text-sm rounded-xl"
-                            disabled={isViewer}
-                          />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black opacity-30">HRS</span>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60 ml-1">Logged</Label>
-                        <div className="relative">
-                          <Input 
-                            type="number" 
-                            value={loggedHours} 
-                            onChange={e => setLoggedHours(parseFloat(e.target.value) || 0)}
-                            className="h-11 bg-muted/20 border-primary/5 font-black text-sm rounded-xl"
-                            disabled={isViewer}
-                          />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black opacity-30">HRS</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-3 pt-2">
-                      <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.2em]">
-                        <span className="text-muted-foreground opacity-40">Progress Arc</span>
-                        <span className="text-primary">{Math.min(100, Math.round((loggedHours / (estimatedHours || 1)) * 100))}%</span>
-                      </div>
-                      <Progress value={Math.min(100, (loggedHours / (estimatedHours || 1)) * 100)} className="h-2 bg-primary/5" />
-                    </div>
-
-                    {!isViewer && (
-                      <Button 
-                        size="sm" 
-                        className="w-full bg-primary text-primary-foreground hover:opacity-90 font-black text-[10px] uppercase tracking-[0.2em] h-11 rounded-xl shadow-glow transition-all"
-                        onClick={() => updateIssueMutation.mutate({ estimatedHours, loggedHours })}
-                        disabled={updateIssueMutation.isPending}
-                      >
-                        {updateIssueMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Deploy Metrics"}
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            </section>
-          </TabsContent>
-
-          <TabsContent value="discussion" className="h-full m-0 data-[state=active]:flex flex-col">
-            <ScrollArea className="flex-1 pr-4 mb-6">
-              <div className="space-y-8 py-4">
-                {comments.length === 0 ? (
-                  <div className="text-center py-32 opacity-30">
-                    <div className="p-6 bg-primary/5 rounded-full inline-flex mb-6">
-                      <MessageCircle className="h-12 w-12 text-primary" />
-                    </div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em]">No transmission history</p>
-                    <p className="text-[11px] font-medium mt-2 text-muted-foreground">Be the first to share insights on this task.</p>
+        {/* Sidebar (Right) */}
+        <aside className="w-[320px] bg-card/20 p-8 space-y-10 overflow-y-auto scrollbar-hide">
+          {/* Metadata Grid */}
+          <div className="space-y-6">
+             <div className="space-y-2">
+                <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-50 ml-1">Assigned Unit</Label>
+                <div className="flex items-center gap-3 p-3 bg-background/50 border border-primary/5 rounded-2xl">
+                  <Avatar className="h-9 w-9">
+                    <AvatarImage src={getAvatarUrl(issue?.assignee?.avatarUrl, issue?.assignee?.email)} />
+                    <AvatarFallback className="bg-primary/10 text-primary font-bold">{issue?.assignee?.fullName?.[0] || '?'}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-black truncate">{issue?.assignee?.fullName || 'Unassigned'}</p>
+                    <p className="text-[9px] font-medium text-muted-foreground truncate">{issue?.assignee?.email || 'Awaiting resource'}</p>
                   </div>
-                ) : (
-                  comments.map((comment: any) => {
-                    const userData = comment.user || comment.author;
-                    return (
-                      <div key={comment.id} className="group flex gap-4">
-                         <Avatar className="h-10 w-10 ring-4 ring-background shadow-md shrink-0">
-                          <AvatarImage src={getAvatarUrl(userData?.avatarUrl, userData?.email)} />
-                          <AvatarFallback className="text-xs font-bold bg-primary/5 text-primary">{userData?.fullName?.[0] || '?'}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs font-black text-foreground">{userData?.fullName || 'Unknown User'}</span>
-                            <span className="text-[10px] text-muted-foreground font-medium uppercase opacity-40">
-                               {new Date(comment.createdDateTime || comment.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })} • {new Date(comment.createdDateTime || comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                          </div>
-                          <div className="p-5 bg-card border border-primary/5 rounded-[1.5rem] rounded-tl-none shadow-sm text-sm font-medium leading-relaxed text-foreground/80">
-                            {comment.content}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </ScrollArea>
+                </div>
+             </div>
 
-            <div className="bg-background/80 backdrop-blur-md p-4 rounded-[2rem] border border-primary/5 shadow-elegant mt-auto">
-              <Textarea 
-                ref={commentInputRef}
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder={isViewer ? "View-only mode active" : "Transmitting insights..."}
-                className="min-h-[100px] border-0 focus-visible:ring-0 resize-none text-sm font-medium p-4 leading-relaxed bg-transparent"
-                disabled={isViewer}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey && newComment.trim()) {
-                    e.preventDefault();
-                    addCommentMutation.mutate(newComment);
-                  }
-                }}
-              />
-              <div className="flex items-center justify-between border-t border-primary/5 pt-3">
-                <span className="text-[9px] font-black uppercase text-muted-foreground opacity-40 ml-4">
-                  Press Enter to send
-                </span>
-                <Button 
-                  size="sm"
-                  className="bg-primary text-primary-foreground font-black text-[10px] uppercase tracking-widest rounded-xl px-6 h-10 shadow-glow transition-all active:scale-[0.98]"
-                  disabled={!newComment.trim() || addCommentMutation.isPending || isViewer}
-                  onClick={() => addCommentMutation.mutate(newComment)}
-                >
-                  {addCommentMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Deploy <Send className="h-3.5 w-3.5 ml-2" /></>}
-                </Button>
+             <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-50 ml-1">Priority</Label>
+                  <div className={`p-3 rounded-2xl border text-xs font-black uppercase text-center ${getPriorityColor(issue?.priority)}`}>
+                    {issue?.priority}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-50 ml-1">Timeline</Label>
+                  <div className="p-3 bg-background/50 border border-primary/5 rounded-2xl flex items-center justify-center gap-2">
+                    <Calendar className="h-3.5 w-3.5 text-primary opacity-40" />
+                    <span className="text-[10px] font-bold">{issue?.dueDate ? new Date(issue.dueDate).toLocaleDateString([], {month: 'short', day: 'numeric'}) : 'TBD'}</span>
+                  </div>
+                </div>
+             </div>
+          </div>
+
+          <Separator className="bg-primary/5" />
+
+          {/* Time Tracking */}
+          <div className="space-y-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-primary" />
+                <h3 className="font-black text-[10px] uppercase tracking-widest">Velocity Metrics</h3>
               </div>
             </div>
-          </TabsContent>
-
-          <TabsContent value="attachments" className="h-full m-0 data-[state=active]:flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-foreground/80">
-                <Paperclip className="h-5 w-5 text-primary" />
-                <h3 className="font-black text-xs uppercase tracking-widest">Resource Archive</h3>
+            
+            <div className="bg-background/50 border border-primary/5 rounded-[1.5rem] p-5 space-y-6 shadow-sm">
+              <div className="space-y-3">
+                <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                  <span>Burn Rate</span>
+                  <span className="text-primary">{Math.min(100, Math.round((loggedHours / (estimatedHours || 1)) * 100))}%</span>
+                </div>
+                <Progress value={Math.min(100, (loggedHours / (estimatedHours || 1)) * 100)} className="h-1.5 bg-primary/5" />
               </div>
+
               {!isViewer && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="h-10 rounded-xl bg-primary/5 border-primary/10 text-primary hover:bg-primary/10 font-black text-[10px] uppercase tracking-widest px-5"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
-                >
-                  {isUploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-                  Upload Resource
-                </Button>
+                <div className="space-y-4">
+                  <div className="flex gap-2">
+                    <Input 
+                      type="number"
+                      value={logTimeAmount}
+                      onChange={e => setLogTimeAmount(e.target.value)}
+                      placeholder="Add hours..."
+                      className="h-10 bg-muted/10 border-primary/5 text-xs font-bold rounded-xl"
+                    />
+                    <Button 
+                      onClick={() => updateIssueMutation.mutate({ estimatedHours, loggedHours: (issue?.loggedHours || 0) + parseFloat(logTimeAmount) })}
+                      disabled={!logTimeAmount || updateIssueMutation.isPending}
+                      className="h-10 px-4 rounded-xl bg-primary font-bold text-[9px] uppercase tracking-widest"
+                    >
+                      Log
+                    </Button>
+                  </div>
+                  <div className="flex flex-col gap-1 px-1">
+                    <div className="flex justify-between text-[9px] font-bold">
+                      <span className="opacity-40 uppercase">Target</span>
+                      <span className="text-foreground">{estimatedHours}h</span>
+                    </div>
+                    <div className="flex justify-between text-[9px] font-bold">
+                      <span className="opacity-40 uppercase">Achieved</span>
+                      <span className="text-primary">{loggedHours}h</span>
+                    </div>
+                  </div>
+                </div>
               )}
+            </div>
+          </div>
+
+          {/* Attachments (Archive) */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Paperclip className="h-4 w-4 text-primary" />
+                <h3 className="font-black text-[10px] uppercase tracking-widest">Resource Archive</h3>
+              </div>
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                className="p-1.5 rounded-lg bg-primary/5 text-primary hover:bg-primary/10 transition-colors"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
               <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} />
             </div>
 
-            <ScrollArea className="flex-1 pr-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
-                {attachments.length === 0 ? (
-                  <div className="col-span-full py-32 text-center opacity-30 border-2 border-dashed border-primary/5 rounded-[2.5rem]">
-                    <div className="p-6 bg-primary/5 rounded-full inline-flex mb-6">
-                      <Paperclip className="h-12 w-12 text-primary" />
-                    </div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em]">No resources attached</p>
+            <div className="space-y-2">
+              {attachments.map((file: Attachment) => (
+                <div key={file.id} className="group flex items-center gap-3 p-3 bg-background/50 border border-primary/5 rounded-xl hover:border-primary/20 transition-all cursor-pointer">
+                  <div className="p-2 bg-muted/20 rounded-lg group-hover:bg-primary/5 transition-colors text-muted-foreground group-hover:text-primary">
+                    <FileText className="h-3.5 w-3.5" />
                   </div>
-                ) : (
-                  attachments.map((file: Attachment) => {
-                    const isImage = file.fileType.startsWith('image/');
-                    const imageUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}${file.fileUrl}`;
-                    
-                    return (
-                      <div key={file.id} className="group flex flex-col glass-panel rounded-3xl hover:border-primary/20 hover:shadow-glow transition-all duration-500 overflow-hidden">
-                        {/* Preview Area */}
-                        <div className="h-40 w-full bg-primary/5 relative overflow-hidden flex items-center justify-center">
-                          {isImage ? (
-                            <img 
-                              src={imageUrl} 
-                              alt={file.fileName} 
-                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            />
-                          ) : (
-                            <div className="flex flex-col items-center gap-3 opacity-40 group-hover:opacity-70 transition-opacity">
-                              <div className="p-4 bg-background rounded-2xl shadow-sm">
-                                {getFileIcon(file.fileType)}
-                              </div>
-                              <span className="text-[9px] font-black uppercase tracking-widest">{file.fileType.split('/')[1] || 'FILE'}</span>
-                            </div>
-                          )}
-                          
-                          {/* Hover Actions Overlay */}
-                          <div className="absolute inset-0 bg-background/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-10 w-10 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow" 
-                              onClick={() => handleDownload(file)}
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            {!isViewer && (
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-10 w-10 rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-glow" 
-                                onClick={() => deleteAttachmentMutation.mutate(file.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Info Area */}
-                        <div className="p-4 flex items-center gap-4">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-black truncate text-foreground/90">{file.fileName}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-[9px] text-muted-foreground font-bold uppercase opacity-40">{formatSize(file.fileSize)}</span>
-                              <span className="w-1 h-1 rounded-full bg-primary/20" />
-                              <span className="text-[9px] text-muted-foreground font-bold uppercase opacity-40">{new Date(file.uploadedAt).toLocaleDateString()}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </ScrollArea>
-          </TabsContent>
-        </div>
-      </Tabs>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-bold truncate">{file.fileName}</p>
+                    <p className="text-[8px] text-muted-foreground uppercase opacity-40">{(file.fileSize / 1024).toFixed(1)} KB</p>
+                  </div>
+                  <button onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}${file.fileUrl}`, '_blank')} className="opacity-0 group-hover:opacity-100 p-1.5 hover:text-primary">
+                    <Download className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 };
