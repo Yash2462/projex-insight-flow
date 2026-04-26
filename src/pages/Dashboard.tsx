@@ -25,6 +25,7 @@ import DashboardCharts from "@/components/dashboard/DashboardCharts";
 import QuickActions from "@/components/dashboard/QuickActions";
 import CreateProjectModal from "@/components/dashboard/CreateProjectModal";
 import OnboardingWidget from "@/components/dashboard/OnboardingWidget";
+import DemoSeeder from "@/components/dashboard/DemoSeeder";
 import { projectAPI } from "@/services/projectService";
 import { dashboardAPI } from "@/services/dashboardService";
 import { issueAPI } from "@/services/issueService";
@@ -132,6 +133,7 @@ const Dashboard = () => {
           </div>
           
           <div className="flex items-center gap-3">
+            <DemoSeeder />
             <Button 
               onClick={() => setIsCreateModalOpen(true)}
               variant="hero"

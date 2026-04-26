@@ -10,15 +10,15 @@ const QuickActions = () => {
       label: "New Project",
       icon: Plus,
       onClick: () => {}, // Handled by Dashboard's existing modal logic
-      variant: "default" as const,
-      className: "bg-gradient-primary hover:opacity-90 shadow-glow"
+      variant: "hero" as const,
+      className: ""
     },
     {
       label: "Invite Member",
       icon: UserPlus,
       onClick: () => navigate("/projects"),
       variant: "outline" as const,
-      className: "border-primary/20 text-primary hover:bg-primary/5"
+      className: "border-primary/20"
     },
     {
       label: "View All Projects",

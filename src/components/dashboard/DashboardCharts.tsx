@@ -25,9 +25,16 @@ interface DashboardChartsProps {
   isLoading: boolean;
 }
 
-const COLORS = ["#6366f1", "#8b5cf6", "#ec4899", "#f43f5e", "#10b981", "#f59e0b"];
-
 const DashboardCharts = ({ counts, isLoading }: DashboardChartsProps) => {
+  const chartColors = [
+    "hsl(var(--primary))",
+    "hsl(var(--primary-glow))",
+    "#ec4899",
+    "#f43f5e",
+    "#10b981",
+    "#f59e0b"
+  ];
+
   if (isLoading || !counts) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -96,7 +103,7 @@ const DashboardCharts = ({ counts, isLoading }: DashboardChartsProps) => {
                 stroke="none"
               >
                 {statusData.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} className="hover:opacity-80 transition-opacity cursor-pointer" />
+                  <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} className="hover:opacity-80 transition-opacity cursor-pointer" />
                 ))}
               </Pie>
               <Tooltip 

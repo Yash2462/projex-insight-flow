@@ -35,9 +35,16 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const COLORS = ["#6366f1", "#8b5cf6", "#ec4899", "#f43f5e", "#10b981", "#f59e0b"];
-
 const Analytics = () => {
+  const chartColors = [
+    "hsl(var(--primary))",
+    "hsl(var(--primary-glow))",
+    "#ec4899",
+    "#f43f5e",
+    "#10b981",
+    "#f59e0b"
+  ];
+  
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const projectId = parseInt(id || "0", 10);
@@ -97,6 +104,15 @@ const Analytics = () => {
     completed: project.issues?.filter((i: any) => i.assignee?.id === member.id && i.status === 'DONE').length || 0,
   })) || [];
 
+  const timeData = project.issues?.filter((i: any) => i.estimatedHours > 0 || i.loggedHours > 0).map((issue: any) => ({
+    name: issue.title.substring(0, 15) + (issue.title.length > 15 ? '...' : ''),
+    estimated: issue.estimatedHours,
+    actual: issue.loggedHours,
+  })).slice(0, 8) || [];
+
+  const totalEstimated = project.issues?.reduce((acc: number, i: any) => acc + (i.estimatedHours || 0), 0) || 0;
+  const totalLogged = project.issues?.reduce((acc: number, i: any) => acc + (i.loggedHours || 0), 0) || 0;
+
   return (
     <div className="min-h-screen bg-background lg:ml-64 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
@@ -130,8 +146,8 @@ const Analytics = () => {
           {[
             { title: "Total Scope", value: project.issues?.length || 0, icon: TrendingUp, color: "text-blue-500", bg: "bg-blue-500/10" },
             { title: "Resolved", value: project.issues?.filter((i: any) => i.status === 'DONE').length || 0, icon: CheckCircle2, color: "text-green-500", bg: "bg-green-500/10" },
+            { title: "Project Time", value: `${totalLogged}h / ${totalEstimated}h`, icon: Clock, color: "text-orange-500", bg: "bg-orange-500/10" },
             { title: "Team Load", value: project.team?.length || 0, icon: Users, color: "text-purple-500", bg: "bg-purple-500/10" },
-            { title: "Avg. Velocity", value: "8.4", icon: Clock, color: "text-orange-500", bg: "bg-orange-500/10" },
           ].map((stat, i) => (
             <Card key={i} className="border border-primary/5 shadow-sm bg-card rounded-3xl relative overflow-hidden">
               <CardContent className="p-6">
@@ -197,7 +213,7 @@ const Analytics = () => {
                     stroke="none"
                   >
                     {statusData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
                     ))}
                   </Pie>
                   <Tooltip contentStyle={{ borderRadius: '16px', border: '1px solid hsl(var(--primary) / 0.1)' }} />
@@ -207,6 +223,44 @@ const Analytics = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Time Tracking Section */}
+        <Card className="border border-primary/5 shadow-elegant bg-card rounded-3xl overflow-hidden">
+          <CardHeader>
+            <CardTitle className="text-xl font-bold tracking-tight">Time Efficiency Report</CardTitle>
+            <CardDescription className="text-xs font-medium uppercase tracking-wider opacity-60">Estimated vs Actual Hours per task</CardDescription>
+          </CardHeader>
+          <CardContent className="h-[350px] pt-4">
+            {timeData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={timeData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--primary))" opacity={0.05} />
+                  <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
+                  <YAxis 
+                    dataKey="name" 
+                    type="category" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    width={100}
+                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9, fontWeight: 700 }}
+                  />
+                  <Tooltip 
+                    cursor={{fill: 'hsl(var(--primary) / 0.02)'}}
+                    contentStyle={{ borderRadius: '16px', border: '1px solid hsl(var(--primary) / 0.1)', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}
+                  />
+                  <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }} />
+                  <Bar dataKey="estimated" fill="hsl(var(--muted))" radius={[0, 4, 4, 0]} name="Estimated Hours" />
+                  <Bar dataKey="actual" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} name="Actual Hours" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center opacity-30">
+                <Clock className="h-10 w-10 mb-4" />
+                <p className="text-xs font-bold uppercase tracking-widest">No time data tracked for this project</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
