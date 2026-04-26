@@ -144,7 +144,8 @@ const ForgotPassword = () => {
 
               <Button
                 type="submit"
-                className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-black uppercase tracking-widest text-[10px] shadow-glow hover:opacity-90 transition-all active:scale-95"
+                variant="hero"
+                className="w-full h-12 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all active:scale-95"
                 disabled={isLoading || !email}
               >
                 {isLoading ? (
@@ -206,7 +207,8 @@ const ForgotPassword = () => {
 
               <Button
                 type="submit"
-                className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-black uppercase tracking-widest text-[10px] shadow-glow hover:opacity-90 transition-all active:scale-95"
+                variant="hero"
+                className="w-full h-12 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all active:scale-95"
                 disabled={isLoading || !otp || !newPassword}
               >
                 {isLoading ? (

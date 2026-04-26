@@ -93,7 +93,7 @@ const Index = () => {
               <Link to="/login" className="text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Sign In</Link>
               <ThemeToggle />
               <Link to="/signup">
-                <Button className="bg-primary text-primary-foreground font-black text-[11px] uppercase tracking-widest rounded-xl h-11 px-8 shadow-glow hover:opacity-90 transition-all active:scale-95">
+                <Button variant="hero" className="font-black text-[11px] uppercase tracking-widest rounded-xl h-11 px-8 transition-all active:scale-95">
                   Launch App
                 </Button>
               </Link>
@@ -106,7 +106,7 @@ const Index = () => {
       <section className="relative pt-44 pb-32 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex flex-col items-center text-center space-y-12">
-            <div className={`space-y-6 max-w-4xl transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+            <div className={`space-y-6 max-w-4xl transform transition-all duration-1000 translate-y-0 opacity-100`}>
               <Badge className="bg-primary/10 text-primary border-primary/20 px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-widest animate-bounce">
                 <Sparkles className="h-3 w-3 mr-2 fill-current" /> Next-Gen Workflow Orchestration
               </Badge>
@@ -119,7 +119,7 @@ const Index = () => {
               </p>
             </div>
             
-            <div className={`flex flex-col sm:flex-row gap-6 transform transition-all duration-1000 delay-200 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+            <div className={`flex flex-col sm:flex-row gap-6 transform transition-all duration-1000 delay-200 translate-y-0 opacity-100`}>
               <Link to="/signup">
                 <Button size="lg" className="h-16 px-10 rounded-[2rem] bg-primary text-primary-foreground font-black uppercase tracking-[0.15em] text-xs shadow-glow hover:scale-105 transition-all">
                   Start Building Free

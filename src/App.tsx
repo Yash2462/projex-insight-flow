@@ -15,9 +15,17 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Analytics from "./pages/Analytics";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import { ThemeProvider } from "./components/theme-provider";
+import { useParams } from "react-router-dom";
+import IssueDetail from "./components/IssueDetail";
 import "./index.css";
 
 const queryClient = new QueryClient();
+
+const IssueDetailWrapper = () => {
+  const { issueId } = useParams();
+  if (!issueId) return null;
+  return <IssueDetail issueId={parseInt(issueId)} issueName="" />;
+};
 
 const App = () => {
   return (
@@ -92,8 +100,18 @@ const App = () => {
                 </>
               } 
             />
-            <Route path="/accept_invitation" element={<AcceptInvitation />} />
-            <Route path="*" element={<NotFound />} />
+            <Route 
+              path="/projects/:projectId/issues/:issueId" 
+              element={
+                <>
+                  <Navigation />
+                  <div className="lg:ml-64 p-4 lg:p-8 min-h-screen bg-background">
+                    <IssueDetailWrapper />
+                  </div>
+                </>
+              } 
+            />
+            <Route path="/accept_invitation" element={<AcceptInvitation />} />            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </QueryClientProvider>

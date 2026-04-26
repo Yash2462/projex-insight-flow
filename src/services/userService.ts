@@ -14,6 +14,9 @@ export const userAPI = {
   getUserById: (id: number) =>
     apiClient.get<ApiResponse<User>>(`/api/users/${id}`),
 
+  getProjectByTeam: () =>
+    apiClient.get<ApiResponse<any[]>>('/api/projects'),
+
   completeOnboardingStep: (stepId: string) =>
     apiClient.post<ApiResponse<User>>(`/api/users/onboarding/step/${stepId}`),
 
