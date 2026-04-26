@@ -54,6 +54,9 @@ import InvitationLinkGenerator from "@/components/InvitationLinkGenerator";
 import UserProfile from "@/components/UserProfile";
 import DirectMessage from "@/components/DirectMessage";
 import KanbanBoard from "@/components/kanban/KanbanBoard";
+import WorkflowManager from "@/components/kanban/WorkflowManager";
+import CalendarView from "@/components/kanban/CalendarView";
+import ProjectDataSeeder from "@/components/dashboard/ProjectDataSeeder";
 import { getAvatarUrl } from "@/lib/utils";
 import { Project, User, Issue } from "@/services/types";
 
@@ -86,7 +89,7 @@ const ProjectDetails = () => {
     }
     return project.statuses.map(status => ({
       id: status,
-      title: status.replace(/_/g, ' ').toLowerCase().split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ')
+      title: (status || "").replace(/_/g, ' ').toLowerCase().split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ')
     }));
   }, [project?.statuses]);
 
@@ -112,6 +115,7 @@ const ProjectDetails = () => {
 
   // Modal states
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [workflowModalOpen, setWorkflowModalOpen] = useState(false);
   const [issueModalOpen, setIssueModalOpen] = useState(false);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
@@ -221,8 +225,48 @@ const ProjectDetails = () => {
     mutationFn: (id: number) => issueAPI.deleteIssue(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
-      toast({ title: "Success", description: "Issue deleted" });
+      toast({ title: "Success", description: "Issue archived" });
     },
+  });
+
+  const reorderIssuesMutation = useMutation({
+    mutationFn: (issueOrders: { id: number; index: number; status: string }[]) => issueAPI.reorderIssues(issueOrders),
+    onMutate: async (newOrders) => {
+      await queryClient.cancelQueries({ queryKey: ["project", projectId] });
+      const previousProject = queryClient.getQueryData(["project", projectId]);
+      
+      queryClient.setQueryData(["project", projectId], (old: any) => {
+        if (!old) return old;
+        const updatedIssues = old.issues.map((issue: any) => {
+          const newOrder = newOrders.find(o => o.id === issue.id);
+          if (newOrder) {
+            return { ...issue, orderIndex: newOrder.index, status: newOrder.status };
+          }
+          return issue;
+        });
+        return { ...old, issues: updatedIssues };
+      });
+      
+      return { previousProject };
+    },
+    onError: (err, newOrders, context) => {
+      queryClient.setQueryData(["project", projectId], context?.previousProject);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+    },
+  });
+
+  const updateProjectMutation = useMutation({
+    mutationFn: (data: Partial<Project>) => projectAPI.updateProject(projectId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+      toast({ title: "Success", description: "Project workflow updated" });
+      setWorkflowModalOpen(false);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update workflow", variant: "destructive" });
+    }
   });
 
   const inviteUserMutation = useMutation({
@@ -243,6 +287,10 @@ const ProjectDetails = () => {
   };
 
   const openCreateIssueModal = (status: string) => {
+    if (status === "NEW_LIST") {
+      setWorkflowModalOpen(true);
+      return;
+    }
     setNewIssue(prev => ({ ...prev, status }));
     setIssueModalOpen(true);
   };
@@ -333,6 +381,14 @@ const ProjectDetails = () => {
                 <BarChart3 className="h-4 w-4 mr-2" /> Analytics
               </Button>
               {isOwner && (
+                <ProjectDataSeeder projectId={projectId} statuses={project.statuses || []} />
+              )}
+              {isOwner && (
+                <Button onClick={() => setWorkflowModalOpen(true)} variant="outline" className="rounded-xl border-primary/20 text-primary hover:bg-primary/5 font-bold h-11 px-5 transition-all">
+                  <Settings className="h-4 w-4 mr-2" /> Manage Board
+                </Button>
+              )}
+              {isOwner && (
                 <Button onClick={() => setInviteModalOpen(true)} variant="outline" className="rounded-xl border-primary/20 text-primary hover:bg-primary/5 font-bold h-11 px-5 transition-all">
                   <UserPlus className="h-4 w-4 mr-2" /> Invite
                 </Button>
@@ -352,6 +408,9 @@ const ProjectDetails = () => {
             <TabsList className="bg-transparent border-0 gap-1 h-10">
               <TabsTrigger value="kanban" className="rounded-xl px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all font-bold text-[10px] uppercase tracking-[0.15em]">
                 Board
+              </TabsTrigger>
+              <TabsTrigger value="timeline" className="rounded-xl px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all font-bold text-[10px] uppercase tracking-[0.15em]">
+                Timeline
               </TabsTrigger>
               <TabsTrigger value="overview" className="rounded-xl px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all font-bold text-[10px] uppercase tracking-[0.15em]">
                 Details
@@ -386,11 +445,30 @@ const ProjectDetails = () => {
                 }
                 updateIssueStatusMutation.mutate({ id, status });
               }}
+              onReorderIssues={(orders) => {
+                if (isViewer) return;
+                reorderIssuesMutation.mutate(orders);
+              }}
+              onDeleteColumn={(columnId) => {
+                if (!canManage) return;
+                const newStatuses = (project.statuses || []).filter(s => s !== columnId);
+                updateProjectMutation.mutate({ statuses: newStatuses });
+              }}
               onViewComments={(issue, initialTab = "details") => {
                 setSelectedIssueForComments(issue);
                 setSelectedIssueTab(initialTab);
               }}
               onCreateIssue={openCreateIssueModal}
+            />
+          </TabsContent>
+
+          <TabsContent value="timeline" className="mt-0 outline-none">
+            <CalendarView 
+              issues={project.issues || []}
+              onViewIssue={(issue) => {
+                setSelectedIssueForComments(issue);
+                setSelectedIssueTab("details");
+              }}
             />
           </TabsContent>
 
@@ -601,6 +679,14 @@ const ProjectDetails = () => {
       )}
 
       {/* User Profile & DM Modals would follow same pattern */}
+
+      <WorkflowManager 
+        open={workflowModalOpen}
+        onOpenChange={setWorkflowModalOpen}
+        currentStatuses={project.statuses || ["TODO", "IN_PROGRESS", "REVIEW", "DONE"]}
+        onSave={(newStatuses) => updateProjectMutation.mutate({ statuses: newStatuses })}
+        isSaving={updateProjectMutation.isPending}
+      />
     </div>
   );
 };

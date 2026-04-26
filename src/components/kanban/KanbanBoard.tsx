@@ -1,10 +1,16 @@
 import { useMemo } from "react";
 import KanbanCard from "./KanbanCard";
 import { Badge } from "@/components/ui/badge";
-import { Plus, MoreHorizontal, AlertCircle, CheckCircle2, CircleDashed, PlayCircle, HelpCircle } from "lucide-react";
+import { Plus, MoreHorizontal, AlertCircle, CheckCircle2, CircleDashed, PlayCircle, HelpCircle, Trash2, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
 import { Issue } from "@/services/api";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface KanbanColumn {
   id: string;
@@ -16,6 +22,8 @@ interface KanbanBoardProps {
   issues: Issue[];
   onDeleteIssue: (id: number) => void;
   onUpdateIssueStatus: (id: number, status: string) => void;
+  onReorderIssues?: (issueOrders: { id: number; index: number; status: string }[]) => void;
+  onDeleteColumn?: (columnId: string) => void;
   onViewComments: (issue: Issue, initialTab?: string) => void;
   onCreateIssue: (status: string) => void;
 }
@@ -47,26 +55,70 @@ const KanbanBoard = ({
   issues, 
   onDeleteIssue, 
   onUpdateIssueStatus, 
+  onReorderIssues,
+  onDeleteColumn,
   onViewComments,
   onCreateIssue
 }: KanbanBoardProps) => {
-  // Group issues by status
+  
+  // Group and sort issues by status and orderIndex
   const groupedIssues = useMemo(() => {
-    return issues.reduce((acc, issue) => {
-      const status = issue.status || "TODO";
-      if (!acc[status]) acc[status] = [];
-      acc[status].push(issue);
-      return acc;
-    }, {} as Record<string, Issue[]>);
-  }, [issues]);
+    const map: Record<string, Issue[]> = {};
+    columns.forEach(col => {
+      map[col.id] = issues.filter(issue => issue.status === col.id)
+                          .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
+    });
+    return map;
+  }, [columns, issues]);
 
   const onDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
     if (!destination) return;
+    
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
     
-    if (destination.droppableId !== source.droppableId) {
-      onUpdateIssueStatus(parseInt(draggableId), destination.droppableId);
+    const sourceColId = source.droppableId;
+    const destColId = destination.droppableId;
+    
+    const sourceIssues = Array.from(groupedIssues[sourceColId] || []);
+    const [movedIssue] = sourceIssues.splice(source.index, 1);
+    
+    let reorderPayload: { id: number; index: number; status: string }[] = [];
+    
+    if (sourceColId === destColId) {
+      // Reordering within the same column
+      sourceIssues.splice(destination.index, 0, movedIssue);
+      reorderPayload = sourceIssues.map((issue, idx) => ({
+        id: issue.id,
+        index: idx,
+        status: sourceColId
+      }));
+    } else {
+      // Moving to a different column
+      const destIssues = Array.from(groupedIssues[destColId] || []);
+      const updatedMovedIssue = { ...movedIssue, status: destColId };
+      destIssues.splice(destination.index, 0, updatedMovedIssue as any);
+      
+      // Update indices for both columns
+      const sourcePayload = sourceIssues.map((issue, idx) => ({
+        id: issue.id,
+        index: idx,
+        status: sourceColId
+      }));
+      
+      const destPayload = destIssues.map((issue, idx) => ({
+        id: issue.id,
+        index: idx,
+        status: destColId
+      }));
+      
+      reorderPayload = [...sourcePayload, ...destPayload];
+    }
+    
+    if (onReorderIssues) {
+      onReorderIssues(reorderPayload);
+    } else if (sourceColId !== destColId) {
+      onUpdateIssueStatus(parseInt(draggableId), destColId);
     }
   };
 
@@ -102,9 +154,38 @@ const KanbanBoard = ({
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 rounded-xl border-primary/10 p-1">
+                      <DropdownMenuItem 
+                        onClick={() => onCreateIssue("NEW_LIST")}
+                        className="flex items-center gap-2 font-bold text-[10px] uppercase py-2.5 rounded-lg"
+                      >
+                        <Settings2 className="h-3.5 w-3.5" />
+                        Manage Workflow
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="flex items-center gap-2 font-bold text-[10px] uppercase py-2.5 rounded-lg text-destructive focus:text-destructive focus:bg-destructive/5"
+                        onClick={() => {
+                          if (columnIssues.length > 0) {
+                            alert("Cannot delete column with active tasks. Please move or delete tasks first.");
+                            return;
+                          }
+                          if (confirm(`Are you sure you want to delete the "${column.title}" column?`)) {
+                            onDeleteColumn?.(column.id);
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Delete Column
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
 
@@ -158,6 +239,17 @@ const KanbanBoard = ({
             </div>
           );
         })}
+
+        <div className="flex flex-col min-w-[320px] max-w-[320px]">
+          <Button 
+            variant="ghost" 
+            className="w-full h-[60px] border-2 border-dashed border-primary/10 hover:border-primary/30 hover:bg-primary/5 text-muted-foreground hover:text-primary text-[11px] font-black uppercase tracking-widest justify-center gap-2 group transition-all duration-500 rounded-[1.5rem]"
+            onClick={() => onCreateIssue("NEW_LIST")}
+          >
+            <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform duration-500" />
+            Add Another List
+          </Button>
+        </div>
       </div>
     </DragDropContext>
   );
