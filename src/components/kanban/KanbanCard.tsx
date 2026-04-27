@@ -1,8 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, MessageSquare, MoreVertical, CheckSquare, Trash2, Paperclip } from "lucide-react";
+import { Calendar, MessageSquare, MoreVertical, CheckSquare, Trash2, Paperclip, Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,7 +60,7 @@ const KanbanCard = ({ issue, index, onDelete, onViewComments }: KanbanCardProps)
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           className={`mb-3 outline-none transition-all duration-300 ${snapshot.isDragging ? "rotate-2 scale-[1.02]" : ""}`}
-          onClick={() => onViewComments(issue, "details")}
+          onClick={() => onViewComments(issue, "overview")}
         >
           <Card className={`group relative border border-primary/5 shadow-sm hover:shadow-elegant hover:border-primary/20 transition-all duration-500 bg-card rounded-2xl overflow-hidden cursor-pointer ${snapshot.isDragging ? "shadow-2xl ring-4 ring-primary/5 border-primary/30" : ""}`}>
             {/* Soft Glow based on priority */}
@@ -78,12 +79,18 @@ const KanbanCard = ({ issue, index, onDelete, onViewComments }: KanbanCardProps)
                       <MoreVertical className="h-3.5 w-3.5" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-44 p-1 rounded-xl shadow-elegant border-primary/10">
-                    <DropdownMenuItem onClick={() => onViewComments(issue, "discussion")} className="rounded-lg font-medium text-xs py-2">
-                      <MessageSquare className="h-3.5 w-3.5 mr-2 text-primary" /> View Comments
+                  <DropdownMenuContent align="end" className="w-56 p-1.5 rounded-2xl shadow-elegant border-primary/10">
+                    <DropdownMenuItem asChild className="rounded-xl font-bold text-xs py-3 cursor-pointer">
+                      <Link to={`/projects/${issue.projectId}/issues/${issue.id}`} className="flex items-center w-full">
+                        <Maximize2 className="h-4 w-4 mr-3 text-primary" /> 
+                        Full Mission View
+                      </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onDelete(issue.id)} className="rounded-lg font-medium text-xs py-2 text-destructive focus:text-destructive focus:bg-destructive/5">
-                      <Trash2 className="h-3.5 w-3.5 mr-2" /> Remove Task
+                    <DropdownMenuItem onClick={() => onViewComments(issue, "discussion")} className="rounded-xl font-bold text-xs py-3 cursor-pointer">
+                      <MessageSquare className="h-4 w-4 mr-3 text-primary opacity-60" /> Discussion History
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onDelete(issue.id)} className="rounded-xl font-bold text-xs py-3 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/5">
+                      <Trash2 className="h-4 w-4 mr-3" /> Terminate Task
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
