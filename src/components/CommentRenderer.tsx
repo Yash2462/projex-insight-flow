@@ -17,25 +17,6 @@ const CommentRenderer = ({ content }: CommentRendererProps) => {
 
   return (
     <div className="space-y-3">
-      <div className="whitespace-pre-wrap break-words">
-        {parts.map((part, i) => {
-          if (part.match(urlRegex)) {
-            return (
-              <a 
-                key={i} 
-                href={part} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="text-primary hover:underline transition-all"
-              >
-                {part}
-              </a>
-            );
-          }
-          return <span key={i}>{part}</span>;
-        })}
-      </div>
-      
       {/* Inline Image/GIF Previews */}
       <div className="flex flex-wrap gap-3">
         {content.match(urlRegex)?.map((url, i) => {
@@ -52,6 +33,25 @@ const CommentRenderer = ({ content }: CommentRendererProps) => {
             );
           }
           return null;
+        })}
+      </div>
+
+      <div className="whitespace-pre-wrap break-words">
+        {parts.map((part, i) => {
+          if (part.match(urlRegex)) {
+            return (
+              <a 
+                key={i} 
+                href={part} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-primary hover:underline transition-all"
+              >
+                {part}
+              </a>
+            );
+          }
+          return <span key={i}>{part}</span>;
         })}
       </div>
     </div>
