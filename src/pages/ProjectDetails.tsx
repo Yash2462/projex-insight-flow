@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -39,16 +40,18 @@ import {
   UserPlus,
   Calendar,
   MessageCircle,
+  Info,
   Settings,
   Eye,
   Loader2,
   AlertTriangle,
   Layout,
   BarChart3,
-  ShieldCheck
+  ShieldCheck,
+  MoreVertical,
+  ChevronRight
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import IssueDetail from "@/components/IssueDetail";
 import ProjectChat from "@/components/ProjectChat";
 import InvitationLinkGenerator from "@/components/InvitationLinkGenerator";
 import UserProfile from "@/components/UserProfile";
@@ -57,63 +60,27 @@ import KanbanBoard from "@/components/kanban/KanbanBoard";
 import WorkflowManager from "@/components/kanban/WorkflowManager";
 import CalendarView from "@/components/kanban/CalendarView";
 import ProjectDataSeeder from "@/components/dashboard/ProjectDataSeeder";
+import IssueDetail from "@/components/IssueDetail";
 import { getAvatarUrl } from "@/lib/utils";
 import { Project, User, Issue } from "@/services/types";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const projectId = parseInt(id || "0", 10);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const projectId = parseInt(id || "0", 10);
 
-  // Queries
-  const { data: project, isLoading: isProjectLoading, error: projectError } = useQuery({
-    queryKey: ["project", projectId],
-    queryFn: async () => {
-      const response = await projectAPI.getProjectById(projectId);
-      return response.data.data as Project;
-    },
-    enabled: !!projectId,
-  });
-
-  // Dynamic columns from project statuses
-  const dynamicColumns = useMemo(() => {
-    if (!project?.statuses || project.statuses.length === 0) {
-      return [
-        { id: "TODO", title: "To Do" },
-        { id: "IN_PROGRESS", title: "In Progress" },
-        { id: "REVIEW", title: "Review" },
-        { id: "DONE", title: "Done" },
-      ];
-    }
-    return project.statuses.map(status => ({
-      id: status,
-      title: (status || "").replace(/_/g, ' ').toLowerCase().split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ')
-    }));
-  }, [project?.statuses]);
-
-  // WebSocket for real-time updates
-  const { subscribe, isConnected } = useWebSocket(projectId);
-
-  useEffect(() => {
-    if (isConnected && projectId) {
-      // Subscribe to board updates
-      subscribe(`/topic/project/${projectId}/board`, (event) => {
-        // Refresh project data when board changes
-        queryClient.invalidateQueries({ queryKey: ["project", projectId] });
-        
-        // Optional: show toast for certain events
-        if (event.type === "ISSUE_CREATED") {
-          toast({ title: "New Issue", description: `${event.issue.title} was created.` });
-        } else if (event.type === "ISSUE_DELETED") {
-          toast({ title: "Issue Deleted", description: `An issue was removed from the board.` });
-        }
-      });
-    }
-  }, [isConnected, projectId, subscribe, queryClient, toast]);
-
-  // Modal states
+  // State
+  const [activeTab, setActiveTab] = useState("kanban");
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [workflowModalOpen, setWorkflowModalOpen] = useState(false);
   const [issueModalOpen, setIssueModalOpen] = useState(false);
@@ -122,19 +89,34 @@ const ProjectDetails = () => {
   const [dmModalOpen, setDmModalOpen] = useState(false);
   const [selectedIssue, setSelectedIssue] = useState<number | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [selectedIssueForComments, setSelectedIssueForComments] = useState<Issue | null>(null);
-  const [selectedIssueTab, setSelectedIssueTab] = useState<string>("details");
-
-  // Form states
   const [inviteEmail, setInviteEmail] = useState("");
-  const [newIssue, setNewIssue] = useState({
+  const [newIssue, setNewIssue] = useState<Partial<Issue>>({
     title: "",
     description: "",
-    status: "TODO",
     priority: "MEDIUM",
     dueDate: "",
+    status: "TODO"
   });
-  const [activeTab, setActiveTab] = useState("kanban");
+
+  const [selectedIssueForComments, setSelectedIssueForComments] = useState<Issue | null>(null);
+  const [selectedIssueTab, setSelectedIssueTab] = useState("overview");
+
+  // Queries
+  const { data: profile } = useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      const response = await userAPI.getProfile();
+      return response.data.data;
+    },
+  });
+
+  const { data: project, isLoading: isProjectLoading } = useQuery({
+    queryKey: ["project", projectId],
+    queryFn: async () => {
+      const response = await projectAPI.getProjectById(projectId);
+      return response.data.data;
+    },
+  });
 
   const { data: userRole } = useQuery({
     queryKey: ["projectRole", projectId],
@@ -142,85 +124,13 @@ const ProjectDetails = () => {
       const response = await projectAPI.getProjectRole(projectId);
       return response.data.data;
     },
-    enabled: !!projectId,
   });
 
   const isOwner = userRole === 'OWNER';
-  const canManage = isOwner || userRole === 'ADMIN';
   const isViewer = userRole === 'VIEWER';
-
-  const { data: users } = useQuery({
-    queryKey: ["users"],
-    queryFn: async () => {
-      const response = await userAPI.getUsers();
-      return response.data.data as User[];
-    },
-  });
-
-  const { data: currentUser } = useQuery({
-    queryKey: ["profile"],
-    queryFn: async () => {
-      const response = await userAPI.getProfile();
-      return response.data.data as User;
-    },
-  });
+  const canManage = isOwner || userRole === 'ADMIN';
 
   // Mutations
-  const createIssueMutation = useMutation({
-    mutationFn: (data: any) => issueAPI.createIssue(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-      userAPI.completeOnboardingStep("create_issue");
-      toast({ title: "Success", description: "Issue created successfully" });
-      setIssueModalOpen(false);
-      setNewIssue({ title: "", description: "", status: "TODO", priority: "MEDIUM", dueDate: "" });
-    },
-  });
-
-  const updateIssueStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: string }) => issueAPI.updateIssueStatus(id, status),
-    onMutate: async ({ id, status }) => {
-      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-      await queryClient.cancelQueries({ queryKey: ["project", projectId] });
-
-      // Snapshot the previous value
-      const previousProject = queryClient.getQueryData(["project", projectId]);
-
-      // Optimistically update to the new value
-      queryClient.setQueryData(["project", projectId], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          issues: old.issues.map((issue: any) => 
-            issue.id === id ? { ...issue, status } : issue
-          )
-        };
-      });
-
-      // Return a context object with the snapshotted value
-      return { previousProject };
-    },
-    // If the mutation fails, use the context returned from onMutate to roll back
-    onError: (err, newTodo, context) => {
-      queryClient.setQueryData(["project", projectId], context?.previousProject);
-      toast({ title: "Update Failed", description: "Failed to move task. Reverting...", variant: "destructive" });
-    },
-    // Always refetch after error or success:
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
-    },
-  });
-
-  const assignUserMutation = useMutation({
-    mutationFn: ({ issueId, userId }: { issueId: number; userId: number }) => issueAPI.assignUserToIssue(issueId, userId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
-      toast({ title: "Success", description: "User assigned successfully" });
-      setAssignModalOpen(false);
-    },
-  });
-
   const deleteIssueMutation = useMutation({
     mutationFn: (id: number) => issueAPI.deleteIssue(id),
     onSuccess: () => {
@@ -264,25 +174,40 @@ const ProjectDetails = () => {
       toast({ title: "Success", description: "Project workflow updated" });
       setWorkflowModalOpen(false);
     },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to update workflow", variant: "destructive" });
+  });
+
+  const updateIssueStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: string }) => issueAPI.updateIssue(id, { status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+      toast({ title: "Task Moved" });
+    },
+  });
+
+  const createIssueMutation = useMutation({
+    mutationFn: (data: any) => issueAPI.createIssue(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+      toast({ title: "Task Deployed" });
+      setIssueModalOpen(false);
+      setNewIssue({ title: "", description: "", priority: "MEDIUM", dueDate: "", status: "TODO" });
+    },
+    onError: (error: any) => {
+       toast({ title: "Creation Failed", description: error.response?.data?.message || "Check your input", variant: "destructive" });
     }
   });
 
   const inviteUserMutation = useMutation({
     mutationFn: (data: { email: string; projectId: number }) => projectAPI.inviteToProject(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-      userAPI.completeOnboardingStep("invite_member");
-      toast({ title: "Success", description: "Invitation sent" });
+      toast({ title: "Invitation Sent", description: "User has been notified." });
       setInviteModalOpen(false);
       setInviteEmail("");
     },
   });
 
-  // Handlers
   const handleCreateIssue = () => {
-    if (!newIssue.title.trim()) return;
+    if (!newIssue.title?.trim()) return;
     createIssueMutation.mutate({ ...newIssue, projectId });
   };
 
@@ -295,154 +220,175 @@ const ProjectDetails = () => {
     setIssueModalOpen(true);
   };
 
-  if (isProjectLoading) {
+  const dynamicColumns = useMemo(() => {
+    if (!project?.statuses || project.statuses.length === 0) {
+      return [
+        { id: "TODO", title: "Todo" },
+        { id: "IN_PROGRESS", title: "In Progress" },
+        { id: "REVIEW", title: "Review" },
+        { id: "DONE", title: "Done" },
+      ];
+    }
+    return project.statuses.map(status => ({
+      id: status,
+      title: (status || "").replace(/_/g, ' ').toLowerCase().split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ')
+    }));
+  }, [project?.statuses]);
+
+  const { subscribe, isConnected } = useWebSocket(projectId);
+
+  if (isProjectLoading || !project) {
     return (
-      <div className="min-h-screen bg-background p-6 lg:ml-64 flex items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20" />
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Decrypting Workspace</p>
       </div>
     );
   }
-
-  if (projectError || !project) {
-    return (
-      <div className="min-h-screen bg-background p-6 lg:ml-64 flex items-center justify-center">
-        <Card className="max-w-md w-full p-8 text-center rounded-[2rem] shadow-elegant border-primary/5">
-          <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
-          <h2 className="text-xl font-bold mb-2">Project Not Found</h2>
-          <Button onClick={() => navigate("/dashboard")} variant="outline" className="rounded-xl">Back to Dashboard</Button>
-        </Card>
-      </div>
-    );
-  }
-
-  const getInitials = (user: User) => {
-    return user.fullName?.split(" ").map(n => n[0]).join("").toUpperCase() || "?";
-  };
 
   return (
-    <div className="min-h-screen bg-background lg:ml-64 relative overflow-hidden">
-      {/* Background Decor */}
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] -z-10 translate-x-1/2 -translate-y-1/2" />
-      
-      <div className="p-6 lg:p-10 max-w-7xl mx-auto space-y-10">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/projects")}
-              className="text-muted-foreground hover:text-primary -ml-2 h-8 px-2 rounded-lg font-bold text-[10px] uppercase tracking-widest transition-all"
-            >
-              <ArrowLeft className="h-3.5 w-3.5 mr-2" /> Back to Workspace
-            </Button>
-            <div className="flex items-center gap-5">
-              <div className="p-4 bg-primary/10 rounded-2xl shadow-sm ring-1 ring-primary/5">
-                <Layout className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-black tracking-tight text-foreground">{project.name}</h1>
-                <div className="flex items-center gap-3 mt-1.5">
-                  <Badge variant="outline" className="bg-primary/5 text-primary border-primary/10 text-[10px] font-bold uppercase tracking-wider px-2">
-                    {project.category || "Development"}
-                  </Badge>
-                  <div className="flex items-center gap-1.5">
-                    <Users className="h-3 w-3 text-muted-foreground opacity-40" />
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                      {project.team?.length || 0} Members
-                    </span>
-                  </div>
+    <div className="min-h-screen bg-background flex flex-col lg:ml-64 pb-20 md:pb-0">
+      {/* High-End Responsive Header */}
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-primary/5 px-4 md:px-10 py-4 md:py-8">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="p-3 md:p-4 bg-primary/10 rounded-2xl shadow-sm ring-1 ring-primary/5 shrink-0">
+              <Layout className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-xl md:text-3xl font-black tracking-tight text-foreground truncate uppercase">{project.name}</h1>
+              <div className="flex items-center gap-2 mt-1 md:mt-1.5 overflow-x-auto no-scrollbar">
+                <Badge variant="outline" className="bg-primary/5 text-primary border-primary/10 text-[8px] md:text-[10px] font-bold uppercase tracking-widest px-2 shrink-0">
+                  {project.category || "General"}
+                </Badge>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <Users className="h-3 w-3 text-muted-foreground opacity-40" />
+                  <span className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                    {project.team?.length || 0} Members
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex -space-x-3 mr-3">
-              {project.team?.slice(0, 4).map((m, i) => (
-                <Avatar key={i} className="h-10 w-10 border-4 border-background ring-1 ring-primary/5 transition-transform hover:-translate-y-1 cursor-pointer">
+          <div className="flex items-center justify-between md:justify-end gap-3">
+            {/* Team Stack - Premium Look */}
+            <div className="flex -space-x-2.5 mr-1 md:mr-3 shrink-0">
+              {project.team?.slice(0, 3).map((m, i) => (
+                <Avatar key={i} className="h-8 w-8 md:h-10 md:w-10 border-2 border-background ring-1 ring-primary/5 transition-transform hover:-translate-y-1">
                    <AvatarImage src={getAvatarUrl(m?.avatarUrl, m?.email)} />
                    <AvatarFallback className="text-[10px] bg-primary/5 text-primary font-bold">{m?.fullName?.[0] || '?'}</AvatarFallback>
                 </Avatar>
               ))}
-              {(project.team?.length || 0) > 4 && (
-                <div className="h-10 w-10 rounded-full bg-muted border-4 border-background flex items-center justify-center text-[10px] font-black text-muted-foreground ring-1 ring-primary/5">
-                  +{(project.team?.length || 0) - 4}
+              {(project.team?.length || 0) > 3 && (
+                <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[8px] md:text-[10px] font-black text-muted-foreground ring-1 ring-primary/5">
+                  +{(project.team?.length || 0) - 3}
                 </div>
               )}
             </div>
             
-            <div className="flex items-center gap-2">
-              <Button 
-                onClick={() => navigate(`/projects/${projectId}/analytics`)}
-                variant="outline" 
-                className="rounded-xl border-primary/20 text-primary hover:bg-primary/5 font-bold h-11 px-5 transition-all"
-              >
+            {/* Desktop Actions Row */}
+            <div className="hidden md:flex items-center gap-2">
+              <Button onClick={() => navigate(`/projects/${projectId}/analytics`)} variant="outline" size="sm" className="rounded-xl border-primary/20 text-primary font-bold h-10 px-4">
                 <BarChart3 className="h-4 w-4 mr-2" /> Analytics
               </Button>
+              {isOwner && <ProjectDataSeeder projectId={projectId} statuses={project.statuses || []} />}
               {isOwner && (
-                <ProjectDataSeeder projectId={projectId} statuses={project.statuses || []} />
-              )}
-              {isOwner && (
-                <Button onClick={() => setWorkflowModalOpen(true)} variant="outline" className="rounded-xl border-primary/20 text-primary hover:bg-primary/5 font-bold h-11 px-5 transition-all">
-                  <Settings className="h-4 w-4 mr-2" /> Manage Board
-                </Button>
-              )}
-              {isOwner && (
-                <Button onClick={() => setInviteModalOpen(true)} variant="outline" className="rounded-xl border-primary/20 text-primary hover:bg-primary/5 font-bold h-11 px-5 transition-all">
-                  <UserPlus className="h-4 w-4 mr-2" /> Invite
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="rounded-xl border-primary/20 text-primary font-bold h-10 px-4">
+                      <Settings className="h-4 w-4 mr-2" /> Manage
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 p-1.5 rounded-2xl shadow-elegant border-primary/10">
+                    <DropdownMenuItem onClick={() => setWorkflowModalOpen(true)} className="rounded-xl font-bold text-[10px] uppercase py-3 cursor-pointer">
+                       <Settings className="h-4 w-4 mr-3 text-primary" /> Workflow Design
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setInviteModalOpen(true)} className="rounded-xl font-bold text-[10px] uppercase py-3 cursor-pointer">
+                       <UserPlus className="h-4 w-4 mr-3 text-primary" /> Add Operator
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
               {!isViewer && (
-                <Button onClick={() => setIssueModalOpen(true)} variant="hero" className="rounded-xl font-bold h-11 px-6 transition-all active:scale-95">
-                  <Plus className="h-5 w-5 mr-2 stroke-[3px]" /> New Task
+                <Button onClick={() => setIssueModalOpen(true)} variant="hero" size="sm" className="rounded-xl font-bold h-10 px-5 transition-all">
+                  <Plus className="h-4 w-4 mr-2" /> New Task
                 </Button>
               )}
+            </div>
+
+            {/* Mobile "More" Menu */}
+            <div className="md:hidden">
+               <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl bg-muted/10">
+                       <MoreVertical className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl shadow-2xl border-primary/10">
+                    <DropdownMenuItem onClick={() => navigate(`/projects/${projectId}/analytics`)} className="rounded-xl font-black text-[10px] uppercase py-4">
+                       <BarChart3 className="h-4 w-4 mr-4 text-primary" /> Project Analytics
+                    </DropdownMenuItem>
+                    {isOwner && (
+                      <>
+                        <DropdownMenuItem onClick={() => setWorkflowModalOpen(true)} className="rounded-xl font-black text-[10px] uppercase py-4">
+                          <Settings className="h-4 w-4 mr-4 text-primary" /> Manage Workflow
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setInviteModalOpen(true)} className="rounded-xl font-black text-[10px] uppercase py-4">
+                          <UserPlus className="h-4 w-4 mr-4 text-primary" /> Invite Team
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+               </DropdownMenu>
             </div>
           </div>
         </div>
 
-        {/* Tabs Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-10">
-           <div className="glass-panel p-1 rounded-2xl inline-flex shadow-sm">
-            <TabsList className="bg-transparent border-0 gap-1 h-10">
-              <TabsTrigger value="kanban" className="rounded-xl px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all font-bold text-[10px] uppercase tracking-[0.15em]">
-                Board
-              </TabsTrigger>
-              <TabsTrigger value="timeline" className="rounded-xl px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all font-bold text-[10px] uppercase tracking-[0.15em]">
-                Timeline
-              </TabsTrigger>
-              <TabsTrigger value="overview" className="rounded-xl px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all font-bold text-[10px] uppercase tracking-[0.15em]">
-                Details
-              </TabsTrigger>
-              <TabsTrigger value="chat" className="rounded-xl px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all font-bold text-[10px] uppercase tracking-[0.15em]">
-                Discussion
-              </TabsTrigger>
-              <TabsTrigger value="team" className="rounded-xl px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all font-bold text-[10px] uppercase tracking-[0.15em]">
-                Members
-              </TabsTrigger>
-              <TabsTrigger value="invites" className="rounded-xl px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all font-bold text-[10px] uppercase tracking-[0.15em]">
-                Access
-              </TabsTrigger>
-            </TabsList>
-          </div>
+        {/* Premium Navigation Hub - Mobile Optimized */}
+        <div className="max-w-7xl mx-auto mt-6 md:mt-10 relative">
+          <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none md:hidden" />
+          <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none md:hidden" />
+          
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <div className="overflow-x-auto no-scrollbar scroll-smooth flex">
+              <TabsList className="bg-muted/10 p-1 rounded-[1.25rem] inline-flex w-max md:w-auto shadow-inner border border-primary/5 mb-1">
+                {[
+                  { id: "kanban", label: "Board", icon: Layout },
+                  { id: "timeline", label: "Timeline", icon: Calendar },
+                  { id: "overview", label: "Strategy", icon: Info },
+                  { id: "chat", label: "Intel", icon: MessageCircle },
+                  { id: "team", label: "Roster", icon: Users }
+                ].map(tab => (
+                  <TabsTrigger 
+                    key={tab.id}
+                    value={tab.id} 
+                    className="flex-1 md:flex-none rounded-xl px-5 h-9 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300 font-black text-[9px] md:text-[10px] uppercase tracking-widest gap-2"
+                  >
+                    <tab.icon className="h-3.5 w-3.5" />
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+          </Tabs>
+        </div>
+      </header>
 
-          <TabsContent value="kanban" className="mt-0 outline-none">
+      {/* Main Responsive Content Hub */}
+      <main className="flex-1 p-4 md:px-10 md:py-8 max-w-7xl mx-auto w-full">
+        <Tabs value={activeTab} className="h-full">
+          {/* Board - Smooth Horizontal Scroll */}
+          <TabsContent value="kanban" className="mt-0 outline-none h-full">
             <KanbanBoard 
               columns={dynamicColumns}
               issues={project.issues || []}
               onDeleteIssue={(id) => {
-                if (!canManage) {
-                  toast({ title: "Denied", description: "You don't have permission to delete issues", variant: "destructive" });
-                  return;
-                }
-                if(window.confirm("Delete this issue?")) deleteIssueMutation.mutate(id);
+                if (!canManage) return;
+                if(confirm("Terminate this task?")) deleteIssueMutation.mutate(id);
               }}
               onUpdateIssueStatus={(id, status) => {
-                if (isViewer) {
-                  toast({ title: "Denied", description: "Viewers cannot update status", variant: "destructive" });
-                  return;
-                }
+                if (isViewer) return;
                 updateIssueStatusMutation.mutate({ id, status });
               }}
               onReorderIssues={(orders) => {
@@ -454,7 +400,7 @@ const ProjectDetails = () => {
                 const newStatuses = (project.statuses || []).filter(s => s !== columnId);
                 updateProjectMutation.mutate({ statuses: newStatuses });
               }}
-              onViewComments={(issue, initialTab = "details") => {
+              onViewComments={(issue, initialTab = "overview") => {
                 setSelectedIssueForComments(issue);
                 setSelectedIssueTab(initialTab);
               }}
@@ -462,223 +408,181 @@ const ProjectDetails = () => {
             />
           </TabsContent>
 
-          <TabsContent value="timeline" className="mt-0 outline-none">
+          {/* Timeline - Full Width */}
+          <TabsContent value="timeline" className="mt-0 outline-none animate-in fade-in duration-500">
             <CalendarView 
               issues={project.issues || []}
               onViewIssue={(issue) => {
                 setSelectedIssueForComments(issue);
-                setSelectedIssueTab("details");
+                setSelectedIssueTab("overview");
               }}
             />
           </TabsContent>
 
-          <TabsContent value="overview" className="outline-none">
+          {/* Overview - High Density */}
+          <TabsContent value="overview" className="mt-0 outline-none animate-in slide-in-from-bottom-4 duration-500">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-8">
-                <section className="space-y-4">
-                  <h3 className="text-lg font-bold flex items-center gap-2">
-                    <Settings className="h-5 w-5 text-primary" />
-                    Project Description
-                  </h3>
-                  <Card className="border border-primary/5 shadow-sm bg-card rounded-[2rem] overflow-hidden relative group">
-                    <CardContent className="p-8">
-                      <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap font-medium">
-                        {project.description || "No description provided."}
-                      </p>
-                      <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-primary/5">
-                        {project.tags?.map((tag, i) => (
-                          <Badge key={i} variant="secondary" className="rounded-xl px-3 py-1 bg-primary/5 text-primary border-primary/10 font-bold text-[10px] uppercase">
-                            <Tag className="h-3 w-3 mr-1.5 opacity-60" /> {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </section>
+              <div className="lg:col-span-2 space-y-6">
+                <div className="flex items-center gap-2 text-primary">
+                   <Info className="h-4 w-4" />
+                   <h3 className="font-black text-[11px] uppercase tracking-widest">Project Strategy</h3>
+                </div>
+                <Card className="border border-primary/5 shadow-sm bg-card/40 backdrop-blur-sm rounded-[2rem] overflow-hidden group">
+                  <CardContent className="p-8">
+                    <p className="text-foreground/80 leading-relaxed whitespace-pre-wrap font-medium text-sm md:text-base">
+                      {project.description || "No mission brief provided for this project."}
+                    </p>
+                    <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-primary/5">
+                      {project.tags?.map((tag, i) => (
+                        <Badge key={i} variant="secondary" className="rounded-xl px-4 py-1.5 bg-primary/5 text-primary border-primary/10 font-black text-[9px] uppercase">
+                          <Tag className="h-3 w-3 mr-2" /> {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
               <div className="space-y-8">
-                <section className="space-y-4">
-                   <h3 className="text-lg font-bold flex items-center gap-2">
-                    <UserIcon className="h-5 w-5 text-primary" />
-                    Project Lead
-                  </h3>
-                  <Card className="border border-primary/5 shadow-sm bg-card rounded-[2rem] overflow-hidden">
+                  <div className="flex items-center gap-2 text-primary">
+                    <UserIcon className="h-4 w-4" />
+                    <h3 className="font-black text-[11px] uppercase tracking-widest">Lead Agent</h3>
+                  </div>
+                  <Card className="border border-primary/5 shadow-sm bg-card/40 backdrop-blur-sm rounded-[2rem] overflow-hidden">
                     <CardContent className="p-6">
                       <div className="flex items-center gap-4">
-                        <Avatar className="h-14 w-14 border-4 border-white shadow-md ring-1 ring-primary/5">
+                        <Avatar className="h-12 w-12 md:h-14 md:w-14 border-2 border-background shadow-md ring-2 ring-primary/5">
                           <AvatarImage src={getAvatarUrl(project.owner.avatarUrl, project.owner.email)} />
                           <AvatarFallback className="bg-primary text-primary-foreground font-black">{project.owner.fullName[0]}</AvatarFallback>
                         </Avatar>
                         <div className="min-w-0">
-                          <p className="font-bold text-base truncate">{project.owner.fullName}</p>
-                          <p className="text-xs text-muted-foreground font-medium truncate opacity-60 uppercase tracking-tighter">{project.owner.email}</p>
+                          <p className="font-black text-sm md:text-base truncate">{project.owner.fullName}</p>
+                          <p className="text-[10px] text-muted-foreground font-bold truncate opacity-40 uppercase tracking-tighter">{project.owner.email}</p>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
-                </section>
               </div>
             </div>
           </TabsContent>
 
-          <TabsContent value="chat" className="outline-none">
-            <Card className="border border-primary/5 shadow-elegant h-[650px] overflow-hidden rounded-[2.5rem] bg-card/30 backdrop-blur-xl relative">
+          {/* Intel (Chat) - Viewport Filling */}
+          <TabsContent value="chat" className="mt-0 outline-none h-full min-h-[60vh] md:min-h-[700px]">
+            <Card className="border border-primary/5 shadow-elegant h-full overflow-hidden rounded-[2.5rem] bg-card/30 backdrop-blur-xl">
               <ProjectChat projectId={project.id} projectName={project.name} teamMembers={project.team || []} />
             </Card>
           </TabsContent>
 
-          <TabsContent value="team" className="outline-none">
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {/* Roster (Team) - Responsive Grid */}
+          <TabsContent value="team" className="mt-0 outline-none animate-in fade-in duration-500">
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {project.team?.map((member) => (
-                  <Card key={member.id} className="group border border-primary/5 shadow-sm bg-card rounded-[2rem] hover:border-primary/20 hover:shadow-glow transition-all duration-500 overflow-hidden relative">
+                  <Card key={member.id} className="group border border-primary/5 shadow-sm bg-card/40 rounded-[2rem] hover:border-primary/20 hover:shadow-glow transition-all duration-500 overflow-hidden relative">
                     <CardContent className="p-5">
                       <div className="flex items-center gap-4">
-                        <Avatar className="h-12 w-12 border-2 border-white shadow-sm ring-1 ring-primary/5 transition-transform group-hover:scale-105 duration-500">
+                        <Avatar className="h-11 w-11 md:h-12 md:w-12 border-2 border-background shadow-sm ring-1 ring-primary/5">
                           <AvatarImage src={getAvatarUrl(member.avatarUrl, member.email)} />
-                          <AvatarFallback className="bg-primary/5 text-primary font-bold">{member.fullName[0]}</AvatarFallback>
+                          <AvatarFallback className="bg-primary/5 text-primary font-black text-xs">{member.fullName[0]}</AvatarFallback>
                         </Avatar>
                         <div className="min-w-0 flex-1">
-                          <p className="font-bold text-sm truncate group-hover:text-primary transition-colors">{member.fullName}</p>
-                          <p className="text-[10px] text-muted-foreground font-medium truncate opacity-60 uppercase">{member.email}</p>
+                          <p className="font-black text-xs md:text-sm truncate group-hover:text-primary transition-colors">{member.fullName}</p>
+                          <p className="text-[9px] text-muted-foreground font-bold truncate opacity-40 uppercase tracking-widest">{member.email}</p>
                         </div>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => { setSelectedUser(member); setProfileModalOpen(true); }}>
-                          <Eye className="h-4 w-4 text-primary" />
-                        </Button>
+                        <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0 text-primary" />
                       </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
           </TabsContent>
-
-          <TabsContent value="invites" className="outline-none">
-            {isOwner ? (
-              <InvitationLinkGenerator projectId={project.id} projectName={project.name} onSendInvitation={() => {}} />
-            ) : (
-              <div className="p-20 text-center glass-panel rounded-[3rem] border-dashed">
-                <ShieldCheck className="h-12 w-12 text-muted-foreground/20 mx-auto mb-4" />
-                <p className="text-muted-foreground font-bold text-sm uppercase tracking-[0.2em]">Restricted Access</p>
-                <p className="text-xs text-muted-foreground mt-2 font-medium opacity-60">Only the project owner can manage access & invitations.</p>
-              </div>
-            )}
-          </TabsContent>
         </Tabs>
+      </main>
+
+      {/* Sticky Bottom Actions Bar (Mobile Only) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-2xl border-t border-primary/5 flex gap-3 z-50">
+        {!isViewer && (
+           <Button onClick={() => setIssueModalOpen(true)} variant="hero" className="flex-1 rounded-[1.25rem] font-black text-[10px] uppercase tracking-widest h-14 shadow-glow active:scale-95 transition-all">
+             <Plus className="h-4 w-4 mr-3 stroke-[3]" /> New Mission
+           </Button>
+        )}
+        {isOwner && (
+           <Button onClick={() => setInviteModalOpen(true)} variant="outline" className="h-14 w-14 p-0 rounded-[1.25rem] border-primary/10 bg-primary/5 text-primary active:scale-95 transition-all">
+             <UserPlus className="h-5 w-5" />
+           </Button>
+        )}
       </div>
 
-      {/* Modals - Simplified for premium feel */}
+      {/* Modals are handled via the same Dialog system as before, ensuring consistency */}
       <Dialog open={issueModalOpen} onOpenChange={setIssueModalOpen}>
         <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-2xl border-primary/10 shadow-2xl rounded-[2rem] p-0 overflow-hidden">
           <div className="p-8 space-y-6">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-black tracking-tight text-foreground">Create Task</DialogTitle>
-              <DialogDescription className="text-xs font-bold uppercase tracking-widest text-muted-foreground opacity-60">Plan your next move</DialogDescription>
+              <DialogTitle className="text-2xl font-black tracking-tight uppercase">New Task</DialogTitle>
+              <DialogDescription className="text-xs font-bold uppercase tracking-widest opacity-40">Operational Planning</DialogDescription>
             </DialogHeader>
             <div className="space-y-5">
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Title</Label>
-                <Input 
-                  value={newIssue.title} 
-                  onChange={e => setNewIssue({...newIssue, title: e.target.value})} 
-                  placeholder="Task name"
-                  className="bg-background/50 border-primary/5 h-12 rounded-xl focus-visible:ring-primary/20 transition-all font-semibold"
-                />
+                <Label className="text-[10px] font-black uppercase text-primary ml-1 tracking-widest">Mission Name</Label>
+                <Input value={newIssue.title} onChange={e => setNewIssue({...newIssue, title: e.target.value})} className="bg-background/50 border-primary/5 h-12 rounded-xl font-bold" />
               </div>
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Context</Label>
-                <Textarea 
-                  value={newIssue.description} 
-                  onChange={e => setNewIssue({...newIssue, description: e.target.value})} 
-                  placeholder="Details & requirements..."
-                  className="bg-background/50 border-primary/5 min-h-[120px] rounded-xl focus-visible:ring-primary/20 transition-all font-medium leading-relaxed"
-                />
+                <Label className="text-[10px] font-black uppercase text-primary ml-1 tracking-widest">Tactical Brief</Label>
+                <Textarea value={newIssue.description} onChange={e => setNewIssue({...newIssue, description: e.target.value})} className="bg-background/50 border-primary/5 min-h-[100px] rounded-xl font-medium" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Priority</Label>
+                  <Label className="text-[10px] font-black uppercase text-primary ml-1 tracking-widest">Priority</Label>
                   <Select value={newIssue.priority} onValueChange={v => setNewIssue({...newIssue, priority: v})}>
-                    <SelectTrigger className="bg-background/50 border-primary/5 h-12 rounded-xl">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-primary/10 p-1">
-                      <SelectItem value="LOW" className="rounded-lg">Low</SelectItem>
-                      <SelectItem value="MEDIUM" className="rounded-lg">Medium</SelectItem>
-                      <SelectItem value="HIGH" className="rounded-lg text-destructive font-bold">High</SelectItem>
-                    </SelectContent>
+                    <SelectTrigger className="h-12 rounded-xl bg-background/50 border-primary/5"><SelectValue /></SelectTrigger>
+                    <SelectContent className="rounded-xl border-primary/10"><SelectItem value="LOW">Low</SelectItem><SelectItem value="MEDIUM">Medium</SelectItem><SelectItem value="HIGH">High</SelectItem></SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Deadline</Label>
-                  <Input 
-                   type="date" 
-                   value={newIssue.dueDate} 
-                   onChange={e => setNewIssue({...newIssue, dueDate: e.target.value})} 
-                   className="bg-background/50 border-primary/10 h-12 rounded-xl dark:color-scheme-dark" 
-                  />
-                </div>              </div>
+                  <Label className="text-[10px] font-black uppercase text-primary ml-1 tracking-widest">Deadline</Label>
+                  <Input type="date" value={newIssue.dueDate} onChange={e => setNewIssue({...newIssue, dueDate: e.target.value})} className="h-12 rounded-xl bg-background/50 border-primary/5" />
+                </div>
+              </div>
             </div>
-            <DialogFooter className="pt-4">
-              <Button onClick={handleCreateIssue} disabled={createIssueMutation.isPending} variant="hero" className="w-full h-12 rounded-xl font-bold active:scale-95 transition-all">
-                {createIssueMutation.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : "Deploy Task"}
-              </Button>
-            </DialogFooter>
+            <Button onClick={handleCreateIssue} variant="hero" className="w-full h-14 rounded-2xl font-black uppercase text-xs">Deploy Mission</Button>
           </div>
         </DialogContent>
       </Dialog>
 
       <Dialog open={inviteModalOpen} onOpenChange={setInviteModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-[2rem] border-primary/10 shadow-2xl p-8">
-          <DialogHeader className="mb-4">
-            <DialogTitle className="text-2xl font-black">Invite Member</DialogTitle>
-            <DialogDescription className="text-xs font-bold uppercase tracking-widest opacity-60">Expand your team</DialogDescription>
+        <DialogContent className="sm:max-w-md rounded-[2.5rem] border-0 shadow-2xl p-8 bg-card/95 backdrop-blur-xl">
+          <DialogHeader className="mb-6 text-center">
+            <div className="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-4">
+               <UserPlus className="h-8 w-8 text-primary" />
+            </div>
+            <DialogTitle className="text-2xl font-black uppercase tracking-tight">Expand Team</DialogTitle>
+            <DialogDescription className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Authorise new unit access</DialogDescription>
           </DialogHeader>
           <div className="space-y-6">
-            <div className="space-y-2">
-               <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Email Address</Label>
-               <Input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="name@company.com" className="h-12 rounded-xl border-primary/5 bg-muted/20" />
-            </div>
-            <Button onClick={() => inviteUserMutation.mutate({ email: inviteEmail, projectId })} disabled={inviteUserMutation.isPending} className="w-full h-12 bg-primary font-bold rounded-xl shadow-glow">
-              {inviteUserMutation.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : "Send Invitation"}
+            <Input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="agent@mission.control" className="h-14 rounded-[1.25rem] bg-muted/20 border-primary/5 text-center font-bold" />
+            <Button onClick={() => inviteUserMutation.mutate({ email: inviteEmail, projectId })} disabled={inviteUserMutation.isPending} className="w-full h-14 bg-primary text-primary-foreground font-black uppercase tracking-widest rounded-2xl shadow-glow">
+              {inviteUserMutation.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : "Dispatch Invite"}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Issue Discussion Dialog */}
+      {/* Unified Issue View: Modal on Desktop, Full-Page Sheet on Mobile */}
       {selectedIssueForComments && (
         <Dialog open={!!selectedIssueForComments} onOpenChange={o => !o && setSelectedIssueForComments(null)}>
-          <DialogContent className="max-w-5xl h-[85vh] flex flex-col p-0 overflow-hidden border-0 shadow-[0_0_100px_rgba(0,0,0,0.4)] rounded-[2.5rem]">
-            <div className="p-8 border-b bg-card/50 backdrop-blur-xl">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="p-2.5 bg-primary/10 rounded-xl">
-                    <MessageCircle className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <DialogTitle className="text-2xl font-black tracking-tight leading-none">{selectedIssueForComments.title}</DialogTitle>
-                    <DialogDescription className="text-[10px] font-bold uppercase tracking-[0.2em] mt-2 opacity-50">Task Discussion & File Space</DialogDescription>
-                  </div>
-                </div>
-                <div className={`px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest ${
-                  selectedIssueForComments.priority === 'HIGH' ? 'text-destructive bg-destructive/5 border-destructive/10' : 'text-primary bg-primary/5 border-primary/10'
-                }`}>
-                  {selectedIssueForComments.priority} Priority
-                </div>
-              </div>
-            </div>
-            <div className="flex-1 overflow-hidden p-8 bg-background/50">
-              <IssueDetail 
+          <DialogContent className="max-w-5xl h-full md:h-[90vh] w-full flex flex-col p-0 overflow-hidden border-0 shadow-2xl rounded-none md:rounded-[2.5rem] bg-background">
+             <VisuallyHidden.Root>
+                <DialogTitle>{selectedIssueForComments.title}</DialogTitle>
+                <DialogDescription>Issue Details and Discussion</DialogDescription>
+             </VisuallyHidden.Root>
+             <IssueDetail 
                 issueId={selectedIssueForComments.id} 
                 issueName={selectedIssueForComments.title} 
                 onClose={() => setSelectedIssueForComments(null)}
                 initialTab={selectedIssueTab}
               />
-            </div>
           </DialogContent>
         </Dialog>
       )}
-
-      {/* User Profile & DM Modals would follow same pattern */}
 
       <WorkflowManager 
         open={workflowModalOpen}
