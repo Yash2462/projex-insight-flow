@@ -24,7 +24,7 @@ const queryClient = new QueryClient();
 const IssueDetailWrapper = () => {
   const { issueId } = useParams();
   if (!issueId) return null;
-  return <IssueDetail issueId={parseInt(issueId)} issueName="" />;
+  return <IssueDetail issueId={parseInt(issueId)} issueName="" isFullPage={true} />;
 };
 
 const App = () => {
