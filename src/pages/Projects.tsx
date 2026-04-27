@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -23,7 +23,8 @@ import {
   Pencil,
   Tag,
   LayoutGrid,
-  ArrowRight
+  ArrowRight,
+  ChevronDown
 } from "lucide-react";
 import { projectAPI, userAPI, Project, Issue } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
@@ -31,9 +32,16 @@ import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import CreateProjectModal from "@/components/dashboard/CreateProjectModal";
 import EditProjectModal from "@/components/dashboard/EditProjectModal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Projects = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -57,6 +65,14 @@ const Projects = () => {
     },
   });
 
+  const categories = useMemo(() => {
+    const cats = new Set<string>(["All"]);
+    projects?.forEach((p: Project) => {
+      if (p.category) cats.add(p.category);
+    });
+    return Array.from(cats);
+  }, [projects]);
+
   // Mutations
   const deleteMutation = useMutation({
     mutationFn: (id: number) => projectAPI.deleteProject(id),
@@ -66,10 +82,12 @@ const Projects = () => {
     },
   });
 
-  const filteredProjects = projects?.filter((p: Project) => 
-    (p.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-    (p.description?.toLowerCase() || "").includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredProjects = projects?.filter((p: Project) => {
+    const matchesSearch = (p.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+                         (p.description?.toLowerCase() || "").includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "All" || p.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  }) || [];
 
   const calculateProgress = (project: Project) => {
     if (!project.issues || project.issues.length === 0) return 0;
@@ -102,18 +120,37 @@ const Projects = () => {
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <div className="relative flex-1 group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input
-              placeholder="Search projects..."
+              placeholder="Search workspaces..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-background/50 border-primary/10 focus:ring-primary/20 rounded-xl py-6"
+              className="pl-11 bg-background/50 border-primary/10 focus:ring-primary/20 rounded-2xl py-6 text-sm font-medium"
             />
           </div>
-          <Button variant="outline" className="rounded-xl border-primary/10 bg-background/50">
-            <Filter className="h-4 w-4 mr-2" />
-            All Categories
-          </Button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="rounded-2xl border-primary/10 bg-background/50 h-14 px-6 gap-2 font-bold text-xs uppercase tracking-widest hover:border-primary/30 transition-all">
+                <Filter className="h-4 w-4 text-primary" />
+                {selectedCategory}
+                <ChevronDown className="h-4 w-4 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl border-primary/10 shadow-elegant">
+              {categories.map((cat) => (
+                <DropdownMenuItem 
+                  key={cat} 
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`rounded-xl px-4 py-3 font-bold text-[10px] uppercase tracking-widest cursor-pointer ${
+                    selectedCategory === cat ? "bg-primary/10 text-primary" : ""
+                  }`}
+                >
+                  {cat}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Projects Grid */}
