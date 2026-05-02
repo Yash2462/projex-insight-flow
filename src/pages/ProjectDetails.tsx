@@ -241,7 +241,7 @@ const ProjectDetails = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20" />
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Decrypting Workspace</p>
+        <p className="text-xs font-black uppercase tracking-[0.3em] opacity-40">Decrypting Workspace</p>
       </div>
     );
   }
@@ -249,7 +249,7 @@ const ProjectDetails = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col lg:ml-64 pb-20 md:pb-0">
       {/* High-End Responsive Header */}
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-primary/5 px-4 md:px-10 py-4 md:py-8">
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-primary/5 px-4 md:px-10 py-4 md:py-8 animate-in fade-in slide-in-from-top-4 duration-500">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4 min-w-0">
             <div className="p-3 md:p-4 bg-primary/10 rounded-2xl shadow-sm ring-1 ring-primary/5 shrink-0">
@@ -258,12 +258,12 @@ const ProjectDetails = () => {
             <div className="min-w-0">
               <h1 className="text-xl md:text-3xl font-black tracking-tight text-foreground truncate uppercase">{project.name}</h1>
               <div className="flex items-center gap-2 mt-1 md:mt-1.5 overflow-x-auto no-scrollbar">
-                <Badge variant="outline" className="bg-primary/5 text-primary border-primary/10 text-[8px] md:text-[10px] font-bold uppercase tracking-widest px-2 shrink-0">
+                <Badge variant="outline" className="bg-primary/5 text-primary border-primary/10 text-xs font-bold uppercase tracking-widest px-2 shrink-0">
                   {project.category || "General"}
                 </Badge>
                 <div className="flex items-center gap-1.5 shrink-0">
                   <Users className="h-3 w-3 text-muted-foreground opacity-40" />
-                  <span className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                     {project.team?.length || 0} Members
                   </span>
                 </div>
@@ -277,11 +277,11 @@ const ProjectDetails = () => {
               {project.team?.slice(0, 3).map((m, i) => (
                 <Avatar key={i} className="h-8 w-8 md:h-10 md:w-10 border-2 border-background ring-1 ring-primary/5 transition-transform hover:-translate-y-1">
                    <AvatarImage src={getAvatarUrl(m?.avatarUrl, m?.email)} />
-                   <AvatarFallback className="text-[10px] bg-primary/5 text-primary font-bold">{m?.fullName?.[0] || '?'}</AvatarFallback>
+                   <AvatarFallback className="text-xs bg-primary/5 text-primary font-bold">{m?.fullName?.[0] || '?'}</AvatarFallback>
                 </Avatar>
               ))}
               {(project.team?.length || 0) > 3 && (
-                <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[8px] md:text-[10px] font-black text-muted-foreground ring-1 ring-primary/5">
+                <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-muted border-2 border-background flex items-center justify-center text-xs font-black text-muted-foreground ring-1 ring-primary/5">
                   +{(project.team?.length || 0) - 3}
                 </div>
               )}
@@ -301,10 +301,10 @@ const ProjectDetails = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56 p-1.5 rounded-2xl shadow-elegant border-primary/10">
-                    <DropdownMenuItem onClick={() => setWorkflowModalOpen(true)} className="rounded-xl font-bold text-[10px] uppercase py-3 cursor-pointer">
+                    <DropdownMenuItem onClick={() => setWorkflowModalOpen(true)} className="rounded-xl font-bold text-xs uppercase py-3 cursor-pointer">
                        <Settings className="h-4 w-4 mr-3 text-primary" /> Workflow Design
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setInviteModalOpen(true)} className="rounded-xl font-bold text-[10px] uppercase py-3 cursor-pointer">
+                    <DropdownMenuItem onClick={() => setInviteModalOpen(true)} className="rounded-xl font-bold text-xs uppercase py-3 cursor-pointer">
                        <UserPlus className="h-4 w-4 mr-3 text-primary" /> Add Operator
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -363,7 +363,7 @@ const ProjectDetails = () => {
                   <TabsTrigger 
                     key={tab.id}
                     value={tab.id} 
-                    className="flex-1 md:flex-none rounded-xl px-5 h-9 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300 font-black text-[9px] md:text-[10px] uppercase tracking-widest gap-2"
+                    className="flex-1 md:flex-none rounded-xl px-5 h-9 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300 font-black text-xs uppercase tracking-widest gap-2"
                   >
                     <tab.icon className="h-3.5 w-3.5" />
                     {tab.label}
@@ -425,7 +425,7 @@ const ProjectDetails = () => {
               <div className="lg:col-span-2 space-y-6">
                 <div className="flex items-center gap-2 text-primary">
                    <Info className="h-4 w-4" />
-                   <h3 className="font-black text-[11px] uppercase tracking-widest">Project Strategy</h3>
+                   <h3 className="font-black text-xs uppercase tracking-widest">Project Strategy</h3>
                 </div>
                 <Card className="border border-primary/5 shadow-sm bg-card/40 backdrop-blur-sm rounded-[2rem] overflow-hidden group">
                   <CardContent className="p-8">
@@ -434,7 +434,7 @@ const ProjectDetails = () => {
                     </p>
                     <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-primary/5">
                       {project.tags?.map((tag, i) => (
-                        <Badge key={i} variant="secondary" className="rounded-xl px-4 py-1.5 bg-primary/5 text-primary border-primary/10 font-black text-[9px] uppercase">
+                        <Badge key={i} variant="secondary" className="rounded-xl px-4 py-1.5 bg-primary/5 text-primary border-primary/10 font-black text-xs uppercase">
                           <Tag className="h-3 w-3 mr-2" /> {tag}
                         </Badge>
                       ))}
@@ -446,7 +446,7 @@ const ProjectDetails = () => {
               <div className="space-y-8">
                   <div className="flex items-center gap-2 text-primary">
                     <UserIcon className="h-4 w-4" />
-                    <h3 className="font-black text-[11px] uppercase tracking-widest">Lead Agent</h3>
+                    <h3 className="font-black text-xs uppercase tracking-widest">Lead Agent</h3>
                   </div>
                   <Card className="border border-primary/5 shadow-sm bg-card/40 backdrop-blur-sm rounded-[2rem] overflow-hidden">
                     <CardContent className="p-6">
@@ -457,7 +457,7 @@ const ProjectDetails = () => {
                         </Avatar>
                         <div className="min-w-0">
                           <p className="font-black text-sm md:text-base truncate">{project.owner.fullName}</p>
-                          <p className="text-[10px] text-muted-foreground font-bold truncate opacity-40 uppercase tracking-tighter">{project.owner.email}</p>
+                          <p className="text-xs text-muted-foreground font-bold truncate opacity-40 uppercase tracking-tighter">{project.owner.email}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -514,7 +514,7 @@ const ProjectDetails = () => {
 
       {/* Modals are handled via the same Dialog system as before, ensuring consistency */}
       <Dialog open={issueModalOpen} onOpenChange={setIssueModalOpen}>
-        <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-2xl border-primary/10 shadow-2xl rounded-[2rem] p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-2xl border-primary/10 shadow-2xl rounded-[2rem] p-0 overflow-hidden animate-in zoom-in-95 duration-300">
           <div className="p-8 space-y-6">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black tracking-tight uppercase">New Task</DialogTitle>
@@ -522,23 +522,23 @@ const ProjectDetails = () => {
             </DialogHeader>
             <div className="space-y-5">
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase text-primary ml-1 tracking-widest">Mission Name</Label>
+                <Label className="text-xs font-black uppercase text-primary ml-1 tracking-widest">Mission Name</Label>
                 <Input value={newIssue.title} onChange={e => setNewIssue({...newIssue, title: e.target.value})} className="bg-background/50 border-primary/5 h-12 rounded-xl font-bold" />
               </div>
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase text-primary ml-1 tracking-widest">Tactical Brief</Label>
+                <Label className="text-xs font-black uppercase text-primary ml-1 tracking-widest">Tactical Brief</Label>
                 <Textarea value={newIssue.description} onChange={e => setNewIssue({...newIssue, description: e.target.value})} className="bg-background/50 border-primary/5 min-h-[100px] rounded-xl font-medium" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-primary ml-1 tracking-widest">Priority</Label>
+                  <Label className="text-xs font-black uppercase text-primary ml-1 tracking-widest">Priority</Label>
                   <Select value={newIssue.priority} onValueChange={v => setNewIssue({...newIssue, priority: v})}>
                     <SelectTrigger className="h-12 rounded-xl bg-background/50 border-primary/5"><SelectValue /></SelectTrigger>
                     <SelectContent className="rounded-xl border-primary/10"><SelectItem value="LOW">Low</SelectItem><SelectItem value="MEDIUM">Medium</SelectItem><SelectItem value="HIGH">High</SelectItem></SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-primary ml-1 tracking-widest">Deadline</Label>
+                  <Label className="text-xs font-black uppercase text-primary ml-1 tracking-widest">Deadline</Label>
                   <Input type="date" value={newIssue.dueDate} onChange={e => setNewIssue({...newIssue, dueDate: e.target.value})} className="h-12 rounded-xl bg-background/50 border-primary/5" />
                 </div>
               </div>
@@ -549,13 +549,13 @@ const ProjectDetails = () => {
       </Dialog>
 
       <Dialog open={inviteModalOpen} onOpenChange={setInviteModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-[2.5rem] border-0 shadow-2xl p-8 bg-card/95 backdrop-blur-xl">
+        <DialogContent className="sm:max-w-md rounded-[2.5rem] border-0 shadow-2xl p-8 bg-card/95 backdrop-blur-xl animate-in zoom-in-95 duration-300">
           <DialogHeader className="mb-6 text-center">
             <div className="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-4">
                <UserPlus className="h-8 w-8 text-primary" />
             </div>
             <DialogTitle className="text-2xl font-black uppercase tracking-tight">Expand Team</DialogTitle>
-            <DialogDescription className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Authorise new unit access</DialogDescription>
+            <DialogDescription className="text-xs font-bold uppercase tracking-[0.2em] opacity-40">Authorise new unit access</DialogDescription>
           </DialogHeader>
           <div className="space-y-6">
             <Input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="agent@mission.control" className="h-14 rounded-[1.25rem] bg-muted/20 border-primary/5 text-center font-bold" />

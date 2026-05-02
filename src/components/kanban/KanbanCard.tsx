@@ -97,18 +97,18 @@ const KanbanCard = ({ issue, index, onDelete, onViewComments }: KanbanCardProps)
               </div>
 
               {issue.description && (
-                <p className="text-[11px] text-muted-foreground line-clamp-2 mb-4 leading-relaxed font-medium opacity-70">
+                <p className="text-xs text-muted-foreground line-clamp-2 mb-4 leading-relaxed font-medium opacity-70">
                   {issue.description}
                 </p>
               )}
 
               <div className="flex items-center justify-between mt-auto pt-3 border-t border-primary/[0.03]">
                 <div className="flex items-center gap-2">
-                   <div className={`px-2 py-0.5 rounded-md border text-[9px] font-black uppercase tracking-widest ${getPriorityColor(issue.priority)}`}>
+                   <div className={`px-2 py-0.5 rounded-md border text-[10px] font-black uppercase tracking-widest ${getPriorityColor(issue.priority)}`}>
                     {issue.priority}
                   </div>
                   {issue.dueDate && (
-                    <div className="flex items-center gap-1 text-[9px] font-bold text-muted-foreground uppercase tracking-tighter opacity-60">
+                    <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase tracking-tighter opacity-60">
                       <Calendar className="h-3 w-3" />
                       {formatDate(issue.dueDate)}
                     </div>
@@ -118,29 +118,29 @@ const KanbanCard = ({ issue, index, onDelete, onViewComments }: KanbanCardProps)
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2.5">
                     <div 
-                      className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground/60 hover:text-primary transition-colors cursor-pointer"
+                      className="flex items-center gap-1 text-xs font-bold text-muted-foreground/60 hover:text-primary transition-colors cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
                         onViewComments(issue, "attachments");
                       }}
                     >
-                      <Paperclip className="h-3 w-3" />
+                      <Paperclip className="h-3.5 w-3.5" />
                       {issue.attachments && issue.attachments.length > 0 && <span>{issue.attachments.length}</span>}
                     </div>
                     <div 
-                      className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground/60 hover:text-primary transition-colors cursor-pointer"
+                      className="flex items-center gap-1 text-xs font-bold text-muted-foreground/60 hover:text-primary transition-colors cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
                         onViewComments(issue, "discussion");
                       }}
                     >
-                      <MessageSquare className="h-3 w-3" />
+                      <MessageSquare className="h-3.5 w-3.5" />
                       {issue.comments && issue.comments.length > 0 && <span>{issue.comments.length}</span>}
                     </div>
                   </div>
-                  <Avatar className="h-6 w-6 border-2 border-white shadow-sm ring-1 ring-primary/5">
+                  <Avatar className="h-7 w-7 border-2 border-white shadow-sm ring-1 ring-primary/5">
                     <AvatarImage src={getAvatarUrl(issue.assignee?.avatarUrl, issue.assignee?.email)} />
-                    <AvatarFallback className="text-[8px] bg-primary/5 text-primary font-black uppercase">
+                    <AvatarFallback className="text-[10px] bg-primary/5 text-primary font-black uppercase">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
