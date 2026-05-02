@@ -187,7 +187,7 @@ const Navigation = () => {
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-black tracking-tighter text-foreground leading-none">PROJEX</span>
-                <span className="text-[10px] font-bold text-primary tracking-widest uppercase mt-0.5">Insight Flow</span>
+                <span className="text-xs font-bold text-primary tracking-widest uppercase mt-0.5">Insight Flow</span>
               </div>
             </Link>
 
@@ -206,14 +206,14 @@ const Navigation = () => {
                     )}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" side="right" className="w-80 p-0 bg-card/90 backdrop-blur-xl border-primary/10 shadow-2xl rounded-2xl overflow-hidden ml-2">
+                <DropdownMenuContent align="start" side="right" className="w-80 p-0 bg-card/90 backdrop-blur-xl border-primary/10 shadow-2xl rounded-2xl overflow-hidden ml-2 animate-in fade-in slide-in-from-left-2 duration-300">
                   <div className="p-4 bg-background/50 flex items-center justify-between">
                     <DropdownMenuLabel className="font-bold text-sm">Notifications</DropdownMenuLabel>
                     {notifications.length > 0 && (
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="h-7 text-[10px] font-bold text-primary hover:bg-primary/10 rounded-lg"
+                        className="h-7 text-xs font-bold text-primary hover:bg-primary/10 rounded-lg"
                         onClick={() => markAllAsReadMutation.mutate()}
                       >
                         MARK ALL AS READ
@@ -264,7 +264,7 @@ const Navigation = () => {
                   </ScrollArea>
                   <DropdownMenuSeparator className="m-0 bg-primary/5" />
                   <div className="p-2 bg-background/50">
-                    <Button variant="ghost" className="w-full h-8 text-[10px] font-bold text-muted-foreground hover:text-primary rounded-lg">
+                    <Button variant="ghost" className="w-full h-8 text-xs font-bold text-muted-foreground hover:text-primary rounded-lg">
                       VIEW ALL NOTIFICATIONS
                     </Button>
                   </div>
@@ -282,7 +282,7 @@ const Navigation = () => {
             >
               <Search className="mr-3 h-4 w-4 group-hover:text-primary transition-colors" />
               <span className="text-xs">Search...</span>
-              <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+              <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-xs font-medium text-muted-foreground opacity-100">
                 <span className="text-xs">⌘</span>K
               </kbd>
             </Button>
@@ -290,7 +290,7 @@ const Navigation = () => {
 
           {/* Navigation Items */}
           <div className="flex-1 px-4 py-4 space-y-1.5">
-            <p className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4 opacity-70">Main Menu</p>
+            <p className="px-4 text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4 opacity-70">Main Menu</p>
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const active = isActivePath(item.path);
@@ -304,7 +304,7 @@ const Navigation = () => {
                   >
                     <Icon className="h-5 w-5" />
                     <span className="text-sm font-medium tracking-tight">{item.label}</span>
-                    <Badge variant="outline" className="ml-auto text-[8px] font-bold px-1.5 h-4 border-muted-foreground/10 bg-muted/5 uppercase tracking-wider">
+                    <Badge variant="outline" className="ml-auto text-[10px] font-bold px-1.5 h-4 border-muted-foreground/10 bg-muted/5 uppercase tracking-wider">
                       Soon
                     </Badge>
                   </div>
@@ -360,7 +360,7 @@ const Navigation = () => {
             </div>
           </div> */}
 
-          <div className="p-3 mx-4 mb-8 glass-panel rounded-[2rem] border-primary/5">
+          <div className="p-3 mx-4 mb-8 glass-panel rounded-[2rem] border-primary/5 animate-in slide-in-from-bottom-2 duration-500">
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10 border-2 border-white shadow-sm ring-1 ring-primary/5">
                 <AvatarImage src={getAvatarUrl(profile?.avatarUrl, profile?.email)} />
@@ -436,7 +436,7 @@ const Navigation = () => {
               >
                 <FolderOpen className="mr-2 h-4 w-4" />
                 <span>{proj.name}</span>
-                {proj.category && <Badge variant="outline" className="ml-auto text-[8px]">{proj.category}</Badge>}
+                {proj.category && <Badge variant="outline" className="ml-auto text-xs">{proj.category}</Badge>}
               </CommandItem>
             ))}
           </CommandGroup>
@@ -455,12 +455,12 @@ const Navigation = () => {
                   <CircleDashed className="mr-2 h-4 w-4" />
                   <div className="flex flex-col">
                     <span>{issue.title}</span>
-                    <span className="text-[8px] opacity-60">in {issue.project?.name}</span>
+                    <span className="text-xs opacity-60">in {issue.project?.name}</span>
                   </div>
                   {issue.priority && (
                     <Badge 
                       variant="outline" 
-                      className={`ml-auto text-[8px] ${
+                      className={`ml-auto text-xs ${
                         issue.priority === 'HIGH' ? 'border-destructive/20 text-destructive' : 'border-primary/20 text-primary'
                       }`}
                     >
