@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -17,10 +18,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { projectAPI, userAPI } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Rocket, Code, Palette, Megaphone } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+const formSchema = z.object({
+  name: z.string().min(2, "Project name must be at least 2 characters."),
+  description: z.string().optional(),
+  category: z.string().min(1, "Please select an industry."),
+  tags: z.string().optional(),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface CreateProjectModalProps {
   open: boolean;
@@ -28,15 +46,18 @@ interface CreateProjectModalProps {
 }
 
 const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => {
-  const [newProject, setNewProject] = useState({
-    name: "",
-    description: "",
-    category: "",
-    tags: "",
-  });
-  
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      category: "",
+      tags: "",
+    },
+  });
 
   const mutation = useMutation({
     mutationFn: (projectData: any) => projectAPI.createProject(projectData),
@@ -46,7 +67,6 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
       queryClient.invalidateQueries({ queryKey: ["project-counts"] });
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       
-      // Update onboarding step (swallow error if it fails)
       userAPI.completeOnboardingStep("create_project").catch(() => {});
       
       toast({
@@ -54,7 +74,7 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
         description: "Project created successfully",
       });
       onOpenChange(false);
-      setNewProject({ name: "", description: "", category: "", tags: "" });
+      form.reset();
     },
     onError: () => {
       toast({
@@ -68,33 +88,29 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
   const applyTemplate = (category: string) => {
     switch(category) {
       case 'web':
-        setNewProject({ ...newProject, category: 'web', tags: 'frontend, backend, api' });
+        form.setValue('category', 'web');
+        form.setValue('tags', 'frontend, backend, api');
         break;
       case 'design':
-        setNewProject({ ...newProject, category: 'design', tags: 'figma, landing-page, prototype' });
+        form.setValue('category', 'design');
+        form.setValue('tags', 'figma, landing-page, prototype');
         break;
       case 'marketing':
-        setNewProject({ ...newProject, category: 'marketing', tags: 'social-media, campaign, seo' });
+        form.setValue('category', 'marketing');
+        form.setValue('tags', 'social-media, campaign, seo');
         break;
     }
   };
 
-  const handleCreateProject = () => {
-    if (!newProject.name.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Project name is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const onSubmit = (values: FormValues) => {
     const projectData = {
-      ...newProject,
-      tags: newProject.tags
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter((tag) => tag),
+      ...values,
+      tags: values.tags
+        ? values.tags
+            .split(",")
+            .map((tag) => tag.trim())
+            .filter((tag) => tag)
+        : [],
     };
     
     mutation.mutate(projectData);
@@ -117,7 +133,7 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
 
           {/* Quick Templates */}
           <div className="space-y-3">
-            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Quick Templates</Label>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Quick Templates</p>
             <div className="grid grid-cols-3 gap-3">
               <button 
                 type="button"
@@ -125,7 +141,7 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
                 className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-primary/5 bg-primary/5 hover:bg-primary/10 transition-all group"
               >
                 <Code className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-bold uppercase tracking-wider">Web Dev</span>
+                <span className="text-xs font-bold uppercase tracking-wider">Web Dev</span>
               </button>
               <button 
                 type="button"
@@ -133,7 +149,7 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
                 className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-primary/5 bg-primary/5 hover:bg-primary/10 transition-all group"
               >
                 <Palette className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-bold uppercase tracking-wider">Design</span>
+                <span className="text-xs font-bold uppercase tracking-wider">Design</span>
               </button>
               <button 
                 type="button"
@@ -141,99 +157,112 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
                 className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-primary/5 bg-primary/5 hover:bg-primary/10 transition-all group"
               >
                 <Megaphone className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-bold uppercase tracking-wider">Marketing</span>
+                <span className="text-xs font-bold uppercase tracking-wider">Marketing</span>
               </button>
             </div>
           </div>
 
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Workspace Name</Label>
-              <Input
-                id="name"
-                value={newProject.name}
-                onChange={(e) =>
-                  setNewProject((prev) => ({
-                    ...prev,
-                    name: e.target.value,
-                  }))
-                }
-                placeholder="e.g., App Development Hub"
-                className="h-12 bg-muted/20 border-primary/5 rounded-xl font-bold focus-visible:ring-primary/20"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Workspace Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., App Development Hub"
+                        className="h-12 bg-muted/20 border-primary/5 rounded-xl font-bold focus-visible:ring-primary/20"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="category" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Industry</Label>
-                <Select
-                  value={newProject.category}
-                  onValueChange={(value) =>
-                    setNewProject((prev) => ({ ...prev, category: value }))
-                  }
-                >
-                  <SelectTrigger className="h-12 bg-muted/20 border-primary/5 rounded-xl font-bold">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-primary/10">
-                    <SelectItem value="web" className="rounded-lg">Engineering</SelectItem>
-                    <SelectItem value="design" className="rounded-lg">Product Design</SelectItem>
-                    <SelectItem value="marketing" className="rounded-lg">Brand Growth</SelectItem>
-                    <SelectItem value="other" className="rounded-lg">Operations</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="tags" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Tags (Comma split)</Label>
-                <Input
-                  id="tags"
-                  value={newProject.tags}
-                  onChange={(e) =>
-                    setNewProject((prev) => ({
-                      ...prev,
-                      tags: e.target.value,
-                    }))
-                  }
-                  placeholder="v1, priority"
-                  className="h-12 bg-muted/20 border-primary/5 rounded-xl font-bold"
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Industry</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="h-12 bg-muted/20 border-primary/5 rounded-xl font-bold">
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="rounded-xl border-primary/10">
+                          <SelectItem value="web" className="rounded-lg">Engineering</SelectItem>
+                          <SelectItem value="design" className="rounded-lg">Product Design</SelectItem>
+                          <SelectItem value="marketing" className="rounded-lg">Brand Growth</SelectItem>
+                          <SelectItem value="other" className="rounded-lg">Operations</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Tags (Comma split)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="v1, priority"
+                          className="h-12 bg-muted/20 border-primary/5 rounded-xl font-bold"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Strategy & Context</Label>
-              <Textarea
-                id="description"
-                value={newProject.description}
-                onChange={(e) =>
-                  setNewProject((prev) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
-                }
-                placeholder="Define the mission objectives..."
-                className="bg-muted/20 border-primary/5 rounded-xl min-h-[100px] font-medium"
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Strategy & Context</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Define the mission objectives..."
+                        className="bg-muted/20 border-primary/5 rounded-xl min-h-[100px] font-medium"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-          </div>
 
-          <div className="flex flex-col gap-3 pt-4">
-            <Button
-              onClick={handleCreateProject}
-              variant="hero"
-              className="w-full h-14 text-base font-black rounded-2xl transition-all active:scale-[0.98]"
-              disabled={mutation.isPending}
-            >
-              {mutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-                  PREPARING WORKSPACE...
-                </>
-              ) : (
-                "ACTIVATE PROJECT"
-              )}
-            </Button>
-          </div>
+              <div className="flex flex-col gap-3 pt-4">
+                <Button
+                  type="submit"
+                  variant="hero"
+                  className="w-full h-14 text-base font-black rounded-2xl transition-all active:scale-[0.98]"
+                  disabled={mutation.isPending}
+                >
+                  {mutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                      PREPARING WORKSPACE...
+                    </>
+                  ) : (
+                    "ACTIVATE PROJECT"
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
         </div>
       </DialogContent>
     </Dialog>
