@@ -110,7 +110,7 @@ const Index = () => {
               <Badge className="bg-primary/10 text-primary border-primary/20 px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-widest animate-bounce">
                 <Sparkles className="h-3 w-3 mr-2 fill-current" /> Next-Gen Workflow Orchestration
               </Badge>
-              <h1 className="text-5xl lg:text-8xl font-black tracking-tighter leading-[0.9] text-foreground">
+              <h1 className="text-4xl md:text-5xl lg:text-8xl font-black tracking-tighter leading-[0.9] text-foreground">
                 Design Your <span className="text-gradient">Success</span><br />
                 Accelerate Your <span className="italic">Impact</span>
               </h1>
