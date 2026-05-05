@@ -305,7 +305,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
 
         {/* Scrollable Tab Navigation */}
         <div className="mt-4">
-          <TabsList className="w-full h-auto bg-transparent p-0 flex justify-start gap-1 overflow-x-auto no-scrollbar scrollbar-hide">
+          <TabsList className="w-full h-auto bg-transparent p-0 flex justify-start gap-1 overflow-x-auto no-scrollbar">
             {[
               { id: "overview", label: "Brief", icon: Info },
               { id: "checklist", label: "Tasks", icon: CheckSquare, count: issue?.subtasks?.length },
@@ -488,11 +488,11 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                   {issue?.subtasks?.map((task: string, idx: number) => {
                     const done = issue.completedSubtasks?.includes(task);
                     return (
-                      <div key={idx} className={`flex items-center gap-5 p-5 rounded-[1.5rem] border transition-all duration-300 ${
+                      <div key={idx} className={`flex items-center gap-3 md:gap-5 p-4 md:p-5 rounded-xl md:rounded-[1.5rem] border transition-all duration-300 ${
                         done ? "bg-primary/[0.02] border-primary/5 opacity-40" : "bg-card border-primary/5 hover:border-primary/10 shadow-sm"
                       }`} onClick={() => !isViewer && toggleSubtaskMutation.mutate(task)}>
-                        <Checkbox checked={done} className="h-6 w-6 rounded-lg border-primary/20 data-[state=checked]:bg-primary" />
-                        <span className={`text-[14px] font-bold leading-snug transition-all ${done ? "line-through text-muted-foreground" : ""}`}>{task}</span>
+                        <Checkbox checked={done} className="h-5 w-5 md:h-6 md:w-6 rounded-lg border-primary/20 data-[state=checked]:bg-primary" />
+                        <span className={`text-[12px] md:text-[14px] font-bold leading-snug transition-all ${done ? "line-through text-muted-foreground" : ""}`}>{task}</span>
                       </div>
                     );
                   })}
@@ -522,9 +522,9 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                               <FileText className="h-10 w-10 text-primary opacity-20" />
                             </div>
                           )}
-                          <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
-                             <Button size="icon" variant="ghost" onClick={() => window.open(fullUrl, '_blank')} className="h-10 w-10 rounded-xl bg-primary text-primary-foreground shadow-glow hover:scale-110 transition-all">
-                              <Download className="h-4 w-4" />
+                          <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
+                             <Button size="icon" variant="ghost" onClick={() => window.open(fullUrl, '_blank')} className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-primary text-primary-foreground shadow-glow hover:scale-110 transition-all">
+                              <Download className="h-3.5 w-3.5 md:h-4 md:w-4" />
                              </Button>
                              {!isViewer && (
                                <Button 
@@ -533,9 +533,9 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                                  onClick={() => {
                                    if(confirm("Purge this asset from vault?")) deleteAttachmentMutation.mutate(file.id);
                                  }} 
-                                 className="h-10 w-10 rounded-xl bg-destructive text-destructive-foreground shadow-glow hover:scale-110 transition-all"
+                                 className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-destructive text-destructive-foreground shadow-glow hover:scale-110 transition-all"
                                >
-                                 <Trash2 className="h-4 w-4" />
+                                 <Trash2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
                                </Button>
                              )}
                           </div>
@@ -570,31 +570,31 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
             </TabsContent>
 
             {/* Discussion */}
-            <TabsContent value="discussion" className="m-0 data-[state=inactive]:hidden flex flex-col h-[calc(100vh-160px)] md:h-[calc(90vh-140px)] outline-none">
+            <TabsContent value="discussion" className="m-0 data-[state=inactive]:hidden flex flex-col h-[calc(100vh-160px)] md:h-[calc(90vh-140px)] outline-none overflow-hidden">
               <div 
-                className="flex-1 overflow-y-auto px-4 md:px-8 py-6 no-scrollbar scroll-smooth" 
+                className="flex-1 overflow-y-auto px-4 md:px-8 py-4 md:py-6 no-scrollbar scroll-smooth" 
                 ref={discussionScrollRef}
               >
-                <div className="space-y-8 pb-10">
+                <div className="space-y-6 md:space-y-8 pb-4">
                   {comments.length === 0 ? (
                     <div className="text-center py-20 opacity-20">
-                      <MessageCircle className="h-16 w-16 mx-auto mb-4" />
+                      <MessageCircle className="h-12 w-12 md:h-16 md:w-16 mx-auto mb-4" />
                       <p className="text-[10px] font-black uppercase tracking-widest">Awaiting Communication</p>
                     </div>
                   ) : (
                     comments.map((comment: Comment) => {
                       const isOwn = comment.user?.id === currentUser?.id;
                       return (
-                        <div key={comment.id} className={`flex gap-3.5 ${isOwn ? 'flex-row-reverse' : 'flex-row'} items-end animate-in slide-in-from-bottom-2 duration-500`}>
-                          <Avatar className="h-8 w-8 shrink-0 border border-background shadow-md">
+                        <div key={comment.id} className={`flex gap-2.5 md:gap-3.5 ${isOwn ? 'flex-row-reverse' : 'flex-row'} items-end animate-in slide-in-from-bottom-2 duration-500`}>
+                          <Avatar className="h-7 w-7 md:h-8 md:w-8 shrink-0 border border-background shadow-md">
                             <AvatarImage src={getAvatarUrl(comment.user?.avatarUrl, comment.user?.email)} />
-                            <AvatarFallback className="text-[9px] font-black bg-primary/10 text-primary">{comment.user?.fullName?.[0]}</AvatarFallback>
+                            <AvatarFallback className="text-[8px] md:text-[9px] font-black bg-primary/10 text-primary">{comment.user?.fullName?.[0]}</AvatarFallback>
                           </Avatar>
-                          <div className={`space-y-1.5 max-w-[85%] md:max-w-[70%] ${isOwn ? 'items-end' : 'items-start'}`}>
-                            <div className={`p-4 shadow-sm text-sm leading-relaxed font-medium ${
+                          <div className={`space-y-1 max-w-[85%] md:max-w-[70%] ${isOwn ? 'items-end' : 'items-start'}`}>
+                            <div className={`p-3 md:p-4 shadow-sm text-xs md:text-sm leading-relaxed font-medium ${
                               isOwn 
-                                ? 'bg-primary text-primary-foreground rounded-[1.5rem] rounded-br-none shadow-glow' 
-                                : 'bg-card border border-primary/5 rounded-[1.5rem] rounded-bl-none text-foreground/90'
+                                ? 'bg-primary text-primary-foreground rounded-[1.25rem] md:rounded-[1.5rem] rounded-br-none shadow-glow' 
+                                : 'bg-card border border-primary/5 rounded-[1.25rem] md:rounded-[1.5rem] rounded-bl-none text-foreground/90'
                             }`}>
                               <CommentRenderer content={comment.content} />
                             </div>
@@ -608,12 +608,12 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
               </div>
 
               {/* Message Input - Fixed Bottom */}
-              <div className="p-4 md:p-6 bg-background/95 backdrop-blur-xl border-t border-primary/5 sticky bottom-0">
-                <div className="bg-muted/30 rounded-[2rem] border border-primary/5 p-1.5 flex items-end gap-1 shadow-inner">
+              <div className="p-3 md:p-6 bg-background/95 backdrop-blur-xl border-t border-primary/5 sticky bottom-0 z-10">
+                <div className="bg-muted/30 rounded-[1.5rem] md:rounded-[2rem] border border-primary/5 p-1 flex items-end gap-0.5 md:gap-1 shadow-inner">
                   <div className="flex items-center">
                     <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
                       <PopoverTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-muted-foreground hover:bg-primary/10 transition-all">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9 rounded-full text-muted-foreground hover:bg-primary/10 transition-all">
                           <Smile className="h-4 w-4" />
                         </Button>
                       </PopoverTrigger>
@@ -628,7 +628,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                     </Popover>
                     <Popover open={gifPickerOpen} onOpenChange={setGifPickerOpen}>
                       <PopoverTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-muted-foreground hover:bg-primary/10 transition-all">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9 rounded-full text-muted-foreground hover:bg-primary/10 transition-all">
                           <FileImage className="h-4 w-4" />
                         </Button>
                       </PopoverTrigger>
@@ -642,7 +642,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                     value={newComment}
                     onChange={e => setNewComment(e.target.value)}
                     placeholder="Intelligence update..."
-                    className="flex-1 min-h-[40px] max-h-[120px] border-0 focus-visible:ring-0 resize-none bg-transparent py-2.5 text-sm leading-tight font-medium px-2"
+                    className="flex-1 min-h-[36px] max-h-[100px] border-0 focus-visible:ring-0 resize-none bg-transparent py-2 text-xs md:text-sm leading-tight font-medium px-2"
                     onKeyDown={e => e.key === 'Enter' && !e.shiftKey && newComment.trim() && addCommentMutation.mutate(newComment)}
                   />
                   
@@ -650,7 +650,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                     onClick={() => addCommentMutation.mutate(newComment)} 
                     disabled={!newComment.trim() || addCommentMutation.isPending}
                     size="icon"
-                    className="h-9 w-9 rounded-full bg-primary shadow-glow shrink-0 transition-all active:scale-90"
+                    className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-primary shadow-glow shrink-0 transition-all active:scale-90"
                   >
                     <Send className="h-4 w-4" />
                   </Button>

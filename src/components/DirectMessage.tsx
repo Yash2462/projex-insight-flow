@@ -113,34 +113,34 @@ const DirectMessage = ({ recipientUser, currentUserId, onClose }: DirectMessageP
   };
 
   return (
-    <Card className="h-full border-0 shadow-2xl bg-card rounded-[2.5rem] overflow-hidden flex flex-col">
-      <CardHeader className="pb-4 border-b bg-muted/5">
+    <Card className="h-full border-0 shadow-2xl bg-card md:rounded-[2.5rem] overflow-hidden flex flex-col">
+      <CardHeader className="p-3 md:p-6 pb-3 md:pb-4 border-b bg-muted/5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-12 w-12 border-2 border-white shadow-sm ring-1 ring-primary/5">
+          <div className="flex items-center gap-3 md:gap-4 min-w-0">
+            <Avatar className="h-10 w-10 md:h-12 md:w-12 border-2 border-white shadow-sm ring-1 ring-primary/5">
               <AvatarImage 
                 src={getAvatarUrl(recipientUser.avatarUrl, recipientUser.email)} 
               />
-              <AvatarFallback className="bg-primary/5 text-primary font-black">
+              <AvatarFallback className="bg-primary/5 text-primary font-black text-xs md:text-base">
                 {getInitials(recipientUser.fullName)}
               </AvatarFallback>
             </Avatar>
             
-            <div>
-              <CardTitle className="text-lg font-black tracking-tight flex items-center gap-2">
+            <div className="min-w-0">
+              <CardTitle className="text-sm md:text-lg font-black tracking-tight flex items-center gap-2 truncate">
                 {recipientUser.fullName}
-                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                <div className="h-1.5 w-1.5 md:h-2 md:w-2 rounded-full bg-green-500 animate-pulse shrink-0" />
               </CardTitle>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">{recipientUser.email}</p>
+              <p className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60 truncate">{recipientUser.email}</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-primary/5">
-              <Phone className="h-4 w-4 text-primary/60" />
+          <div className="flex items-center gap-1 md:gap-2">
+            <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9 rounded-xl hover:bg-primary/5">
+              <Phone className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary/60" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-primary/5">
-              <Video className="h-4 w-4 text-primary/60" />
+            <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9 rounded-xl hover:bg-primary/5">
+              <Video className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary/60" />
             </Button>
           </div>
         </div>
@@ -149,7 +149,7 @@ const DirectMessage = ({ recipientUser, currentUserId, onClose }: DirectMessageP
       <CardContent className="flex-1 flex flex-col min-h-0 p-0">
         <ScrollArea 
           ref={scrollAreaRef}
-          className="flex-1 p-6"
+          className="flex-1 p-4 md:p-6"
         >
           {isLoading && messages.length === 0 ? (
             <div className="flex items-center justify-center py-20">

@@ -196,9 +196,9 @@ const IssueComments = ({ issueId, issueName }: IssueCommentsProps) => {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0"
+                                className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 h-8 w-8 rounded-xl hover:bg-destructive/10 hover:text-destructive"
                               >
-                                <Trash2 className="h-3 w-3" />
+                                <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">

@@ -150,23 +150,23 @@ const ProjectChat = ({ projectId, projectName, teamMembers = [] }: ProjectChatPr
   };
 
   return (
-    <Card className="h-full border-0 shadow-lg bg-card/40 backdrop-blur-sm flex flex-col overflow-hidden">
-      <CardHeader className="pb-4 border-b bg-background/50">
+    <Card className="h-full border-0 shadow-lg bg-card/40 backdrop-blur-sm flex flex-col overflow-hidden md:rounded-[2rem]">
+      <CardHeader className="p-3 md:p-6 pb-3 md:pb-4 border-b bg-background/50">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-3 text-lg">
-            <Hash className="h-5 w-5 text-primary" />
-            {projectName}
+          <CardTitle className="flex items-center gap-2 md:gap-3 text-sm md:text-lg truncate">
+            <Hash className="h-4 w-4 md:h-5 md:w-5 text-primary shrink-0" />
+            <span className="truncate">{projectName}</span>
           </CardTitle>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <Badge variant="secondary" className="bg-primary/10 text-primary border-0">
+          <div className="flex items-center gap-3 md:gap-4 shrink-0">
+            <div className="hidden sm:flex items-center gap-2">
+              <Users className="h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
+              <Badge variant="secondary" className="bg-primary/10 text-primary border-0 text-[10px]">
                 {teamMembers.length}
               </Badge>
             </div>
-            <div className="flex items-center gap-2">
-              <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500'}`} />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <div className={`h-1.5 w-1.5 md:h-2 md:w-2 rounded-full ${isConnected ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500'}`} />
+              <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 {isConnected ? 'Live' : 'Offline'}
               </span>
             </div>
@@ -175,7 +175,7 @@ const ProjectChat = ({ projectId, projectName, teamMembers = [] }: ProjectChatPr
       </CardHeader>
       
       <CardContent className="flex-1 flex flex-col p-0 min-h-0">
-        <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+        <ScrollArea className="flex-1 p-3 md:p-6" ref={scrollRef}>
           <div className="space-y-6">
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">

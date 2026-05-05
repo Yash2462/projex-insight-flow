@@ -152,12 +152,12 @@ const Navigation = () => {
   return (
     <>
       {/* Mobile Menu Button */}
-      <div className="lg:hidden fixed top-4 right-4 z-50">
+      <div className="lg:hidden fixed top-3 md:top-4 right-3 md:right-4 z-50 flex items-center gap-2">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="bg-card/80 backdrop-blur-md shadow-elegant rounded-xl border border-primary/10"
+          className="bg-card/90 backdrop-blur-md shadow-elegant rounded-xl border border-primary/10 h-10 w-10 md:h-11 md:w-11"
         >
           {isMobileMenuOpen ? (
             <X className="h-5 w-5 text-primary" />
@@ -170,7 +170,7 @@ const Navigation = () => {
       {/* Sidebar */}
       <nav
         className={`
-          fixed inset-y-0 left-0 z-40 w-64 bg-card/40 backdrop-blur-2xl border-r border-primary/5 transform transition-all duration-500 ease-in-out
+          fixed inset-y-0 left-0 z-40 w-72 lg:w-64 bg-card/40 backdrop-blur-2xl border-r border-primary/5 transform transition-all duration-500 ease-in-out
           ${
             isMobileMenuOpen
               ? "translate-x-0"
@@ -206,7 +206,11 @@ const Navigation = () => {
                     )}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" side="right" className="w-80 p-0 bg-card/90 backdrop-blur-xl border-primary/10 shadow-2xl rounded-2xl overflow-hidden ml-2 animate-in fade-in slide-in-from-left-2 duration-300">
+                <DropdownMenuContent 
+                  align="end" 
+                  side="bottom" 
+                  className="w-[calc(100vw-32px)] md:w-80 p-0 bg-card/90 backdrop-blur-xl border-primary/10 shadow-2xl rounded-2xl overflow-hidden mt-2 animate-in fade-in slide-in-from-top-2 duration-300"
+                >
                   <div className="p-4 bg-background/50 flex items-center justify-between">
                     <DropdownMenuLabel className="font-bold text-sm">Notifications</DropdownMenuLabel>
                     {notifications.length > 0 && (

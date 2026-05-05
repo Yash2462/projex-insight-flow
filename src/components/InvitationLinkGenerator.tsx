@@ -108,17 +108,17 @@ const InvitationLinkGenerator = ({
   return (
     <div className="space-y-6">
       {/* Quick Invite Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <Card className="rounded-2xl md:rounded-3xl border-primary/5 shadow-sm">
+        <CardHeader className="p-5 md:p-6 pb-3 md:pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg md:text-xl font-bold">
             <Mail className="h-5 w-5 text-primary" />
             Send Email Invitation
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs md:text-sm">
             Send a direct invitation email to team members
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="p-5 md:p-6 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="invite-email">Email Address</Label>
             <Input
@@ -165,17 +165,17 @@ const InvitationLinkGenerator = ({
       </Card>
 
       {/* Link Generator Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <Card className="rounded-2xl md:rounded-3xl border-primary/5 shadow-sm">
+        <CardHeader className="p-5 md:p-6 pb-3 md:pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg md:text-xl font-bold">
             <ExternalLink className="h-5 w-5 text-primary" />
             Generate Invitation Link
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs md:text-sm">
             Create a shareable link for project invitations
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="p-5 md:p-6 space-y-4">
           {!inviteLink ? (
             <Button onClick={handleGenerateLink} variant="outline" className="w-full">
               <Users className="h-4 w-4 mr-2" />
