@@ -118,15 +118,15 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px] border-0 shadow-2xl bg-card p-0 overflow-hidden rounded-[2.5rem]">
-        <div className="bg-gradient-primary h-2 w-full" />
-        <div className="p-8 space-y-8">
+      <DialogContent className="w-[calc(100vw-32px)] sm:max-w-[550px] border-0 shadow-2xl bg-card p-0 overflow-hidden rounded-[2rem] md:rounded-[2.5rem]">
+        <div className="bg-gradient-primary h-1.5 md:h-2 w-full" />
+        <div className="p-5 md:p-8 space-y-6 md:space-y-8">
           <DialogHeader>
-            <DialogTitle className="text-3xl font-black tracking-tight text-foreground flex items-center gap-3">
-              <Rocket className="h-8 w-8 text-primary" />
+            <DialogTitle className="text-xl md:text-3xl font-black tracking-tight text-foreground flex items-center gap-2 md:gap-3">
+              <Rocket className="h-6 w-6 md:h-8 md:w-8 text-primary" />
               Launch Project
             </DialogTitle>
-            <DialogDescription className="text-sm font-medium opacity-60">
+            <DialogDescription className="text-xs md:text-sm font-medium opacity-60">
               Set up your new workspace and invite your team to collaborate.
             </DialogDescription>
           </DialogHeader>

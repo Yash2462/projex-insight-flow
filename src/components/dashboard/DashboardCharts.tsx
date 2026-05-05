@@ -89,7 +89,7 @@ const DashboardCharts = ({ counts, isLoading }: DashboardChartsProps) => {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="h-[300px]">
+        <CardContent className="h-[250px] md:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -143,7 +143,7 @@ const DashboardCharts = ({ counts, isLoading }: DashboardChartsProps) => {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="h-[300px]">
+        <CardContent className="h-[250px] md:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={velocityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>

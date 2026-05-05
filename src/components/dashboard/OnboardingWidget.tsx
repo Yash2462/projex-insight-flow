@@ -71,7 +71,7 @@ const OnboardingWidget = () => {
             </div>
             <Progress value={progress} className="h-2" />
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 pt-2">
               {ONBOARDING_STEPS.map((step) => {
                 const isCompleted = completedSteps.includes(step.id);
                 const Icon = step.icon;
@@ -85,9 +85,9 @@ const OnboardingWidget = () => {
                         : "bg-background border-primary/10 hover:border-primary/30 hover:shadow-md"
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-3 md:mb-2">
                       <div className={`p-2 rounded-lg ${isCompleted ? "bg-primary/10" : "bg-muted"}`}>
-                        <Icon className={`h-4 w-4 ${isCompleted ? "text-primary" : "text-muted-foreground"}`} />
+                        <Icon className={`h-4 w-4 md:h-5 md:w-5 ${isCompleted ? "text-primary" : "text-muted-foreground"}`} />
                       </div>
                       {isCompleted ? (
                         <CheckCircle2 className="h-4 w-4 text-primary" />
@@ -95,8 +95,8 @@ const OnboardingWidget = () => {
                         <Circle className="h-4 w-4 text-muted-foreground/30" />
                       )}
                     </div>
-                    <h4 className="text-sm font-bold mb-1">{step.title}</h4>
-                    <p className="text-[10px] text-muted-foreground leading-tight">{step.description}</p>
+                    <h4 className="text-sm font-bold mb-1 tracking-tight">{step.title}</h4>
+                    <p className="text-[10px] md:text-[11px] text-muted-foreground leading-tight font-medium">{step.description}</p>
                   </div>
                 );
               })}

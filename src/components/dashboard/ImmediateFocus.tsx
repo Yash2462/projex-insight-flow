@@ -50,7 +50,7 @@ export function ImmediateFocus({ issues, isLoading, isError, onRetry }: Immediat
                 variant="ghost" 
                 size="sm" 
                 asChild 
-                className="rounded-xl font-bold text-xs uppercase opacity-0 group-hover:opacity-100 transition-opacity"
+                className="rounded-xl font-bold text-xs uppercase opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
               >
                 <Link to={`/projects/${issue.projectId}`}>View Task</Link>
               </Button>
