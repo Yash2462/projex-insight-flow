@@ -158,21 +158,21 @@ const Settings = () => {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="profile" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
+          <TabsList className="flex w-full overflow-x-auto no-scrollbar justify-start md:grid md:grid-cols-4 h-auto p-1 bg-muted/20">
+            <TabsTrigger value="profile" className="flex items-center gap-2 shrink-0 px-4 py-2 text-[10px] md:text-xs font-bold uppercase tracking-widest rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-elegant">
+              <User className="h-3.5 w-3.5" />
               Profile
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center gap-2">
-              <Bell className="h-4 w-4" />
+            <TabsTrigger value="notifications" className="flex items-center gap-2 shrink-0 px-4 py-2 text-[10px] md:text-xs font-bold uppercase tracking-widest rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-elegant">
+              <Bell className="h-3.5 w-3.5" />
               Notifications
             </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center gap-2">
-              <Shield className="h-4 w-4" />
+            <TabsTrigger value="security" className="flex items-center gap-2 shrink-0 px-4 py-2 text-[10px] md:text-xs font-bold uppercase tracking-widest rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-elegant">
+              <Shield className="h-3.5 w-3.5" />
               Security
             </TabsTrigger>
-            <TabsTrigger value="preferences" className="flex items-center gap-2">
-              <Palette className="h-4 w-4" />
+            <TabsTrigger value="preferences" className="flex items-center gap-2 shrink-0 px-4 py-2 text-[10px] md:text-xs font-bold uppercase tracking-widest rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-elegant">
+              <Palette className="h-3.5 w-3.5" />
               Preferences
             </TabsTrigger>
           </TabsList>

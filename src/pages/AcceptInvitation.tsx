@@ -144,40 +144,41 @@ const AcceptInvitation = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-hero p-4">
-      <Card className="w-full max-w-md shadow-elegant">
-        <CardHeader className="text-center">
+      <Card className="w-full max-w-md shadow-elegant border-0 rounded-[2rem] overflow-hidden">
+        <div className="bg-gradient-primary h-1.5 w-full" />
+        <CardHeader className="text-center pt-8">
           <div className="flex justify-center mb-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-glow rotate-3 ${
               status === 'success' 
-                ? 'bg-green-500/10' 
+                ? 'bg-green-500' 
                 : status === 'error' 
-                ? 'bg-destructive/10' 
-                : 'bg-primary/10'
+                ? 'bg-destructive' 
+                : 'bg-primary'
             }`}>
               {loading || status === 'pending' ? (
-                <Loader2 className="h-6 w-6 text-primary animate-spin" />
+                <Loader2 className="h-7 w-7 text-white animate-spin" />
               ) : status === 'success' ? (
-                <CheckCircle className="h-6 w-6 text-green-500" />
+                <CheckCircle className="h-7 w-7 text-white" />
               ) : (
-                <XCircle className="h-6 w-6 text-destructive" />
+                <XCircle className="h-7 w-7 text-white" />
               )}
             </div>
           </div>
           
-          <CardTitle className="text-2xl font-bold">
-            {status === 'pending' && 'Processing Invitation'}
-            {status === 'success' && 'Welcome to the Team!'}
-            {status === 'error' && 'Invitation Failed'}
+          <CardTitle className="text-2xl md:text-3xl font-black tracking-tight">
+            {status === 'pending' && 'Processing Hub Invitation'}
+            {status === 'success' && 'Welcome to the Mission!'}
+            {status === 'error' && 'Invitation Failure'}
           </CardTitle>
           
-          <CardDescription>
-            {status === 'pending' && 'We\'re adding you to the project...'}
-            {status === 'success' && projectInfo && `You've joined ${projectInfo.name}`}
-            {status === 'error' && 'There was an issue with your invitation'}
+          <CardDescription className="font-medium opacity-60">
+            {status === 'pending' && 'We\'re synchronizing your access to the workspace...'}
+            {status === 'success' && projectInfo && `You've successfully joined ${projectInfo.name}`}
+            {status === 'error' && 'We encountered an error during your deployment'}
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6 p-6 md:p-8 pt-4">
           {status === 'pending' && (
             <div className="text-center">
               <p className="text-muted-foreground">

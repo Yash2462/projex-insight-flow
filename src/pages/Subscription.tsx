@@ -130,22 +130,22 @@ const Subscription = () => {
 
   return (
     <div className="min-h-screen bg-background lg:ml-64">
-      <div className="p-6 lg:p-8">
+      <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-foreground mb-4">Subscription Plans</h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+        <div className="text-center mb-8 md:mb-12">
+          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-foreground mb-3">Subscription Plans</h1>
+          <p className="text-xs md:text-sm text-muted-foreground max-w-2xl mx-auto font-medium">
             Choose the perfect plan for your team. Upgrade or downgrade at any time.
           </p>
           
           {currentSubscription && (
             <div className="mt-6">
-              <Card className="max-w-md mx-auto bg-gradient-card">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-center gap-2 text-sm">
-                    <Crown className="h-4 w-4 text-primary" />
-                    <span className="text-muted-foreground">Current Plan:</span>
-                    <Badge variant="secondary" className="font-medium">
+              <Card className="max-w-md mx-auto bg-muted/10 border-primary/5 rounded-2xl">
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-center gap-2 text-[10px] md:text-xs font-bold uppercase tracking-widest">
+                    <Crown className="h-3.5 w-3.5 text-primary" />
+                    <span className="text-muted-foreground opacity-60">Active Protocol:</span>
+                    <Badge variant="secondary" className="bg-primary/10 text-primary border-0 font-black">
                       {currentSubscription.planType || 'Free'}
                     </Badge>
                   </div>
@@ -156,100 +156,76 @@ const Subscription = () => {
         </div>
 
         {/* Usage Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-          <Card className="bg-gradient-card shadow-elegant border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Projects Used</p>
-                  <p className="text-2xl font-bold text-foreground">8 / 25</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-8 md:mb-12">
+          {[
+            { label: "Projects", value: "8 / 25", icon: FolderOpen },
+            { label: "Team", value: "12 / 25", icon: Users },
+            { label: "Vault", value: "15.2 GB", icon: Shield },
+            { label: "Signals", value: "2.4K", icon: Zap }
+          ].map((stat, i) => (
+            <Card key={i} className="bg-card shadow-sm border-primary/5 rounded-2xl md:rounded-[1.5rem] overflow-hidden group hover:border-primary/20 transition-all">
+              <CardContent className="p-4 md:p-6">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <stat.icon className="h-5 w-5 text-primary opacity-40 group-hover:opacity-100 transition-opacity" />
+                    <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">{stat.label}</p>
+                  </div>
+                  <p className="text-lg md:text-2xl font-black text-foreground">{stat.value}</p>
                 </div>
-                <FolderOpen className="h-8 w-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-card shadow-elegant border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Team Members</p>
-                  <p className="text-2xl font-bold text-foreground">12 / 25</p>
-                </div>
-                <Users className="h-8 w-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-card shadow-elegant border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Storage Used</p>
-                  <p className="text-2xl font-bold text-foreground">15.2 GB</p>
-                </div>
-                <Shield className="h-8 w-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-card shadow-elegant border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">API Calls</p>
-                  <p className="text-2xl font-bold text-foreground">2.4K</p>
-                </div>
-                <Zap className="h-8 w-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {/* Pricing Plans */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
           {plans.map((plan) => (
-            <Card key={plan.name} className={`relative shadow-elegant ${plan.color} ${plan.popular ? 'scale-105' : ''}`}>
+            <Card key={plan.name} className={`relative shadow-elegant rounded-[2rem] border-primary/5 ${plan.color} ${plan.popular ? 'md:scale-105 z-10 ring-2 ring-primary/20' : ''}`}>
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-primary text-primary-foreground px-4 py-1">
-                    <Star className="h-3 w-3 mr-1" />
-                    Most Popular
+                  <Badge className="bg-primary text-primary-foreground px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-glow">
+                    <Star className="h-3 w-3 mr-2 fill-current" />
+                    Elite Tier
                   </Badge>
                 </div>
               )}
               
-              <CardHeader className="text-center pb-2">
-                <CardTitle className="text-xl font-bold text-foreground">{plan.name}</CardTitle>
-                <CardDescription>{plan.description}</CardDescription>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold text-foreground">{plan.price}</span>
-                  <span className="text-muted-foreground ml-1">/{plan.billing}</span>
+              <CardHeader className="text-center pb-2 pt-8">
+                <CardTitle className="text-xl md:text-2xl font-black tracking-tight text-foreground uppercase">{plan.name}</CardTitle>
+                <CardDescription className="text-[10px] font-bold uppercase tracking-widest opacity-60">{plan.description}</CardDescription>
+                <div className="mt-6">
+                  <span className="text-4xl md:text-5xl font-black tracking-tighter text-foreground">{plan.price}</span>
+                  <span className="text-xs font-bold text-muted-foreground ml-1 uppercase opacity-40">/{plan.billing}</span>
                 </div>
               </CardHeader>
               
-              <CardContent className="space-y-6">
-                <ul className="space-y-3">
+              <CardContent className="space-y-8 p-6 md:p-8">
+                <ul className="space-y-4">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-center gap-3">
-                      <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                      <span className="text-sm text-foreground">{feature}</span>
+                      <div className="h-5 w-5 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                        <Check className="h-3 w-3 text-emerald-500 stroke-[3px]" />
+                      </div>
+                      <span className="text-xs md:text-sm font-medium text-foreground/80">{feature}</span>
                     </li>
                   ))}
                 </ul>
                 
                 <Button 
                   onClick={() => handleUpgrade(plan.type)}
-                  className="w-full" 
+                  className="w-full h-12 md:h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all active:scale-95" 
                   variant={plan.popular ? "hero" : "outline"}
                   disabled={currentSubscription?.planType === plan.type}
                 >
                   {currentSubscription?.planType === plan.type ? (
                     <>
                       <Crown className="h-4 w-4 mr-2" />
-                      Current Plan
+                      Protocol Active
                     </>
                   ) : plan.type === 'FREE' ? (
-                    'Downgrade to Free'
+                    'Revert to Basic'
                   ) : (
-                    `Upgrade to ${plan.name}`
+                    `Authorise ${plan.name}`
                   )}
                 </Button>
               </CardContent>

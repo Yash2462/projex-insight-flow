@@ -65,133 +65,140 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-hero p-4">
-      <Card className="w-full max-w-md shadow-elegant">
-        <CardHeader className="space-y-1 text-center">
+      <Card className="w-full max-w-md shadow-elegant border-0 rounded-[2rem] overflow-hidden">
+        <div className="bg-gradient-primary h-1.5 w-full" />
+        <CardHeader className="space-y-1 text-center pt-8">
           <div className="flex justify-center mb-4">
-            <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-xl">P</span>
+            <div className="w-14 h-14 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow rotate-3">
+              <span className="text-white font-black text-2xl">P</span>
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
-          <CardDescription>
-            Join ProjeX and start managing your projects efficiently
+          <CardTitle className="text-3xl font-black tracking-tight">Create account</CardTitle>
+          <CardDescription className="font-medium opacity-60">
+            Join the ProjeX network and start your first mission
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+        <CardContent className="p-6 md:p-8 pt-4">
+          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
+            {error && (
+              <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-bold text-center">
+                {error}
+              </div>
+            )}
 
             <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
+              <Label htmlFor="fullName" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Full Name</Label>
               <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <User className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="fullName"
                   type="text"
                   placeholder="John Doe"
                   value={formData.fullName}
                   onChange={(e) => handleInputChange("fullName", e.target.value)}
-                  className="pl-10"
+                  className="pl-11 h-11 bg-muted/20 border-primary/5 rounded-xl font-bold"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="john@example.com"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
-                  className="pl-10"
+                  className="pl-11 h-11 bg-muted/20 border-primary/5 rounded-xl font-bold"
                   required
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={(e) => handleInputChange("password", e.target.value)}
-                  className="pl-10 pr-10"
-                  required
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-full w-10 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Minimum 6 chars"
+                    value={formData.password}
+                    onChange={(e) => handleInputChange("password", e.target.value)}
+                    className="pl-11 pr-10 h-11 bg-muted/20 border-primary/5 rounded-xl font-bold text-xs"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-1 top-1 h-9 w-9 hover:bg-transparent text-muted-foreground"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Confirm</Label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm password"
+                    value={formData.confirmPassword}
+                    onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                    className="pl-11 pr-10 h-11 bg-muted/20 border-primary/5 rounded-xl font-bold text-xs"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-1 top-1 h-9 w-9 hover:bg-transparent text-muted-foreground"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm your password"
-                  value={formData.confirmPassword}
-                  onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                  className="pl-10 pr-10"
-                  required
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-full w-10 hover:bg-transparent"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <input type="checkbox" id="terms" className="rounded border-input" required />
-              <Label htmlFor="terms" className="text-sm">
-                I agree to the{" "}
-                <Link to="/terms" className="text-primary hover:underline">
-                  Terms of Service
+            <div className="flex items-center space-x-2 py-1">
+              <input type="checkbox" id="terms" className="rounded border-primary/20 bg-muted/20" required />
+              <Label htmlFor="terms" className="text-[10px] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Agree to{" "}
+                <Link to="/terms" className="text-primary hover:underline font-bold">
+                  Terms
                 </Link>{" "}
                 and{" "}
-                <Link to="/privacy" className="text-primary hover:underline">
-                  Privacy Policy
+                <Link to="/privacy" className="text-primary hover:underline font-bold">
+                  Privacy
                 </Link>
               </Label>
             </div>
 
-            <Button type="submit" className="w-full" variant="hero" disabled={isLoading}>
-              {isLoading ? "Creating account..." : "Create account"}
+            <Button type="submit" className="w-full h-12 text-sm font-black rounded-xl transition-all active:scale-[0.98]" variant="hero" disabled={isLoading}>
+              {isLoading ? "DEPLOYING ACCOUNT..." : "CREATE HUB IDENTITY"}
             </Button>
 
-            <div className="relative">
+            <div className="relative py-2">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <span className="w-full border-t border-primary/5" />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+              <div className="relative flex justify-center text-[10px] font-black uppercase tracking-[0.2em]">
+                <span className="bg-card px-4 text-muted-foreground/40">Neural Bridge</span>
               </div>
             </div>
 
-            <Button variant="outline" type="button" className="w-full" onClick={handleGoogleSignup}>
-              <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+            <Button variant="outline" type="button" className="w-full h-11 rounded-xl border-primary/5 bg-primary/5 hover:bg-primary/10 transition-all font-bold text-xs" onClick={handleGoogleSignup}>
+              <svg className="mr-3 h-4 w-4" viewBox="0 0 24 24">
                 <path
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                   fill="#4285F4"
@@ -209,13 +216,13 @@ const Signup = () => {
                   fill="#EA4335"
                 />
               </svg>
-              Sign up with Google
+              Identity Sync (Google)
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm">
-            <span className="text-muted-foreground">Already have an account? </span>
-            <Link to="/login" className="text-primary hover:underline font-medium">
+          <div className="mt-6 text-center text-xs">
+            <span className="text-muted-foreground font-medium">Already have an account? </span>
+            <Link to="/login" className="text-primary hover:underline font-black uppercase tracking-widest ml-1">
               Sign in
             </Link>
           </div>
