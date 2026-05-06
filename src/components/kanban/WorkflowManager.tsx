@@ -74,16 +74,16 @@ const WorkflowManager = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md rounded-[2rem] border-primary/10 shadow-2xl p-0 overflow-hidden">
-        <div className="p-8 space-y-6">
+      <DialogContent className="w-[calc(100vw-32px)] sm:max-w-md rounded-[2rem] border-primary/10 shadow-2xl p-0 overflow-hidden">
+        <div className="p-6 md:p-8 space-y-6">
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-primary/10 rounded-xl">
-                <Settings2 className="h-6 w-6 text-primary" />
+              <div className="p-2 bg-primary/10 rounded-xl shrink-0">
+                <Settings2 className="h-5 w-5 md:h-6 md:w-6 text-primary" />
               </div>
               <div>
-                <DialogTitle className="text-2xl font-black tracking-tight">Board Workflow</DialogTitle>
-                <DialogDescription className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-60">
+                <DialogTitle className="text-xl md:text-2xl font-black tracking-tight">Board Workflow</DialogTitle>
+                <DialogDescription className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-60">
                   Customise your project stages
                 </DialogDescription>
               </div>
