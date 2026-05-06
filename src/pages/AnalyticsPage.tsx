@@ -128,15 +128,15 @@ const AnalyticsDashboard = () => {
               <CardTitle className="text-xl font-bold tracking-tight">Project Distribution</CardTitle>
               <CardDescription className="text-xs font-medium uppercase tracking-wider opacity-60">Volume by category</CardDescription>
             </CardHeader>
-            <CardContent className="h-[350px] pt-4">
+            <CardContent className="h-[280px] md:h-[350px] pt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={projectStatusData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={80}
-                    outerRadius={110}
+                    innerRadius={60}
+                    outerRadius={90}
                     paddingAngle={5}
                     dataKey="value"
                     stroke="none"
@@ -157,7 +157,7 @@ const AnalyticsDashboard = () => {
               <CardTitle className="text-xl font-bold tracking-tight">Efficiency Quota</CardTitle>
               <CardDescription className="text-xs font-medium uppercase tracking-wider opacity-60">Resolved vs Total Scope</CardDescription>
             </CardHeader>
-            <CardContent className="h-[350px] pt-4">
+            <CardContent className="h-[280px] md:h-[350px] pt-4">
                <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={[
                   { name: 'Workspace', resolved: completedIssues, remaining: totalIssues - completedIssues }

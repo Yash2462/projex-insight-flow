@@ -170,7 +170,7 @@ const Analytics = () => {
               <CardTitle className="text-xl font-bold tracking-tight">Team Workload</CardTitle>
               <CardDescription className="text-xs font-medium uppercase tracking-wider opacity-60">Tasks assigned vs completed</CardDescription>
             </CardHeader>
-            <CardContent className="h-[350px] pt-4">
+            <CardContent className="h-[280px] md:h-[350px] pt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={teamData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--primary))" opacity={0.05} />
@@ -199,15 +199,15 @@ const Analytics = () => {
               <CardTitle className="text-xl font-bold tracking-tight">Status Lifecycle</CardTitle>
               <CardDescription className="text-xs font-medium uppercase tracking-wider opacity-60">Inventory across columns</CardDescription>
             </CardHeader>
-            <CardContent className="h-[350px] pt-4">
+            <CardContent className="h-[280px] md:h-[350px] pt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={statusData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={80}
-                    outerRadius={110}
+                    innerRadius={60}
+                    outerRadius={90}
                     paddingAngle={5}
                     dataKey="value"
                     stroke="none"
@@ -230,7 +230,7 @@ const Analytics = () => {
             <CardTitle className="text-xl font-bold tracking-tight">Time Efficiency Report</CardTitle>
             <CardDescription className="text-xs font-medium uppercase tracking-wider opacity-60">Estimated vs Actual Hours per task</CardDescription>
           </CardHeader>
-          <CardContent className="h-[350px] pt-4">
+          <CardContent className="h-[300px] md:h-[400px] pt-4">
             {timeData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={timeData} layout="vertical">
@@ -241,7 +241,7 @@ const Analytics = () => {
                     type="category" 
                     axisLine={false} 
                     tickLine={false} 
-                    width={100}
+                    width={80}
                     tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9, fontWeight: 700 }}
                   />
                   <Tooltip 
