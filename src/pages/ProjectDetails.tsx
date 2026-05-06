@@ -249,39 +249,39 @@ const ProjectDetails = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col lg:ml-64 pb-20 md:pb-0">
       {/* High-End Responsive Header */}
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-primary/5 px-4 md:px-10 py-4 md:py-8 animate-in fade-in slide-in-from-top-4 duration-500">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-center gap-4 min-w-0">
-            <div className="p-3 md:p-4 bg-primary/10 rounded-2xl shadow-sm ring-1 ring-primary/5 shrink-0">
-              <Layout className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-primary/5 px-4 md:px-10 py-3 md:py-8 animate-in fade-in slide-in-from-top-4 duration-500">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
+          <div className="flex items-center gap-3 md:gap-4 min-w-0">
+            <div className="p-2.5 md:p-4 bg-primary/10 rounded-xl md:rounded-2xl shadow-sm ring-1 ring-primary/5 shrink-0">
+              <Layout className="h-4.5 w-4.5 md:h-6 md:w-6 text-primary" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-xl md:text-3xl font-black tracking-tight text-foreground truncate uppercase">{project.name}</h1>
-              <div className="flex items-center gap-2 mt-1 md:mt-1.5 overflow-x-auto no-scrollbar">
-                <Badge variant="outline" className="bg-primary/5 text-primary border-primary/10 text-xs font-bold uppercase tracking-widest px-2 shrink-0">
+              <h1 className="text-lg md:text-3xl font-black tracking-tight text-foreground truncate uppercase">{project.name}</h1>
+              <div className="flex items-center gap-2 mt-0.5 md:mt-1.5 overflow-x-auto no-scrollbar">
+                <Badge variant="outline" className="bg-primary/5 text-primary border-primary/10 text-[9px] md:text-xs font-bold uppercase tracking-widest px-2 shrink-0">
                   {project.category || "General"}
                 </Badge>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  <Users className="h-3 w-3 text-muted-foreground opacity-40" />
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                    {project.team?.length || 0} Members
+                  <Users className="h-2.5 w-2.5 md:h-3 md:w-3 text-muted-foreground opacity-40" />
+                  <span className="text-[9px] md:text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                    {project.team?.length || 0}
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-between md:justify-end gap-3">
+          <div className="flex items-center justify-between md:justify-end gap-2 md:gap-3">
             {/* Team Stack - Premium Look */}
-            <div className="flex -space-x-2.5 mr-1 md:mr-3 shrink-0">
+            <div className="flex -space-x-2 mr-1 md:mr-3 shrink-0">
               {project.team?.slice(0, 3).map((m, i) => (
-                <Avatar key={i} className="h-8 w-8 md:h-10 md:w-10 border-2 border-background ring-1 ring-primary/5 transition-transform hover:-translate-y-1">
+                <Avatar key={i} className="h-7 w-7 md:h-10 md:w-10 border-2 border-background ring-1 ring-primary/5 transition-transform hover:-translate-y-1">
                    <AvatarImage src={getAvatarUrl(m?.avatarUrl, m?.email)} />
-                   <AvatarFallback className="text-xs bg-primary/5 text-primary font-bold">{m?.fullName?.[0] || '?'}</AvatarFallback>
+                   <AvatarFallback className="text-[10px] bg-primary/5 text-primary font-bold">{m?.fullName?.[0] || '?'}</AvatarFallback>
                 </Avatar>
               ))}
               {(project.team?.length || 0) > 3 && (
-                <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-muted border-2 border-background flex items-center justify-center text-xs font-black text-muted-foreground ring-1 ring-primary/5">
+                <div className="h-7 w-7 md:h-10 md:w-10 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[10px] font-black text-muted-foreground ring-1 ring-primary/5">
                   +{(project.team?.length || 0) - 3}
                 </div>
               )}
@@ -321,8 +321,8 @@ const ProjectDetails = () => {
             <div className="md:hidden">
                <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl bg-muted/10">
-                       <MoreVertical className="h-5 w-5" />
+                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl bg-muted/10">
+                       <MoreVertical className="h-4.5 w-4.5" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl shadow-2xl border-primary/10">
@@ -346,7 +346,7 @@ const ProjectDetails = () => {
         </div>
 
         {/* Premium Navigation Hub - Mobile Optimized */}
-        <div className="max-w-7xl mx-auto mt-6 md:mt-10 relative">
+        <div className="max-w-7xl mx-auto mt-4 md:mt-10 relative">
           <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none md:hidden" />
           <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none md:hidden" />
           
@@ -514,11 +514,11 @@ const ProjectDetails = () => {
 
       {/* Modals are handled via the same Dialog system as before, ensuring consistency */}
       <Dialog open={issueModalOpen} onOpenChange={setIssueModalOpen}>
-        <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-2xl border-primary/10 shadow-2xl rounded-[2rem] p-0 overflow-hidden animate-in zoom-in-95 duration-300">
-          <div className="p-8 space-y-6">
+        <DialogContent className="w-[calc(100vw-32px)] sm:max-w-md bg-card/95 backdrop-blur-2xl border-primary/10 shadow-2xl rounded-[2rem] p-0 overflow-hidden animate-in zoom-in-95 duration-300">
+          <div className="p-6 md:p-8 space-y-6">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-black tracking-tight uppercase">New Task</DialogTitle>
-              <DialogDescription className="text-xs font-bold uppercase tracking-widest opacity-40">Operational Planning</DialogDescription>
+              <DialogTitle className="text-xl md:text-2xl font-black tracking-tight uppercase">New Task</DialogTitle>
+              <DialogDescription className="text-[10px] md:text-xs font-bold uppercase tracking-widest opacity-40">Operational Planning</DialogDescription>
             </DialogHeader>
             <div className="space-y-5">
               <div className="space-y-2">
@@ -549,13 +549,13 @@ const ProjectDetails = () => {
       </Dialog>
 
       <Dialog open={inviteModalOpen} onOpenChange={setInviteModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-[2.5rem] border-0 shadow-2xl p-8 bg-card/95 backdrop-blur-xl animate-in zoom-in-95 duration-300">
-          <DialogHeader className="mb-6 text-center">
-            <div className="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-4">
-               <UserPlus className="h-8 w-8 text-primary" />
+        <DialogContent className="w-[calc(100vw-32px)] sm:max-w-md rounded-[2.5rem] border-0 shadow-2xl p-6 md:p-8 bg-card/95 backdrop-blur-xl animate-in zoom-in-95 duration-300">
+          <DialogHeader className="mb-4 md:mb-6 text-center">
+            <div className="w-14 h-14 md:w-16 md:h-16 bg-primary/10 rounded-2xl md:rounded-3xl flex items-center justify-center mx-auto mb-3 md:mb-4">
+               <UserPlus className="h-7 w-7 md:h-8 md:w-8 text-primary" />
             </div>
-            <DialogTitle className="text-2xl font-black uppercase tracking-tight">Expand Team</DialogTitle>
-            <DialogDescription className="text-xs font-bold uppercase tracking-[0.2em] opacity-40">Authorise new unit access</DialogDescription>
+            <DialogTitle className="text-xl md:text-2xl font-black uppercase tracking-tight">Expand Team</DialogTitle>
+            <DialogDescription className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] opacity-40">Authorise new unit access</DialogDescription>
           </DialogHeader>
           <div className="space-y-6">
             <Input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="agent@mission.control" className="h-14 rounded-[1.25rem] bg-muted/20 border-primary/5 text-center font-bold" />

@@ -97,44 +97,44 @@ const Projects = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 lg:ml-64">
-      <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+      <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <LayoutGrid className="h-6 w-6 text-primary" />
-              <h1 className="text-3xl font-bold text-foreground">My Projects</h1>
+              <LayoutGrid className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+              <h1 className="text-2xl md:text-3xl font-black tracking-tight text-foreground uppercase">My Projects</h1>
             </div>
-            <p className="text-muted-foreground">Manage and track your active workspaces.</p>
+            <p className="text-xs md:text-sm text-muted-foreground font-medium">Manage and track your active workspaces.</p>
           </div>
           <Button 
             onClick={() => setIsCreateModalOpen(true)}
             variant="hero"
-            className="rounded-xl px-6"
+            className="w-full md:w-auto rounded-xl px-6 h-11 md:h-12 text-xs md:text-sm font-bold"
           >
-            <Plus className="h-5 w-5 mr-2" />
+            <Plus className="h-4 w-4 md:h-5 md:w-5 mr-2" />
             New Project
           </Button>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mb-8">
           <div className="relative flex-1 group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input
               placeholder="Search workspaces..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-11 bg-background/50 border-primary/10 focus:ring-primary/20 rounded-2xl py-6 text-sm font-medium"
+              className="pl-11 bg-background/50 border-primary/10 focus:ring-primary/20 rounded-2xl h-11 md:h-14 text-sm font-medium"
             />
           </div>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="rounded-2xl border-primary/10 bg-background/50 h-14 px-6 gap-2 font-bold text-xs uppercase tracking-widest hover:border-primary/30 transition-all">
+              <Button variant="outline" className="w-full sm:w-auto rounded-2xl border-primary/10 bg-background/50 h-11 md:h-14 px-6 gap-2 font-bold text-[10px] md:text-xs uppercase tracking-widest hover:border-primary/30 transition-all">
                 <Filter className="h-4 w-4 text-primary" />
                 {selectedCategory}
-                <ChevronDown className="h-4 w-4 opacity-50" />
+                <ChevronDown className="h-4 w-4 opacity-50 ml-auto md:ml-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl border-primary/10 shadow-elegant">

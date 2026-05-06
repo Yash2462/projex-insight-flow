@@ -112,31 +112,31 @@ const Dashboard = () => {
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary/5 rounded-full blur-[100px] -z-10 -translate-x-1/2 translate-y-1/2" />
 
-      <div className="p-6 lg:p-10 max-w-7xl mx-auto space-y-10">
+      <div className="p-4 md:p-6 lg:p-10 max-w-7xl mx-auto space-y-8 md:space-y-10">
         {/* Header Section */}
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <LayoutDashboard className="h-6 w-6 text-primary" />
+              <div className="p-2 bg-primary/10 rounded-lg shrink-0">
+                <LayoutDashboard className="h-5 w-5 md:h-6 md:w-6 text-primary" />
               </div>
-              <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground">
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight text-foreground truncate">
                 Command Center
               </h1>
             </div>
-            <p className="text-muted-foreground font-medium pl-11">
+            <p className="text-xs md:text-sm text-muted-foreground font-medium pl-11 md:pl-11">
               Real-time intelligence for your active workspaces.
             </p>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
             <DemoSeeder />
             <Button 
               onClick={() => setIsCreateModalOpen(true)}
               variant="hero"
-              className="rounded-2xl px-6 h-12 font-bold transition-all active:scale-95"
+              className="flex-1 md:flex-none rounded-2xl px-4 md:px-6 h-11 md:h-12 text-xs md:text-sm font-bold transition-all active:scale-95"
             >
-              <Plus className="h-5 w-5 mr-2 stroke-[3px]" />
+              <Plus className="h-4 w-4 md:h-5 md:w-5 mr-2 stroke-[3px]" />
               New Project
             </Button>
           </div>
