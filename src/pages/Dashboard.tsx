@@ -12,97 +12,29 @@ import { ProjectPerformance } from "@/components/dashboard/ProjectPerformance";
 import { ImmediateFocus } from "@/components/dashboard/ImmediateFocus";
 import { ActiveWorkspaces } from "@/components/dashboard/ActiveWorkspaces";
 import { LiveActivity } from "@/components/dashboard/LiveActivity";
-import { projectAPI } from "@/services/projectService";
-import { dashboardAPI } from "@/services/dashboardService";
-import { userAPI } from "@/services/userService";
-import { Project, Issue } from "@/services/types";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useDashboardData } from "@/hooks/use-dashboard-data";
 
 const Dashboard = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const queryClient = useQueryClient();
-
-  // Queries
-  const { 
-    data: stats, 
-    isLoading: isStatsLoading,
-    isError: isStatsError,
-    refetch: refetchStats
-  } = useQuery({
-    queryKey: ["dashboard-stats"],
-    queryFn: async () => {
-      const response = await dashboardAPI.getStatistics();
-      return response.data.data;
-    },
-  });
-
-  const { data: currentUser } = useQuery({
-    queryKey: ["profile"],
-    queryFn: async () => {
-      const response = await userAPI.getProfile();
-      return response.data.data;
-    },
-  });
-
-  const { 
-    data: projectCounts, 
-    isLoading: isCountsLoading,
-    isError: isCountsError,
-    refetch: refetchCounts
-  } = useQuery({
-    queryKey: ["project-counts"],
-    queryFn: async () => {
-      const response = await dashboardAPI.getProjectCounts();
-      return response.data.data;
-    },
-  });
-
-  const { 
-    data: projects = [], 
-    isLoading: isProjectsLoading,
-    isError: isProjectsError,
-    refetch: refetchProjects
-  } = useQuery({
-    queryKey: ["projects"],
-    queryFn: async () => {
-      const response = await projectAPI.getProjects();
-      return response.data.data || [];
-    },
-  });
-
-  const { 
-    data: recentActivity = [], 
-    isLoading: isActivityLoading,
-    isError: isActivityError,
-    refetch: refetchActivity
-  } = useQuery({
-    queryKey: ["recent-activity"],
-    queryFn: async () => {
-      const response = await dashboardAPI.getRecentActivity(10);
-      return response.data.data || [];
-    },
-  });
-
-  const { 
-    data: myIssues = [], 
-    isLoading: isMyIssuesLoading,
-    isError: isMyIssuesError,
-    refetch: refetchMyIssues
-  } = useQuery({
-    queryKey: ["my-issues", currentUser?.id],
-    queryFn: async () => {
-      if (!currentUser?.id) return [];
-      const response = await projectAPI.getProjects();
-      const allProjects = response.data.data || [];
-      const assigned = allProjects.flatMap((p: Project) => 
-        (p.issues || []).filter((i: Issue) => 
-          i.assignee?.id === currentUser.id && i.status !== 'DONE'
-        )
-      );
-      return assigned.slice(0, 5);
-    },
-    enabled: !!currentUser?.id,
-  });
+  
+  const {
+    stats,
+    isStatsLoading,
+    projectCounts,
+    isCountsLoading,
+    projects,
+    isProjectsLoading,
+    isProjectsError,
+    refetchProjects,
+    recentActivity,
+    isActivityLoading,
+    isActivityError,
+    refetchActivity,
+    myIssues,
+    isMyIssuesLoading,
+    isMyIssuesError,
+    refetchMyIssues,
+  } = useDashboardData();
 
   const recentProjects = projects?.slice(0, 4) || [];
 
