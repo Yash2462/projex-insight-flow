@@ -129,6 +129,7 @@ const App = () => {
             </Routes>
           </Suspense>
           <Toaster />
+          <MobileBottomNav />
         </BrowserRouter>
       </QueryClientProvider>
     </ThemeProvider>
