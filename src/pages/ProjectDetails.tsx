@@ -240,8 +240,8 @@ const ProjectDetails = () => {
   if (isProjectLoading || !project) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20" />
-        <p className="text-xs font-black uppercase tracking-[0.3em] opacity-40">Decrypting Workspace</p>
+        <Loader2 className="h-10 w-10 animate-spin text-primary opacity-60" />
+        <p className="text-xs font-black uppercase tracking-[0.3em] opacity-60">Decrypting Workspace</p>
       </div>
     );
   }
@@ -262,7 +262,7 @@ const ProjectDetails = () => {
                   {project.category || "General"}
                 </Badge>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  <Users className="h-2.5 w-2.5 md:h-3 md:w-3 text-muted-foreground opacity-40" />
+                  <Users className="h-2.5 w-2.5 md:h-3 md:w-3 text-muted-foreground opacity-60" />
                   <span className="text-[9px] md:text-xs font-bold text-muted-foreground uppercase tracking-widest">
                     {project.team?.length || 0}
                   </span>
@@ -321,7 +321,7 @@ const ProjectDetails = () => {
             <div className="md:hidden">
                <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl bg-muted/10">
+                    <Button variant="ghost" size="icon" aria-label="More options" className="h-9 w-9 rounded-xl bg-muted/10">
                        <MoreVertical className="h-4.5 w-4.5" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -457,7 +457,7 @@ const ProjectDetails = () => {
                         </Avatar>
                         <div className="min-w-0">
                           <p className="font-black text-sm md:text-base truncate">{project.owner.fullName}</p>
-                          <p className="text-xs text-muted-foreground font-bold truncate opacity-40 uppercase tracking-tighter">{project.owner.email}</p>
+                          <p className="text-xs text-muted-foreground font-bold truncate opacity-60 uppercase tracking-tighter">{project.owner.email}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -486,7 +486,7 @@ const ProjectDetails = () => {
                         </Avatar>
                         <div className="min-w-0 flex-1">
                           <p className="font-black text-xs md:text-sm truncate group-hover:text-primary transition-colors">{member.fullName}</p>
-                          <p className="text-[9px] text-muted-foreground font-bold truncate opacity-40 uppercase tracking-widest">{member.email}</p>
+                          <p className="text-[9px] text-muted-foreground font-bold truncate opacity-60 uppercase tracking-widest">{member.email}</p>
                         </div>
                         <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0 text-primary" />
                       </div>
@@ -506,7 +506,7 @@ const ProjectDetails = () => {
            </Button>
         )}
         {isOwner && (
-           <Button onClick={() => setInviteModalOpen(true)} variant="outline" className="h-14 w-14 p-0 rounded-[1.25rem] border-primary/10 bg-primary/5 text-primary active:scale-95 transition-all">
+           <Button onClick={() => setInviteModalOpen(true)} variant="outline" aria-label="Add operator" className="h-14 w-14 p-0 rounded-[1.25rem] border-primary/10 bg-primary/5 text-primary active:scale-95 transition-all">
              <UserPlus className="h-5 w-5" />
            </Button>
         )}
@@ -518,7 +518,7 @@ const ProjectDetails = () => {
           <div className="p-6 md:p-8 space-y-6">
             <DialogHeader>
               <DialogTitle className="text-xl md:text-2xl font-black tracking-tight uppercase">New Task</DialogTitle>
-              <DialogDescription className="text-[10px] md:text-xs font-bold uppercase tracking-widest opacity-40">Operational Planning</DialogDescription>
+              <DialogDescription className="text-[10px] md:text-xs font-bold uppercase tracking-widest opacity-60">Operational Planning</DialogDescription>
             </DialogHeader>
             <div className="space-y-5">
               <div className="space-y-2">
@@ -555,7 +555,7 @@ const ProjectDetails = () => {
                <UserPlus className="h-7 w-7 md:h-8 md:w-8 text-primary" />
             </div>
             <DialogTitle className="text-xl md:text-2xl font-black uppercase tracking-tight">Expand Team</DialogTitle>
-            <DialogDescription className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] opacity-40">Authorise new unit access</DialogDescription>
+            <DialogDescription className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] opacity-60">Authorise new unit access</DialogDescription>
           </DialogHeader>
           <div className="space-y-6">
             <Input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="agent@mission.control" className="h-14 rounded-[1.25rem] bg-muted/20 border-primary/5 text-center font-bold" />

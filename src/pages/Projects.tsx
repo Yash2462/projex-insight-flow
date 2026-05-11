@@ -38,6 +38,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const Projects = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -207,39 +213,63 @@ const Projects = () => {
                       </span>
                     </div>
                     <div className="flex gap-1">
-                      <Button asChild size="sm" variant="ghost" className="h-9 w-9 p-0 rounded-xl hover:bg-primary/10 text-primary transition-all" title="View Project">
-                        <Link to={`/projects/${project.id}`}><Eye className="h-4.5 w-4.5" /></Link>
-                      </Button>
-                      
-                      {project.owner?.id === profile?.id && (
-                        <>
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            className="h-9 w-9 p-0 rounded-xl hover:bg-primary/10 text-primary transition-all"
-                            title="Edit Project"
-                            onClick={() => {
-                              setSelectedProject(project);
-                              setIsEditModalOpen(true);
-                            }}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            className="h-9 w-9 p-0 rounded-xl hover:bg-destructive/10 text-destructive group-hover:opacity-100 transition-all"
-                            title="Delete Project"
-                            onClick={() => {
-                              if(window.confirm("Are you sure you want to archive this project? It will no longer be visible in your active workspace.")) {
-                                deleteMutation.mutate(project.id);
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button asChild size="sm" variant="ghost" className="h-9 w-9 p-0 rounded-xl hover:bg-primary/10 text-primary transition-all" aria-label="View Project">
+                              <Link to={`/projects/${project.id}`}><Eye className="h-4.5 w-4.5" /></Link>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent className="rounded-xl font-bold text-[10px] uppercase tracking-widest bg-card border-primary/10">
+                            View Workspace
+                          </TooltipContent>
+                        </Tooltip>
+                        
+                        {project.owner?.id === profile?.id && (
+                          <>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  className="h-9 w-9 p-0 rounded-xl hover:bg-primary/10 text-primary transition-all"
+                                  aria-label="Edit Project"
+                                  onClick={() => {
+                                    setSelectedProject(project);
+                                    setIsEditModalOpen(true);
+                                  }}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent className="rounded-xl font-bold text-[10px] uppercase tracking-widest bg-card border-primary/10">
+                                Edit Project
+                              </TooltipContent>
+                            </Tooltip>
+
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  className="h-9 w-9 p-0 rounded-xl hover:bg-destructive/10 text-destructive group-hover:opacity-100 transition-all"
+                                  aria-label="Delete Project"
+                                  onClick={() => {
+                                    if(window.confirm("Are you sure you want to archive this project? It will no longer be visible in your active workspace.")) {
+                                      deleteMutation.mutate(project.id);
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent className="rounded-xl font-bold text-[10px] uppercase tracking-widest bg-destructive text-destructive-foreground">
+                                Archive Project
+                              </TooltipContent>
+                            </Tooltip>
+                          </>
+                        )}
+                      </TooltipProvider>
                     </div>
                   </div>
 
@@ -254,7 +284,7 @@ const Projects = () => {
           </div>
         ) : (
           <div className="text-center py-24 bg-card/40 rounded-3xl border-2 border-dashed border-primary/10">
-            <Folder className="h-16 w-16 text-muted-foreground/20 mx-auto mb-4" />
+            <Folder className="h-16 w-16 text-muted-foreground/60 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-foreground mb-2">No projects found</h3>
             <p className="text-muted-foreground mb-8">Try adjusting your search or create a new workspace.</p>
             <Button 

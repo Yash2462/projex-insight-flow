@@ -139,6 +139,8 @@ const Index = () => {
                     <img 
                       src={heroImage} 
                       alt="ProjeX Interface" 
+                      loading="lazy"
+                      decoding="async"
                       className="w-full opacity-90 group-hover:scale-[1.02] transition-transform duration-1000"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent" />
