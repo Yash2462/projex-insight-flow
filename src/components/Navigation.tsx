@@ -44,6 +44,12 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Notification {
   id: number;
@@ -157,6 +163,7 @@ const Navigation = () => {
           variant="ghost"
           size="icon"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
           className="bg-card/90 backdrop-blur-md shadow-elegant rounded-xl border border-primary/10 h-10 w-10 md:h-11 md:w-11"
         >
           {isMobileMenuOpen ? (
@@ -192,25 +199,41 @@ const Navigation = () => {
             </Link>
 
             <div className="flex items-center gap-1">
-              <ThemeToggle />
-              {/* Notification Bell */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-xl hover:bg-primary/10 group transition-all duration-300 active:scale-90">
-                    <Bell className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                    {notifications.length > 0 && (
-                      <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                      </span>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent 
-                  align="end" 
-                  side="bottom" 
-                  className="w-[calc(100vw-32px)] md:w-80 p-0 bg-card/90 backdrop-blur-xl border-primary/10 shadow-2xl rounded-2xl overflow-hidden mt-2 animate-in fade-in slide-in-from-top-2 duration-300"
-                >
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div><ThemeToggle /></div>
+                  </TooltipTrigger>
+                  <TooltipContent className="rounded-xl font-bold text-[10px] uppercase tracking-widest bg-card border-primary/10">
+                    Switch Theme
+                  </TooltipContent>
+                </Tooltip>
+
+                {/* Notification Bell */}
+                <DropdownMenu>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" aria-label="Notifications" className="relative h-9 w-9 rounded-xl hover:bg-primary/10 group transition-all duration-300 active:scale-90">
+                          <Bell className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                          {notifications.length > 0 && (
+                            <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                            </span>
+                          )}
+                        </Button>
+                      </DropdownMenuTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent className="rounded-xl font-bold text-[10px] uppercase tracking-widest bg-card border-primary/10">
+                      Notifications
+                    </TooltipContent>
+                  </Tooltip>
+                  <DropdownMenuContent 
+                    align="end" 
+                    side="bottom" 
+                    className="w-[calc(100vw-32px)] md:w-80 p-0 bg-card/90 backdrop-blur-xl border-primary/10 shadow-2xl rounded-2xl overflow-hidden mt-2 animate-in fade-in slide-in-from-top-2 duration-300"
+                  >
                   <div className="p-4 bg-background/50 flex items-center justify-between">
                     <DropdownMenuLabel className="font-bold text-sm">Notifications</DropdownMenuLabel>
                     {notifications.length > 0 && (
@@ -229,7 +252,7 @@ const Navigation = () => {
                     {notifications.length === 0 ? (
                       <div className="p-8 text-center flex flex-col items-center gap-3">
                         <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                          <Bell className="h-6 w-6 text-muted-foreground/30" />
+                          <Bell className="h-6 w-6 text-muted-foreground/60" />
                         </div>
                         <p className="text-xs text-muted-foreground font-medium">No new notifications</p>
                       </div>
@@ -255,6 +278,7 @@ const Navigation = () => {
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
+                                aria-label="Mark as read"
                                 className="h-6 w-6 opacity-0 group-hover:opacity-100 rounded-lg hover:bg-primary/10"
                                 onClick={() => markAsReadMutation.mutate(notif.id)}
                               >
@@ -274,6 +298,7 @@ const Navigation = () => {
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
+              </TooltipProvider>
             </div>
           </div>
 
@@ -304,7 +329,7 @@ const Navigation = () => {
                 return (
                   <div
                     key={item.label}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground/30 cursor-not-allowed grayscale"
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground/60 cursor-not-allowed grayscale"
                   >
                     <Icon className="h-5 w-5" />
                     <span className="text-sm font-medium tracking-tight">{item.label}</span>
@@ -367,7 +392,11 @@ const Navigation = () => {
           <div className="p-3 mx-4 mb-8 glass-panel rounded-[2rem] border-primary/5 animate-in slide-in-from-bottom-2 duration-500">
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10 border-2 border-white shadow-sm ring-1 ring-primary/5">
-                <AvatarImage src={getAvatarUrl(profile?.avatarUrl, profile?.email)} />
+                <AvatarImage 
+                  src={getAvatarUrl(profile?.avatarUrl, profile?.email)} 
+                  loading="lazy"
+                  decoding="async"
+                />
                 <AvatarFallback className="bg-primary/5 text-primary font-bold text-xs uppercase">
                   {profile?.fullName?.split(' ').map((n:any) => n[0]).join('')}
                 </AvatarFallback>
@@ -382,6 +411,7 @@ const Navigation = () => {
                 onClick={handleLogout}
                 variant="ghost"
                 size="icon"
+                aria-label="Logout"
                 className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
               >
                 <LogOut className="h-4 w-4" />
