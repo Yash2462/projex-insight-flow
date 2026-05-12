@@ -203,7 +203,10 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
 
   const toggleSubtaskMutation = useMutation({
     mutationFn: (subtask: string) => issueAPI.toggleSubtask(issueId, subtask),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["issue", issueId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["issue", issueId] });
+      triggerHaptic(20);
+    },
   });
 
   const assignUserMutation = useMutation({
@@ -256,7 +259,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
     return (
       <div className="flex flex-col items-center justify-center h-[50vh] gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Decrypting Data</p>
+        <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Decrypting Data</p>
       </div>
     );
   }
@@ -271,7 +274,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             {isFullPage ? (
-              <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-xl h-8 w-8 -ml-1">
+              <Button variant="ghost" size="icon" aria-label="Go back" onClick={() => navigate(-1)} className="rounded-xl h-8 w-8 -ml-1">
                 <ChevronLeft className="h-5 w-5" />
               </Button>
             ) : (
@@ -281,7 +284,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
             )}
             <div className="min-w-0">
               <h2 className="text-sm md:text-lg font-black tracking-tight truncate leading-tight uppercase">{issue?.title}</h2>
-              <div className="flex items-center gap-1.5 opacity-40">
+              <div className="flex items-center gap-1.5 opacity-60">
                 <span className="text-[7px] md:text-[9px] font-black uppercase tracking-tighter">#{issue?.id}</span>
                 <span className="w-0.5 h-0.5 rounded-full bg-foreground" />
                 <span className="text-[7px] md:text-[9px] font-black uppercase tracking-tighter truncate">{project?.name}</span>
@@ -291,12 +294,12 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
 
           <div className="flex items-center gap-1.5 shrink-0">
             {!isFullPage && (
-              <Button variant="ghost" size="icon" asChild className="h-8 w-8 rounded-lg hidden md:flex">
+              <Button variant="ghost" size="icon" asChild aria-label="Maximize" className="h-8 w-8 rounded-lg hidden md:flex">
                 <a href={`/projects/${issue?.projectId}/issues/${issue?.id}`}><Maximize2 className="h-4 w-4" /></a>
               </Button>
             )}
             {!isFullPage && (
-              <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 rounded-full hover:bg-destructive/5 hover:text-destructive">
+              <Button variant="ghost" size="icon" aria-label="Close" onClick={onClose} className="h-8 w-8 rounded-full hover:bg-destructive/5 hover:text-destructive">
                 <X className="h-4 w-4" />
               </Button>
             )}
@@ -349,6 +352,8 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                         <img 
                           src={`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}${file.fileUrl}`} 
                           className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
                         />
                       </div>
                     ))}
@@ -357,8 +362,8 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                         onClick={() => setActiveTab("attachments")}
                         className="h-24 md:h-40 min-w-[100px] rounded-[2rem] bg-muted/20 border border-dashed border-primary/10 flex flex-col items-center justify-center gap-1 group"
                       >
-                        <Plus className="h-4 w-4 text-primary opacity-40 group-hover:scale-110 transition-transform" />
-                        <span className="text-[7px] font-black uppercase opacity-40">+{attachments.filter((a: any) => a.fileType.startsWith('image/')).length - 5} More</span>
+                        <Plus className="h-4 w-4 text-primary opacity-60 group-hover:scale-110 transition-transform" />
+                        <span className="text-[7px] font-black uppercase opacity-60">+{attachments.filter((a: any) => a.fileType.startsWith('image/')).length - 5} More</span>
                       </button>
                     )}
                   </div>
@@ -388,7 +393,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                     </div>
                     <div className="p-5 bg-card border border-primary/5 rounded-[2rem] space-y-5 shadow-sm">
                       <div className="space-y-2">
-                        <Label className="text-[8px] font-black uppercase opacity-30 ml-1">Assigned Agent</Label>
+                        <Label className="text-[8px] font-black uppercase opacity-60 ml-1">Assigned Agent</Label>
                         {!isViewer ? (
                           <Select 
                             value={issue?.assignee?.id?.toString() || "0"} 
@@ -416,13 +421,13 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                       </div>
 
                       <div className="flex justify-between items-center bg-muted/20 p-3 rounded-xl border border-primary/5">
-                        <span className="text-[9px] font-black uppercase opacity-30">Urgency</span>
+                        <span className="text-[9px] font-black uppercase opacity-60">Urgency</span>
                         <Badge variant="outline" className={`text-[9px] font-black uppercase border-0 px-3 h-6 rounded-lg ${getPriorityColor(issue?.priority)}`}>
                           {issue?.priority}
                         </Badge>
                       </div>
                       <div className="flex justify-between items-center bg-muted/20 p-3 rounded-xl border border-primary/5">
-                        <span className="text-[9px] font-black uppercase opacity-30">Deadline</span>
+                        <span className="text-[9px] font-black uppercase opacity-60">Deadline</span>
                         <span className="text-[10px] font-black uppercase tracking-tighter">
                           {issue?.dueDate ? new Date(issue.dueDate).toLocaleDateString([], {month: 'short', day: 'numeric'}) : 'OPEN'}
                         </span>
@@ -438,7 +443,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                     <div className="p-5 bg-card border border-primary/5 rounded-[2rem] space-y-5 shadow-sm">
                        <div className="space-y-3">
                           <div className="flex justify-between text-[10px] font-black uppercase">
-                             <span className="opacity-30">Intensity</span>
+                             <span className="opacity-60">Intensity</span>
                              <span className="text-primary">{Math.min(100, Math.round((loggedHours / (estimatedHours || 1)) * 100))}%</span>
                           </div>
                           <Progress value={Math.min(100, (loggedHours / (estimatedHours || 1)) * 100)} className="h-1.5 bg-primary/5" />
@@ -455,6 +460,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                           <Button 
                             onClick={() => updateIssueMutation.mutate({ estimatedHours, loggedHours: (issue?.loggedHours || 0) + parseFloat(logTimeAmount) })}
                             disabled={!logTimeAmount || updateIssueMutation.isPending}
+                            aria-label="Log time"
                             className="h-10 px-5 rounded-xl bg-primary text-primary-foreground font-black text-[10px] uppercase shadow-glow"
                           >
                             Log
