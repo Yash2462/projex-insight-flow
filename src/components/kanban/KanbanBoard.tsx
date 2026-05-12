@@ -5,6 +5,7 @@ import { Plus, MoreHorizontal, AlertCircle, CheckCircle2, CircleDashed, PlayCirc
 import { Button } from "@/components/ui/button";
 import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
 import { Issue } from "@/services/api";
+import { triggerHaptic } from "@/lib/haptics";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -117,8 +118,10 @@ const KanbanBoard = ({
     
     if (onReorderIssues) {
       onReorderIssues(reorderPayload);
+      triggerHaptic(15);
     } else if (sourceColId !== destColId) {
       onUpdateIssueStatus(parseInt(draggableId), destColId);
+      triggerHaptic(15);
     }
   };
 
@@ -138,7 +141,7 @@ const KanbanBoard = ({
                 const colorClasses = getColumnColor(column.id);
 
                 return (
-                  <div key={column.id} className="flex flex-col min-w-[320px] max-w-[320px]">
+                  <div key={column.id} className="flex flex-col min-w-[280px] md:min-w-[320px] max-w-[280px] md:max-w-[320px]">
                     {/* Column Header */}
                     <div className="flex items-center justify-between mb-4 px-3 py-1">
                       <div className="flex items-center gap-2.5">
@@ -152,7 +155,7 @@ const KanbanBoard = ({
                           <span className="text-[10px] font-black text-muted-foreground">{columnIssues.length}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 opacity-40 hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1 opacity-60 hover:opacity-100 transition-opacity">
                         <Button 
                           variant="ghost" 
                           size="icon" 
@@ -247,7 +250,7 @@ const KanbanBoard = ({
                 );
               })}
 
-              <div className="flex flex-col min-w-[320px] max-w-[320px]">
+              <div className="flex flex-col min-w-[280px] md:min-w-[320px] max-w-[280px] md:max-w-[320px]">
                 <Button 
                   variant="ghost" 
                   className="w-full h-[60px] border-2 border-dashed border-primary/10 hover:border-primary/30 hover:bg-primary/5 text-muted-foreground hover:text-primary text-[11px] font-black uppercase tracking-widest justify-center gap-2 group transition-all duration-500 rounded-[1.5rem]"
@@ -264,8 +267,6 @@ const KanbanBoard = ({
       </div>
     </DragDropContext>
   );
-
-
 };
 
 export default KanbanBoard;

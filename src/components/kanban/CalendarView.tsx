@@ -94,7 +94,7 @@ const CalendarView = ({ issues, onViewIssue }: CalendarViewProps) => {
               <Card 
                 key={idx} 
                 className={`min-h-[120px] md:min-h-[140px] rounded-2xl border transition-all duration-300 overflow-hidden flex flex-col ${
-                  !isCurrentMonth ? "opacity-20 bg-muted/5 border-transparent" : 
+                  !isCurrentMonth ? "opacity-60 bg-muted/5 border-transparent" : 
                   isToday(day) ? "border-primary/40 bg-primary/[0.02] shadow-glow" : "border-primary/5 bg-card hover:border-primary/20"
                 }`}
               >
