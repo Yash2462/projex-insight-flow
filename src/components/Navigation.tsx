@@ -318,9 +318,9 @@ const Navigation = () => {
           </div>
 
           {/* Navigation Items */}
-          <div className="flex-1 px-4 py-4 space-y-1.5">
-            <p className="px-4 text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4 opacity-70">Main Menu</p>
-            {navigationItems.map((item) => {
+          <div className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto no-scrollbar">
+            <p className="px-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4 opacity-50 animate-in fade-in duration-700">Main Menu</p>
+            {navigationItems.map((item, index) => {
               const Icon = item.icon;
               const active = isActivePath(item.path);
               const isDisabled = item.disabled;
@@ -329,7 +329,8 @@ const Navigation = () => {
                 return (
                   <div
                     key={item.label}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground/60 cursor-not-allowed grayscale"
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground/60 cursor-not-allowed grayscale animate-in fade-in slide-in-from-left-4 fill-mode-backwards"
+                    style={{ animationDelay: `${(index + 1) * 100}ms` }}
                   >
                     <Icon className="h-5 w-5" />
                     <span className="text-sm font-medium tracking-tight">{item.label}</span>
@@ -344,31 +345,32 @@ const Navigation = () => {
                 <Link
                   key={item.path}
                   to={item.path}
+                  style={{ animationDelay: `${(index + 1) * 100}ms` }}
                   className={`
                       group flex items-center gap-3 px-4 py-3 rounded-xl
-                      transition-all duration-300 relative
+                      transition-all duration-300 relative animate-in fade-in slide-in-from-left-4 fill-mode-backwards
                       ${
                         active
-                          ? "bg-primary text-primary-foreground shadow-glow"
-                          : "text-muted-foreground hover:text-primary hover:bg-primary/5"
+                          ? "bg-primary/10 text-primary shadow-[0_0_20px_rgba(99,102,241,0.1)] border border-primary/10"
+                          : "text-muted-foreground hover:text-primary hover:bg-primary/5 border border-transparent"
                       }
                     `}
                 >
+                  {active && (
+                    <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full shadow-glow" />
+                  )}
                   <Icon
                     className={`h-5 w-5 transition-all duration-500
                     ${
                       active
-                        ? "text-primary-foreground scale-110"
-                        : "group-hover:scale-110 group-hover:text-primary"
+                        ? "text-primary scale-110"
+                        : "group-hover:scale-110 group-hover:rotate-6 group-hover:text-primary"
                     }
                   `}
                   />
-                  <span className={`text-sm font-semibold tracking-tight`}>
+                  <span className={`text-sm font-bold tracking-tight ${active ? "text-primary" : ""}`}>
                     {item.label}
                   </span>
-                  {active && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-foreground shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
-                  )}
                 </Link>
               );
             })}
