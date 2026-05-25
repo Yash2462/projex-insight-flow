@@ -75,45 +75,57 @@ const Dashboard = () => {
         </header>
 
         {/* Stats Grid */}
-        <DashboardStats stats={stats} isLoading={isStatsLoading} />
+        <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100 fill-mode-backwards">
+          <DashboardStats stats={stats} isLoading={isStatsLoading} />
+        </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           <div className="xl:col-span-2 space-y-12">
             {/* Charts Section */}
-            <DashboardCharts counts={projectCounts} isLoading={isCountsLoading} />
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 fill-mode-backwards">
+              <DashboardCharts counts={projectCounts} isLoading={isCountsLoading} />
+            </div>
             
             {/* Project Progress Overview */}
-            <ProjectPerformance 
-              projects={projects} 
-              isLoading={isProjectsLoading} 
-              isError={isProjectsError}
-              onRetry={() => refetchProjects()}
-            />
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-backwards">
+              <ProjectPerformance 
+                projects={projects} 
+                isLoading={isProjectsLoading} 
+                isError={isProjectsError}
+                onRetry={() => refetchProjects()}
+              />
+            </div>
 
             {/* My Focus Section */}
-            <ImmediateFocus 
-              issues={myIssues} 
-              isLoading={isMyIssuesLoading} 
-              isError={isMyIssuesError}
-              onRetry={() => refetchMyIssues()}
-            />
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-400 fill-mode-backwards">
+              <ImmediateFocus 
+                issues={myIssues} 
+                isLoading={isMyIssuesLoading} 
+                isError={isMyIssuesError}
+                onRetry={() => refetchMyIssues()}
+              />
+            </div>
 
             {/* Recent Workspaces */}
-            <ActiveWorkspaces 
-              projects={recentProjects} 
-              isLoading={isProjectsLoading} 
-              isError={isProjectsError}
-              onRetry={() => refetchProjects()}
-            />
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-500 fill-mode-backwards">
+              <ActiveWorkspaces 
+                projects={recentProjects} 
+                isLoading={isProjectsLoading} 
+                isError={isProjectsError}
+                onRetry={() => refetchProjects()}
+              />
+            </div>
           </div>
 
           {/* Right Sidebar */}
-          <LiveActivity 
-            activities={recentActivity} 
-            isLoading={isActivityLoading} 
-            isError={isActivityError}
-            onRetry={() => refetchActivity()}
-          />
+          <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-backwards">
+            <LiveActivity 
+              activities={recentActivity} 
+              isLoading={isActivityLoading} 
+              isError={isActivityError}
+              onRetry={() => refetchActivity()}
+            />
+          </div>
         </div>
       </div>
 
