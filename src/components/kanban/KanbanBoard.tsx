@@ -135,13 +135,17 @@ const KanbanBoard = ({
               ref={provided.innerRef}
               className="flex gap-6 min-h-[calc(100vh-250px)]"
             >
-              {columns.map((column) => {
+              {columns.map((column, index) => {
                 const columnIssues = groupedIssues[column.id] || [];
                 const Icon = getColumnIcon(column.id);
                 const colorClasses = getColumnColor(column.id);
 
                 return (
-                  <div key={column.id} className="flex flex-col min-w-[280px] md:min-w-[320px] max-w-[280px] md:max-w-[320px]">
+                  <div 
+                    key={column.id} 
+                    className="flex flex-col min-w-[280px] md:min-w-[320px] max-w-[280px] md:max-w-[320px] animate-in fade-in slide-in-from-left-8 duration-700 fill-mode-backwards"
+                    style={{ animationDelay: `${(index + 1) * 150}ms` }}
+                  >
                     {/* Column Header */}
                     <div className="flex items-center justify-between mb-4 px-3 py-1">
                       <div className="flex items-center gap-2.5">
