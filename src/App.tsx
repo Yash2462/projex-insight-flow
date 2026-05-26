@@ -5,6 +5,7 @@ import { ThemeProvider } from "./components/theme-provider";
 import { Toaster } from "./components/ui/toaster";
 import { useParams } from "react-router-dom";
 import Navigation from "./components/Navigation";
+import MobileBottomNav from "./components/MobileBottomNav";
 import { Loader2 } from "lucide-react";
 import "./index.css";
 
