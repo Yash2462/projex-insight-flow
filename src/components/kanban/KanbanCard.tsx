@@ -59,13 +59,13 @@ const KanbanCard = ({ issue, index, onDelete, onViewComments }: KanbanCardProps)
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`mb-3 outline-none transition-all duration-300 ${snapshot.isDragging ? "rotate-2 scale-[1.02]" : ""}`}
+          className={`mb-3 outline-none transition-all duration-300 ${snapshot.isDragging ? "rotate-3 scale-105" : ""}`}
           onClick={() => onViewComments(issue, "overview")}
         >
-          <Card className={`group relative border border-primary/5 shadow-sm hover:shadow-elegant hover:border-primary/20 transition-all duration-500 bg-card rounded-2xl overflow-hidden cursor-pointer ${snapshot.isDragging ? "shadow-2xl ring-4 ring-primary/5 border-primary/30" : ""}`}>
+          <Card className={`group relative border border-primary/5 shadow-sm hover-lift hover:border-primary/20 transition-all duration-500 bg-card rounded-2xl overflow-hidden cursor-pointer ${snapshot.isDragging ? "shadow-glow shadow-primary/20 ring-4 ring-primary/10 border-primary/40 z-50 bg-white/90 backdrop-blur-md" : ""}`}>
             {/* Soft Glow based on priority */}
             <div className={`absolute top-0 left-0 w-full h-1 opacity-80 ${
-              issue.priority === "HIGH" ? "bg-red-500" : issue.priority === "MEDIUM" ? "bg-amber-500" : "bg-green-500"
+              issue.priority === "HIGH" ? "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" : issue.priority === "MEDIUM" ? "bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]" : "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"
             }`} />
             
             <CardContent className="p-4 pt-5">
