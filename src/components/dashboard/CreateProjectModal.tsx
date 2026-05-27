@@ -118,46 +118,48 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-32px)] sm:max-w-[550px] border-0 shadow-2xl bg-card p-0 overflow-hidden rounded-[2rem] md:rounded-[2.5rem]">
+      <DialogContent className="w-[calc(100vw-32px)] sm:max-w-[550px] border-0 shadow-2xl bg-card/95 backdrop-blur-2xl p-0 overflow-hidden rounded-[2.5rem] animate-in zoom-in-95 duration-300">
         <div className="bg-gradient-primary h-1.5 md:h-2 w-full" />
-        <div className="p-5 md:p-8 space-y-6 md:space-y-8">
+        <div className="p-5 md:p-10 space-y-6 md:space-y-10">
           <DialogHeader>
-            <DialogTitle className="text-xl md:text-3xl font-black tracking-tight text-foreground flex items-center gap-2 md:gap-3">
-              <Rocket className="h-6 w-6 md:h-8 md:w-8 text-primary" />
-              Launch Project
+            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 shadow-sm ring-1 ring-primary/5">
+              <Rocket className="h-8 w-8 text-primary" />
+            </div>
+            <DialogTitle className="text-xl md:text-3xl font-black tracking-tight text-foreground uppercase">
+              Initialize Mission
             </DialogTitle>
-            <DialogDescription className="text-xs md:text-sm font-medium opacity-60">
-              Set up your new workspace and invite your team to collaborate.
+            <DialogDescription className="text-xs md:text-sm font-bold uppercase tracking-widest opacity-60">
+              Define the parameters for your new operational workspace.
             </DialogDescription>
           </DialogHeader>
 
           {/* Quick Templates */}
-          <div className="space-y-3">
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Quick Templates</p>
-            <div className="grid grid-cols-3 gap-3">
+          <div className="space-y-4">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary ml-1">Pre-configured Blueprints</p>
+            <div className="grid grid-cols-3 gap-4">
               <button 
                 type="button"
                 onClick={() => applyTemplate('web')}
-                className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-primary/5 bg-primary/5 hover:bg-primary/10 transition-all group"
+                className="flex flex-col items-center gap-2 p-5 rounded-[1.5rem] border border-primary/5 bg-primary/5 hover:bg-primary/10 transition-all group"
               >
-                <Code className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
-                <span className="text-xs font-bold uppercase tracking-wider">Web Dev</span>
+                <Code className="h-6 w-6 text-primary group-hover:scale-110 transition-transform duration-500" />
+                <span className="text-[10px] font-black uppercase tracking-wider">Web Dev</span>
               </button>
               <button 
                 type="button"
                 onClick={() => applyTemplate('design')}
-                className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-primary/5 bg-primary/5 hover:bg-primary/10 transition-all group"
+                className="flex flex-col items-center gap-2 p-5 rounded-[1.5rem] border border-primary/5 bg-primary/5 hover:bg-primary/10 transition-all group"
               >
-                <Palette className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
-                <span className="text-xs font-bold uppercase tracking-wider">Design</span>
+                <Palette className="h-6 w-6 text-primary group-hover:scale-110 transition-transform duration-500" />
+                <span className="text-[10px] font-black uppercase tracking-wider">Design</span>
               </button>
               <button 
                 type="button"
                 onClick={() => applyTemplate('marketing')}
-                className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-primary/5 bg-primary/5 hover:bg-primary/10 transition-all group"
+                className="flex flex-col items-center gap-2 p-5 rounded-[1.5rem] border border-primary/5 bg-primary/5 hover:bg-primary/10 transition-all group"
               >
-                <Megaphone className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
-                <span className="text-xs font-bold uppercase tracking-wider">Marketing</span>
+                <Megaphone className="h-6 w-6 text-primary group-hover:scale-110 transition-transform duration-500" />
+                <span className="text-[10px] font-black uppercase tracking-wider">Growth</span>
               </button>
             </div>
           </div>
@@ -169,11 +171,11 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Workspace Name</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Workspace Identity</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="e.g., App Development Hub"
-                        className="h-12 bg-muted/20 border-primary/5 rounded-xl font-bold focus-visible:ring-primary/20"
+                        placeholder="e.g., Project Overlord"
+                        className="h-12 glass-input rounded-xl font-bold"
                         {...field}
                       />
                     </FormControl>
@@ -182,24 +184,24 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
                 )}
               />
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
                   name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Industry</FormLabel>
+                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Industry</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                         <FormControl>
-                          <SelectTrigger className="h-12 bg-muted/20 border-primary/5 rounded-xl font-bold">
+                          <SelectTrigger className="h-12 glass-input rounded-xl font-bold">
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="rounded-xl border-primary/10">
-                          <SelectItem value="web" className="rounded-lg">Engineering</SelectItem>
-                          <SelectItem value="design" className="rounded-lg">Product Design</SelectItem>
-                          <SelectItem value="marketing" className="rounded-lg">Brand Growth</SelectItem>
-                          <SelectItem value="other" className="rounded-lg">Operations</SelectItem>
+                        <SelectContent className="rounded-2xl border-primary/10 p-2">
+                          <SelectItem value="web" className="rounded-xl py-3 font-bold text-xs uppercase tracking-wider">Engineering</SelectItem>
+                          <SelectItem value="design" className="rounded-xl py-3 font-bold text-xs uppercase tracking-wider">Product Design</SelectItem>
+                          <SelectItem value="marketing" className="rounded-xl py-3 font-bold text-xs uppercase tracking-wider">Brand Growth</SelectItem>
+                          <SelectItem value="other" className="rounded-xl py-3 font-bold text-xs uppercase tracking-wider">Operations</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -212,11 +214,11 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
                   name="tags"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Tags (Comma split)</FormLabel>
+                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Strategic Tags</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="v1, priority"
-                          className="h-12 bg-muted/20 border-primary/5 rounded-xl font-bold"
+                          placeholder="alpha, critical"
+                          className="h-12 glass-input rounded-xl font-bold"
                           {...field}
                         />
                       </FormControl>
@@ -231,11 +233,11 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Strategy & Context</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Mission Briefing</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Define the mission objectives..."
-                        className="bg-muted/20 border-primary/5 rounded-xl min-h-[100px] font-medium"
+                        placeholder="Define the primary objectives and operational context..."
+                        className="glass-input rounded-xl min-h-[120px] font-medium"
                         {...field}
                       />
                     </FormControl>
@@ -244,11 +246,11 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
                 )}
               />
 
-              <div className="flex flex-col gap-3 pt-4">
+              <div className="flex flex-col gap-3 pt-6">
                 <Button
                   type="submit"
                   variant="hero"
-                  className="w-full h-14 text-base font-black rounded-2xl transition-all active:scale-[0.98]"
+                  className="w-full h-14 text-sm font-black rounded-2xl transition-all active:scale-[0.98] shadow-glow"
                   disabled={mutation.isPending}
                 >
                   {mutation.isPending ? (
@@ -257,7 +259,7 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
                       PREPARING WORKSPACE...
                     </>
                   ) : (
-                    "ACTIVATE PROJECT"
+                    "ACTIVATE HUB"
                   )}
                 </Button>
               </div>
