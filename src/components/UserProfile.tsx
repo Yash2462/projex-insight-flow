@@ -63,110 +63,137 @@ const UserProfile = ({ userId, onMessageClick }: UserProfileProps) => {
   const initials = user.fullName?.split(" ").map((n: string) => n[0]).join("").toUpperCase() || "?";
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto p-4 md:p-4">
+    <div className="space-y-8 max-w-5xl mx-auto p-2">
       {/* Profile Header */}
-      <div className="relative mb-12 md:mb-8">
-        <div className="h-24 md:h-32 w-full bg-gradient-primary rounded-2xl md:rounded-t-3xl shadow-lg" />
-        <div className="absolute -bottom-10 md:-bottom-12 left-4 md:left-8 flex items-end gap-4 md:gap-6">
-          <Avatar className="h-20 w-20 md:h-24 md:w-24 border-4 border-background shadow-xl rounded-2xl">
-            <AvatarImage src={getAvatarUrl(user.avatarUrl, user.email)} />
-            <AvatarFallback className="text-2xl font-bold bg-primary/10 text-primary">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          <div className="pb-1 md:pb-2 min-w-0">
-            <h2 className="text-xl md:text-3xl font-black text-foreground tracking-tight truncate">{user.fullName}</h2>
-            <div className="flex items-center gap-1.5 text-muted-foreground">
-              <Mail className="h-3 md:h-3.5 w-3 md:w-3.5" />
-              <span className="text-xs md:text-sm font-medium truncate">{user.email}</span>
+      <div className="relative mb-16 animate-in fade-in slide-in-from-top-8 duration-700">
+        <div className="h-32 md:h-48 w-full bg-gradient-hero rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+           <div className="absolute -right-20 -top-20 w-64 h-64 bg-primary/20 rounded-full blur-[100px]"></div>
+        </div>
+        <div className="absolute -bottom-12 left-6 md:left-12 flex items-end gap-6 md:gap-10">
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary to-purple-500 rounded-[2rem] blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+            <Avatar className="h-24 w-24 md:h-36 md:w-36 border-8 border-background shadow-2xl rounded-[2rem] relative">
+              <AvatarImage src={getAvatarUrl(user.avatarUrl, user.email)} />
+              <AvatarFallback className="text-3xl font-black bg-primary/5 text-primary">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+          <div className="pb-4 min-w-0">
+            <h2 className="text-2xl md:text-4xl font-black text-foreground tracking-tight truncate uppercase italic">{user.fullName}</h2>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/10 flex items-center gap-2">
+                <Mail className="h-3 w-3 text-primary" />
+                <span className="text-[10px] md:text-xs font-black text-primary uppercase tracking-widest truncate">{user.email}</span>
+              </div>
             </div>
           </div>
         </div>
-        <div className="absolute bottom-2 right-4 flex gap-2">
+        <div className="absolute bottom-4 right-6 flex gap-3">
           {onMessageClick && (
             <Button 
               onClick={() => onMessageClick(user)}
-              className="bg-white/20 backdrop-blur-md hover:bg-white/30 text-white border-0 rounded-xl h-8 px-3"
+              variant="hero"
+              className="rounded-2xl h-12 px-6 shadow-glow"
               size="sm"
             >
-              <MessageCircle className="h-3.5 w-3.5 mr-2" /> 
-              <span className="hidden sm:inline">Message</span>
+              <MessageCircle className="h-4 w-4 mr-2" /> 
+              <span className="font-black text-xs uppercase tracking-widest">Establish Uplink</span>
             </Button>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 md:pt-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-8">
         {/* Info Sidebar */}
-        <div className="space-y-6">
-          <Card className="border-0 shadow-elegant bg-card/60 backdrop-blur-md rounded-2xl">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                <UserIcon className="h-3 w-3" /> About
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/5 text-primary">
-                  <Briefcase className="h-4 w-4" />
+        <div className="space-y-6 animate-in fade-in slide-in-from-left-8 duration-700 delay-200 fill-mode-backwards">
+          <Card className="glass-panel hover-lift border-primary/5 rounded-[2.5rem] p-8 space-y-8">
+            <div className="space-y-1">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Operative Status</h3>
+              <p className="text-lg font-black tracking-tight uppercase">Strategic Profile</p>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="flex items-center gap-5 group">
+                <div className="p-3 rounded-2xl bg-primary/5 text-primary group-hover:scale-110 transition-transform duration-500 shadow-sm border border-primary/5">
+                  <Briefcase className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Role</p>
-                  <p className="text-sm font-semibold">Team Member</p>
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Designation</p>
+                  <p className="text-sm font-black uppercase tracking-tight">Active Team Unit</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-500/5 text-green-500">
-                  <Calendar className="h-4 w-4" />
+
+              <div className="flex items-center gap-5 group">
+                <div className="p-3 rounded-2xl bg-green-500/5 text-green-500 group-hover:scale-110 transition-transform duration-500 shadow-sm border border-green-500/5">
+                  <Calendar className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Joined</p>
-                  <p className="text-sm font-semibold">Dec 2023</p>
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Enlistment Date</p>
+                  <p className="text-sm font-black uppercase tracking-tight">Q4 2023</p>
                 </div>
               </div>
-            </CardContent>
+            </div>
+
+            <div className="pt-4 border-t border-primary/5">
+               <p className="text-[10px] font-medium text-muted-foreground leading-relaxed italic opacity-70">
+                 "Commitment to operational excellence and architectural integrity in every mission."
+               </p>
+            </div>
           </Card>
         </div>
 
         {/* Projects List */}
-        <div className="md:col-span-2 space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <h3 className="font-bold text-lg flex items-center gap-2">
-              <Folder className="h-5 w-5 text-primary" /> Active Projects
-            </h3>
-            <Badge variant="secondary" className="rounded-md">
-              {projects?.length || 0}
-            </Badge>
+        <div className="lg:col-span-2 space-y-6 animate-in fade-in slide-in-from-right-8 duration-700 delay-300 fill-mode-backwards">
+          <div className="flex items-center justify-between px-4">
+            <div className="space-y-1">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Mission Portfolio</h3>
+              <p className="text-xl font-black tracking-tight uppercase">Assigned Deployments</p>
+            </div>
+            <div className="h-10 w-10 rounded-2xl glass-panel flex items-center justify-center border-primary/10">
+              <span className="font-black text-primary text-sm">{projects?.length || 0}</span>
+            </div>
           </div>
           
-          <div className="grid gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {isProjectsLoading ? (
-              [...Array(2)].map((_, i) => (
-                <div key={i} className="h-20 rounded-2xl bg-muted/30 animate-pulse" />
+              [...Array(4)].map((_, i) => (
+                <div key={i} className="h-28 rounded-[2rem] bg-muted/10 animate-pulse border border-primary/5" />
               ))
             ) : projects && projects.length > 0 ? (
               projects.map((project: any) => (
-                <div 
+                <Card 
                   key={project.id}
-                  className="group flex items-center justify-between p-4 rounded-2xl border bg-background/40 hover:bg-background hover:shadow-md transition-all duration-300"
+                  className="glass-panel hover-lift border-primary/5 rounded-[2rem] p-6 group cursor-pointer"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-primary/10 flex items-center justify-center text-primary font-bold">
-                      {project.name[0]}
+                  <div className="flex flex-col h-full justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-primary/10 flex items-center justify-center text-primary font-black text-lg border border-primary/5 group-hover:scale-110 transition-transform duration-500 shadow-sm">
+                        {project.name[0].toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-black text-sm uppercase tracking-tight group-hover:text-primary transition-colors truncate">{project.name}</p>
+                        <Badge variant="outline" className="bg-primary/5 text-primary border-primary/10 text-[9px] font-black uppercase tracking-tighter mt-1 px-2">
+                          {project.category || "General"}
+                        </Badge>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-sm group-hover:text-primary transition-colors">{project.name}</p>
-                      <p className="text-xs text-muted-foreground capitalize">{project.category || "General"}</p>
+                    <div className="flex items-center justify-between pt-4 border-t border-primary/5">
+                       <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Status Matrix</span>
+                       <span className="text-[10px] font-black text-primary uppercase tracking-tighter bg-primary/5 px-2 py-0.5 rounded-lg border border-primary/10">
+                         {project.status || "Deployed"}
+                       </span>
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-[10px] font-bold border-primary/20 text-primary">
-                    {project.status || "In Progress"}
-                  </Badge>
-                </div>
+                </Card>
               ))
             ) : (
-              <div className="text-center py-8 bg-muted/20 rounded-2xl border border-dashed">
-                <p className="text-sm text-muted-foreground">No active projects found.</p>
+              <div className="col-span-full py-16 text-center glass-panel rounded-[2.5rem] border-dashed border-2 border-primary/5">
+                <div className="p-4 bg-muted/5 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 border border-primary/5">
+                   <Folder className="h-6 w-6 text-muted-foreground/30" />
+                </div>
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-40">No active mission protocols detected</p>
               </div>
             )}
           </div>
