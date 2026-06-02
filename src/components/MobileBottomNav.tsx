@@ -19,7 +19,7 @@ const MobileBottomNav = () => {
   if (hideOnPaths.includes(location.pathname) || isProjectDetail) return null;
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-2xl border-t border-primary/5 px-4 pb-safe">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-2xl border-t border-primary/5 px-4 pb-safe">
       <div className="flex items-center justify-around h-16 max-w-md mx-auto">
         {navItems.map((item) => {
           const Icon = item.icon;

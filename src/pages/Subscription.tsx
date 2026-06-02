@@ -122,14 +122,14 @@ const Subscription = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background lg:ml-64 p-8">
+      <div className="min-h-screen bg-background md:ml-64 p-8">
         <div className="text-center">Loading subscription details...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background lg:ml-64">
+    <div className="min-h-screen bg-background md:ml-64">
       <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8 md:mb-12">

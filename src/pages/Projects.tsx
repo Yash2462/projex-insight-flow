@@ -102,7 +102,7 @@ const Projects = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 lg:ml-64">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 md:ml-64">
       <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">

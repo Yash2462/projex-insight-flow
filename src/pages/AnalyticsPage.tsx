@@ -57,7 +57,7 @@ const AnalyticsDashboard = () => {
 
   if (isProjectsLoading || isStatsLoading) {
     return (
-      <div className="min-h-screen bg-background p-6 lg:ml-64 flex items-center justify-center">
+      <div className="min-h-screen bg-background p-6 md:ml-64 flex items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
       </div>
     );
@@ -81,7 +81,7 @@ const AnalyticsDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background lg:ml-64 relative overflow-hidden">
+    <div className="min-h-screen bg-background md:ml-64 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
       
       <div className="p-6 lg:p-10 max-w-7xl mx-auto space-y-10">

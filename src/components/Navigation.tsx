@@ -67,6 +67,11 @@ const Navigation = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -158,7 +163,7 @@ const Navigation = () => {
   return (
     <>
       {/* Mobile Menu Button */}
-      <div className="lg:hidden fixed top-3 md:top-4 right-3 md:right-4 z-50 flex items-center gap-2">
+      <div className="md:hidden fixed top-3 md:top-4 right-3 md:right-4 z-50 flex items-center gap-2">
         <Button
           variant="ghost"
           size="icon"
@@ -177,11 +182,11 @@ const Navigation = () => {
       {/* Sidebar */}
       <nav
         className={`
-          fixed inset-y-0 left-0 z-40 w-72 lg:w-64 bg-card/40 backdrop-blur-2xl border-r border-primary/5 transform transition-all duration-500 ease-in-out
+          fixed inset-y-0 left-0 z-[60] w-72 md:w-64 bg-card/40 backdrop-blur-2xl border-r border-primary/5 transform transition-all duration-500 ease-in-out
           ${
             isMobileMenuOpen
               ? "translate-x-0"
-              : "-translate-x-full lg:translate-x-0"
+              : "-translate-x-full md:translate-x-0"
           }
         `}
       >

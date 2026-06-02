@@ -5,7 +5,6 @@ import { ThemeProvider } from "./components/theme-provider";
 import { Toaster } from "./components/ui/toaster";
 import { useParams } from "react-router-dom";
 import Navigation from "./components/Navigation";
-import MobileBottomNav from "./components/MobileBottomNav";
 import { Loader2 } from "lucide-react";
 import "./index.css";
 
@@ -119,7 +118,7 @@ const App = () => {
                 element={
                   <>
                     <Navigation />
-                    <div className="lg:ml-64 p-4 lg:p-8 min-h-screen bg-background">
+                    <div className="md:ml-64 p-4 lg:p-8 min-h-screen bg-background">
                       <IssueDetailWrapper />
                     </div>
                   </>
@@ -130,7 +129,6 @@ const App = () => {
             </Routes>
           </Suspense>
           <Toaster />
-          <MobileBottomNav />
         </BrowserRouter>
       </QueryClientProvider>
     </ThemeProvider>
