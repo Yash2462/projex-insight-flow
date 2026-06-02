@@ -142,9 +142,17 @@ const DashboardCharts = ({ counts, isLoading }: DashboardChartsProps) => {
               </CardTitle>
               <CardDescription className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Completion performance</CardDescription>
             </div>
-            <div className="text-right">
-              <div className="text-3xl font-black text-primary tracking-tighter drop-shadow-sm">{completionRate}%</div>
-              <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Health Score</div>
+            <div className="flex flex-col items-end gap-2">
+              <div className="text-right">
+                <div className="text-3xl font-black text-primary tracking-tighter drop-shadow-sm">{completionRate}%</div>
+                <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Health Score</div>
+              </div>
+              {counts.overdue > 0 && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive animate-pulse shadow-sm">
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">{counts.overdue} Critical</span>
+                </div>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -187,12 +195,6 @@ const DashboardCharts = ({ counts, isLoading }: DashboardChartsProps) => {
             </AreaChart>
           </ResponsiveContainer>
         </CardContent>
-        {counts.overdue > 0 && (
-          <div className="absolute bottom-8 right-8 flex items-center gap-2 px-4 py-2 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive animate-pulse shadow-glow shadow-destructive/10">
-            <AlertTriangle className="h-4 w-4" />
-            <span className="text-[10px] font-black uppercase tracking-widest">{counts.overdue} Critical</span>
-          </div>
-        )}
       </Card>
     </div>
   );

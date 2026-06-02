@@ -59,7 +59,6 @@ import DirectMessage from "@/components/DirectMessage";
 import KanbanBoard from "@/components/kanban/KanbanBoard";
 import WorkflowManager from "@/components/kanban/WorkflowManager";
 import CalendarView from "@/components/kanban/CalendarView";
-import ProjectDataSeeder from "@/components/dashboard/ProjectDataSeeder";
 import IssueDetail from "@/components/IssueDetail";
 import { getAvatarUrl } from "@/lib/utils";
 import { Project, User, Issue } from "@/services/types";
@@ -247,7 +246,7 @@ const ProjectDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col lg:ml-64 pb-20 md:pb-0">
+    <div className="min-h-screen bg-background flex flex-col md:ml-64">
       {/* High-End Responsive Header */}
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-primary/5 px-4 md:px-10 py-3 md:py-8 animate-in fade-in slide-in-from-top-4 duration-500">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
@@ -292,7 +291,6 @@ const ProjectDetails = () => {
               <Button onClick={() => navigate(`/projects/${projectId}/analytics`)} variant="outline" size="sm" className="rounded-xl border-primary/20 text-primary font-bold h-10 px-4">
                 <BarChart3 className="h-4 w-4 mr-2" /> Analytics
               </Button>
-              {isOwner && <ProjectDataSeeder projectId={projectId} statuses={project.statuses || []} />}
               {isOwner && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -497,20 +495,6 @@ const ProjectDetails = () => {
           </TabsContent>
         </Tabs>
       </main>
-
-      {/* Sticky Bottom Actions Bar (Mobile Only) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-2xl border-t border-primary/5 flex gap-3 z-50">
-        {!isViewer && (
-           <Button onClick={() => setIssueModalOpen(true)} variant="hero" className="flex-1 rounded-[1.25rem] font-black text-[10px] uppercase tracking-widest h-14 shadow-glow active:scale-95 transition-all">
-             <Plus className="h-4 w-4 mr-3 stroke-[3]" /> New Mission
-           </Button>
-        )}
-        {isOwner && (
-           <Button onClick={() => setInviteModalOpen(true)} variant="outline" aria-label="Add operator" className="h-14 w-14 p-0 rounded-[1.25rem] border-primary/10 bg-primary/5 text-primary active:scale-95 transition-all">
-             <UserPlus className="h-5 w-5" />
-           </Button>
-        )}
-      </div>
 
       {/* Modals are handled via the same Dialog system as before, ensuring consistency */}
       <Dialog open={issueModalOpen} onOpenChange={setIssueModalOpen}>

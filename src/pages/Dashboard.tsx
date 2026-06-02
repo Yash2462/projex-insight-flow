@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
 import CreateProjectModal from "@/components/dashboard/CreateProjectModal";
-import DemoSeeder from "@/components/dashboard/DemoSeeder";
 import { ProjectPerformance } from "@/components/dashboard/ProjectPerformance";
 import { ImmediateFocus } from "@/components/dashboard/ImmediateFocus";
 import { ActiveWorkspaces } from "@/components/dashboard/ActiveWorkspaces";
@@ -39,7 +38,7 @@ const Dashboard = () => {
   const recentProjects = projects?.slice(0, 4) || [];
 
   return (
-    <div className="min-h-screen bg-background lg:ml-64 relative overflow-hidden">
+    <div className="min-h-screen bg-background md:ml-64 relative overflow-hidden">
       {/* Dynamic Background Accents */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary/5 rounded-full blur-[100px] -z-10 -translate-x-1/2 translate-y-1/2" />
@@ -62,7 +61,6 @@ const Dashboard = () => {
           </div>
           
           <div className="flex items-center gap-2 md:gap-3">
-            <DemoSeeder />
             <Button 
               onClick={() => setIsCreateModalOpen(true)}
               variant="hero"

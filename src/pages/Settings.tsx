@@ -138,7 +138,7 @@ const Settings = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background lg:ml-64 flex items-center justify-center">
+      <div className="min-h-screen bg-background md:ml-64 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -149,7 +149,7 @@ const Settings = () => {
     : `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.email}`;
 
   return (
-    <div className="min-h-screen bg-background lg:ml-64 relative overflow-hidden">
+    <div className="min-h-screen bg-background md:ml-64 relative overflow-hidden">
       {/* Dynamic Background Accents */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary/5 rounded-full blur-[100px] -z-10 -translate-x-1/2 translate-y-1/2" />
@@ -171,14 +171,6 @@ const Settings = () => {
               <TabsTrigger value="notifications" className="flex items-center gap-2 px-6 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300">
                 <Bell className="h-3.5 w-3.5" />
                 Alerts
-              </TabsTrigger>
-              <TabsTrigger value="security" className="flex items-center gap-2 px-6 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300">
-                <Shield className="h-3.5 w-3.5" />
-                Defense
-              </TabsTrigger>
-              <TabsTrigger value="preferences" className="flex items-center gap-2 px-6 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300">
-                <Palette className="h-3.5 w-3.5" />
-                Aesthetic
               </TabsTrigger>
             </TabsList>
           </div>
@@ -281,20 +273,6 @@ const Settings = () => {
                     </Button>
                   </div>
                 </Card>
-
-                {/* Additional Bento Card Example */}
-                <Card className="glass-panel hover-lift rounded-[2.5rem] border-primary/5 p-8 flex items-center justify-between animate-in fade-in slide-in-from-bottom-8 duration-700 delay-400 fill-mode-backwards">
-                  <div className="flex items-center gap-6">
-                    <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center">
-                      <Globe className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-black text-sm uppercase tracking-tight">Public Node</h4>
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Allow others to find your operative profile</p>
-                    </div>
-                  </div>
-                  <Switch defaultChecked />
-                </Card>
               </div>
             </div>
           </TabsContent>
@@ -347,8 +325,6 @@ const Settings = () => {
               </div>
             </Card>
           </TabsContent>
-
-          {/* Other tabs follow same aesthetic pattern... */}
         </Tabs>
       </div>
     </div>
