@@ -1,11 +1,11 @@
 import apiClient from './client';
-import { ApiResponse, Project } from './types';
+import { ApiResponse, Project, Page } from './types';
 import axios from 'axios';
 import { API_URL } from './client';
 
 export const projectAPI = {
-  getProjects: (params?: { category?: string; tag?: string }) =>
-    apiClient.get<ApiResponse<Project[]>>('/api/projects', { params }),
+  getProjects: (params?: { category?: string; tag?: string; page?: number; size?: number; keyword?: string }) =>
+    apiClient.get<ApiResponse<Page<Project>>>('/api/projects', { params }),
   
   getProjectById: (id: number) =>
     apiClient.get<ApiResponse<Project>>(`/api/projects/${id}`),

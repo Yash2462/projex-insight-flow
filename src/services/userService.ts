@@ -1,5 +1,5 @@
 import apiClient from './client';
-import { ApiResponse, User } from './types';
+import { ApiResponse, User, Page, Project } from './types';
 
 export const userAPI = {
   getProfile: () =>
@@ -15,7 +15,7 @@ export const userAPI = {
     apiClient.get<ApiResponse<User>>(`/api/users/${id}`),
 
   getProjectByTeam: () =>
-    apiClient.get<ApiResponse<any[]>>('/api/projects'),
+    apiClient.get<ApiResponse<Page<Project>>>('/api/projects'),
 
   completeOnboardingStep: (stepId: string) =>
     apiClient.post<ApiResponse<User>>(`/api/users/onboarding/step/${stepId}`),

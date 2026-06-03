@@ -1,5 +1,5 @@
 import apiClient from './client';
-import { ApiResponse, Issue } from './types';
+import { ApiResponse, Issue, Page } from './types';
 
 export const issueAPI = {
   createIssue: (data: Partial<Issue>) => 
@@ -11,8 +11,8 @@ export const issueAPI = {
   searchIssues: (keyword: string) =>
     apiClient.get<ApiResponse<Issue[]>>('/api/issues/search', { params: { keyword } }),
 
-  getIssueByProjectId: (projectId: number) =>
-    apiClient.get<ApiResponse<Issue[]>>(`/api/issues/project/${projectId}`),
+  getIssueByProjectId: (projectId: number, page?: number, size?: number) =>
+    apiClient.get<ApiResponse<Page<Issue>>>(`/api/issues/project/${projectId}`, { params: { page, size } }),
 
   updateIssueStatus: (id: number, status: string) =>
     apiClient.put<ApiResponse<Issue>>(`/api/issues/${id}/status/${status}`),

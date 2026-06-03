@@ -24,10 +24,14 @@ export const useDashboardData = () => {
   });
 
   const projectsQuery = useQuery({
-    queryKey: ["projects"],
+    queryKey: ["projects", "dashboard"],
     queryFn: async () => {
-      const response = await projectAPI.getProjects();
-      return response.data.data || [];
+      const response = await projectAPI.getProjects({ size: 100 });
+      const data = response.data.data;
+      if (data && 'content' in data) {
+        return data.content || [];
+      }
+      return Array.isArray(data) ? data : [];
     },
   });
 
@@ -43,8 +47,8 @@ export const useDashboardData = () => {
     queryKey: ["my-issues", currentUser?.id],
     queryFn: async () => {
       if (!currentUser?.id) return [];
-      const response = await projectAPI.getProjects();
-      const allProjects = response.data.data || [];
+      const response = await projectAPI.getProjects({ size: 100 });
+      const allProjects = response.data.data.content || [];
       const assigned = allProjects.flatMap((p: Project) => 
         (p.issues || []).filter((i: Issue) => 
           i.assignee?.id === currentUser.id && i.status !== 'DONE'
