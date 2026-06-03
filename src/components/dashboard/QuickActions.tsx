@@ -1,15 +1,19 @@
 import { Button } from "@/components/ui/button";
-import { Plus, UserPlus, FileText, CheckCircle2 } from "lucide-react";
+import { Plus, UserPlus, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const QuickActions = () => {
+interface QuickActionsProps {
+  onCreateProject?: () => void;
+}
+
+const QuickActions = ({ onCreateProject }: QuickActionsProps) => {
   const navigate = useNavigate();
 
   const actions = [
     {
       label: "New Project",
       icon: Plus,
-      onClick: () => {}, // Handled by Dashboard's existing modal logic
+      onClick: onCreateProject || (() => console.log("New Project clicked")),
       variant: "hero" as const,
       className: ""
     },

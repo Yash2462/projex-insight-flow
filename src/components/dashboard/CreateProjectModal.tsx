@@ -118,15 +118,15 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-32px)] sm:max-w-[550px] border-0 shadow-2xl bg-card/95 backdrop-blur-2xl p-0 overflow-hidden rounded-[2.5rem] animate-in zoom-in-95 duration-300">
-        <div className="bg-gradient-primary h-1.5 md:h-2 w-full" />
-        <div className="p-5 md:p-10 space-y-6 md:space-y-10">
+      <DialogContent className="w-[95vw] sm:max-w-[550px] max-h-[90vh] overflow-y-auto border-0 shadow-2xl bg-card/95 backdrop-blur-2xl p-0 rounded-[2.5rem] animate-in zoom-in-95 duration-300">
+        <div className="bg-gradient-primary h-1.5 md:h-2 w-full sticky top-0 z-10" />
+        <div className="p-5 md:p-8 space-y-6 md:space-y-8">
           <DialogHeader>
             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 shadow-sm ring-1 ring-primary/5">
               <Rocket className="h-8 w-8 text-primary" />
             </div>
             <DialogTitle className="text-xl md:text-3xl font-black tracking-tight text-foreground uppercase">
-              Initialize Mission
+              Create Workspace
             </DialogTitle>
             <DialogDescription className="text-xs md:text-sm font-bold uppercase tracking-widest opacity-60">
               Define the parameters for your new operational workspace.
@@ -174,7 +174,7 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
                     <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Workspace Identity</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="e.g., Project Overlord"
+                        placeholder="e.g., Website Redesign"
                         className="h-12 glass-input rounded-xl font-bold"
                         {...field}
                       />
@@ -184,7 +184,7 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
                 )}
               />
               
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                 <FormField
                   control={form.control}
                   name="category"
@@ -233,7 +233,7 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Mission Briefing</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Project Description</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Define the primary objectives and operational context..."
@@ -256,10 +256,10 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
                   {mutation.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-                      PREPARING WORKSPACE...
+                      CREATING WORKSPACE...
                     </>
                   ) : (
-                    "ACTIVATE HUB"
+                    "CREATE WORKSPACE"
                   )}
                 </Button>
               </div>

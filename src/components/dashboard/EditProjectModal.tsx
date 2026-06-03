@@ -94,8 +94,8 @@ const EditProjectModal = ({ open, onOpenChange, project }: EditProjectModalProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-32px)] sm:max-w-[550px] border-0 shadow-2xl bg-card p-0 overflow-hidden rounded-[2rem] md:rounded-[2.5rem]">
-        <div className="bg-primary h-1.5 md:h-2 w-full opacity-20" />
+      <DialogContent className="w-[95vw] sm:max-w-[550px] max-h-[90vh] overflow-y-auto border-0 shadow-2xl bg-card p-0 rounded-[2rem] md:rounded-[2.5rem]">
+        <div className="bg-primary h-1.5 md:h-2 w-full opacity-20 sticky top-0 z-10" />
         <div className="p-5 md:p-8 space-y-6 md:space-y-8">
           <DialogHeader>
             <DialogTitle className="text-xl md:text-3xl font-black tracking-tight text-foreground flex items-center gap-2 md:gap-3">
@@ -123,7 +123,7 @@ const EditProjectModal = ({ open, onOpenChange, project }: EditProjectModalProps
               />
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="edit-category" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Industry</Label>
                 <Select

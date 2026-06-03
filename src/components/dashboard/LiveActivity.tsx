@@ -9,9 +9,10 @@ interface LiveActivityProps {
   isLoading: boolean;
   isError: boolean;
   onRetry: () => void;
+  onCreateProject?: () => void;
 }
 
-export function LiveActivity({ activities, isLoading, isError, onRetry }: LiveActivityProps) {
+export function LiveActivity({ activities, isLoading, isError, onRetry, onCreateProject }: LiveActivityProps) {
   return (
     <aside className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
       <GlassCard className="rounded-[2.5rem] p-6 flex flex-col gap-6 min-h-[400px]">
@@ -59,7 +60,7 @@ export function LiveActivity({ activities, isLoading, isError, onRetry }: LiveAc
         </div>
 
         <div className="mt-auto pt-6 border-t border-primary/5">
-          <QuickActions />
+          <QuickActions onCreateProject={onCreateProject} />
         </div>
       </GlassCard>
     </aside>
