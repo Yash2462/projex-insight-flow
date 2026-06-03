@@ -60,9 +60,12 @@ const Dashboard = () => {
             </p>
           </div>
           
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-2 md:gap-3 relative z-20">
             <Button 
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={() => {
+                console.log("New Project button clicked!");
+                setIsCreateModalOpen(true);
+              }}
               variant="hero"
               className="flex-1 md:flex-none rounded-2xl px-4 md:px-6 h-11 md:h-12 text-xs md:text-sm font-bold transition-all active:scale-95"
             >
@@ -122,6 +125,7 @@ const Dashboard = () => {
               isLoading={isActivityLoading} 
               isError={isActivityError}
               onRetry={() => refetchActivity()}
+              onCreateProject={() => setIsCreateModalOpen(true)}
             />
           </div>
         </div>

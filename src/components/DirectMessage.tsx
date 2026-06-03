@@ -158,7 +158,7 @@ const DirectMessage = ({ recipientUser, currentUserId, onClose }: DirectMessageP
           ) : messages.length === 0 ? (
             <div className="text-center py-20 opacity-20">
               <MessageCircle className="h-16 w-16 mx-auto mb-4" />
-              <p className="text-[10px] font-black uppercase tracking-[0.3em]">No transmission history</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em]">No message history</p>
             </div>
           ) : (
             <div className="space-y-6">
@@ -201,7 +201,7 @@ const DirectMessage = ({ recipientUser, currentUserId, onClose }: DirectMessageP
               <Input
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                placeholder={`Deploy message to ${recipientUser.fullName.split(' ')[0]}...`}
+                placeholder={`Send message to ${recipientUser.fullName.split(' ')[0]}...`}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();

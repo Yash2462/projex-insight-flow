@@ -213,7 +213,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
     mutationFn: (userId: number) => issueAPI.assignUserToIssue(issueId, userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["issue", issueId] });
-      toast({ title: "Agent Assigned" });
+      toast({ title: "Member Assigned" });
     },
   });
 
@@ -239,7 +239,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
       attachmentAPI.upload(file, issueId)
         .then(() => {
           queryClient.invalidateQueries({ queryKey: ["attachments", issueId] });
-          toast({ title: "Asset Deployed" });
+          toast({ title: "Attachment Uploaded" });
         })
         .catch(() => toast({ title: "Upload Failed", variant: "destructive" }))
         .finally(() => setIsUploading(false));
@@ -379,7 +379,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                     </div>
                     <Card className="border border-primary/5 bg-card border-primary/5 rounded-[2rem] shadow-sm relative overflow-hidden group">
                       <p className="text-sm md:text-base font-medium leading-relaxed text-foreground/80 relative z-10 p-6">
-                        {issue?.description || "Awaiting tactical mission parameters."}
+                        {issue?.description || "Awaiting task description."}
                       </p>
                     </Card>
                   </div>
@@ -393,14 +393,14 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                     </div>
                     <div className="p-5 bg-card border border-primary/5 rounded-[2rem] space-y-5 shadow-sm">
                       <div className="space-y-2">
-                        <Label className="text-[8px] font-black uppercase opacity-60 ml-1">Assigned Agent</Label>
+                        <Label className="text-[8px] font-black uppercase opacity-60 ml-1">Assignee</Label>
                         {!isViewer ? (
                           <Select 
                             value={issue?.assignee?.id?.toString() || "0"} 
                             onValueChange={(val) => assignUserMutation.mutate(parseInt(val))}
                           >
                             <SelectTrigger className="h-11 bg-muted/20 border-primary/5 rounded-xl font-bold text-[11px] px-3">
-                              <SelectValue placeholder="Select Agent" />
+                              <SelectValue placeholder="Select Member" />
                             </SelectTrigger>
                             <SelectContent className="rounded-xl border-primary/10">
                               <SelectItem value="0">Unassigned</SelectItem>
@@ -562,7 +562,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                       <div className="p-3 rounded-2xl bg-primary/10 group-hover:scale-110 transition-transform">
                         <Plus className="h-6 w-6 text-primary" />
                       </div>
-                      <span className="text-[9px] font-black uppercase text-primary tracking-widest mt-2">Deploy Data</span>
+                      <span className="text-[9px] font-black uppercase text-primary tracking-widest mt-2">Upload Date</span>
                       <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} />
                     </button>
                   )}
@@ -615,27 +615,27 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
 
               {/* Message Input - Fixed Bottom */}
               <div className="p-3 md:p-6 bg-background/95 backdrop-blur-xl border-t border-primary/5 sticky bottom-0 z-10">
-                <div className="bg-muted/30 rounded-[1.5rem] md:rounded-[2rem] border border-primary/5 p-1 flex items-end gap-0.5 md:gap-1 shadow-inner">
-                  <div className="flex items-center">
+                <div className="bg-muted/30 rounded-[1.5rem] md:rounded-[2rem] border border-primary/5 p-1.5 md:p-2 flex items-end gap-1 md:gap-2 shadow-inner">
+                  <div className="flex items-center gap-1">
                     <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
                       <PopoverTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9 rounded-full text-muted-foreground hover:bg-primary/10 transition-all">
-                          <Smile className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="h-10 w-10 md:h-12 md:w-12 rounded-full text-muted-foreground hover:bg-primary/10 transition-all">
+                          <Smile className="h-5 w-5 md:h-6 md:w-6" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent side="top" align="start" className="p-0 border-0 bg-transparent w-auto">
                         <EmojiPicker 
                           onEmojiClick={e => {setNewComment(p => p + e.emoji); setEmojiPickerOpen(false)}}
                           theme={theme === 'dark' ? EmojiTheme.DARK : EmojiTheme.LIGHT}
-                          width={260} height={300}
+                          width={300} height={350}
                           previewConfig={{showPreview: false}}
                         />
                       </PopoverContent>
                     </Popover>
                     <Popover open={gifPickerOpen} onOpenChange={setGifPickerOpen}>
                       <PopoverTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9 rounded-full text-muted-foreground hover:bg-primary/10 transition-all">
-                          <FileImage className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="h-10 w-10 md:h-12 md:w-12 rounded-full text-muted-foreground hover:bg-primary/10 transition-all">
+                          <FileImage className="h-5 w-5 md:h-6 md:w-6" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent side="top" align="start" className="p-0 border-0 bg-transparent w-auto">
@@ -647,8 +647,8 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                   <Textarea 
                     value={newComment}
                     onChange={e => setNewComment(e.target.value)}
-                    placeholder="Intelligence update..."
-                    className="flex-1 min-h-[36px] max-h-[100px] border-0 focus-visible:ring-0 resize-none bg-transparent py-2 text-xs md:text-sm leading-tight font-medium px-2"
+                    placeholder="Type a message..."
+                    className="flex-1 min-h-[44px] md:min-h-[48px] max-h-[150px] border-0 focus-visible:ring-0 resize-none bg-transparent py-3 md:py-3.5 text-sm leading-tight font-medium px-3"
                     onKeyDown={e => e.key === 'Enter' && !e.shiftKey && newComment.trim() && addCommentMutation.mutate(newComment)}
                   />
                   
@@ -656,9 +656,9 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                     onClick={() => addCommentMutation.mutate(newComment)} 
                     disabled={!newComment.trim() || addCommentMutation.isPending}
                     size="icon"
-                    className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-primary shadow-glow shrink-0 transition-all active:scale-90"
+                    className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-primary shadow-glow shrink-0 transition-all active:scale-90"
                   >
-                    <Send className="h-4 w-4" />
+                    <Send className="h-5 w-5" />
                   </Button>
                 </div>
               </div>

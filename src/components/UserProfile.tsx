@@ -34,9 +34,10 @@ const UserProfile = ({ userId, onMessageClick }: UserProfileProps) => {
   const { data: projects, isLoading: isProjectsLoading } = useQuery({
     queryKey: ["user-projects", userId],
     queryFn: async () => {
-      const response = await projectAPI.getProjects();
+      const response = await projectAPI.getProjects({ size: 100 });
+      const projectList = response.data.data.content || [];
       // Filter projects where this user is a member or owner
-      return (response.data.data || []).filter((p: any) => 
+      return projectList.filter((p: any) => 
         p.owner?.id === userId || p.team?.some((m: any) => m.id === userId)
       );
     },
@@ -99,7 +100,7 @@ const UserProfile = ({ userId, onMessageClick }: UserProfileProps) => {
               size="sm"
             >
               <MessageCircle className="h-4 w-4 mr-2" /> 
-              <span className="font-black text-xs uppercase tracking-widest">Establish Uplink</span>
+              <span className="font-black text-xs uppercase tracking-widest">Send Message</span>
             </Button>
           )}
         </div>
@@ -110,7 +111,7 @@ const UserProfile = ({ userId, onMessageClick }: UserProfileProps) => {
         <div className="space-y-6 animate-in fade-in slide-in-from-left-8 duration-700 delay-200 fill-mode-backwards">
           <Card className="glass-panel hover-lift border-primary/5 rounded-[2.5rem] p-8 space-y-8">
             <div className="space-y-1">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Operative Status</h3>
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">User Profile</h3>
               <p className="text-lg font-black tracking-tight uppercase">Strategic Profile</p>
             </div>
             
@@ -138,7 +139,7 @@ const UserProfile = ({ userId, onMessageClick }: UserProfileProps) => {
 
             <div className="pt-4 border-t border-primary/5">
                <p className="text-[10px] font-medium text-muted-foreground leading-relaxed italic opacity-70">
-                 "Commitment to operational excellence and architectural integrity in every mission."
+                 "Commitment to operational excellence and architectural integrity in every project."
                </p>
             </div>
           </Card>
@@ -148,8 +149,8 @@ const UserProfile = ({ userId, onMessageClick }: UserProfileProps) => {
         <div className="lg:col-span-2 space-y-6 animate-in fade-in slide-in-from-right-8 duration-700 delay-300 fill-mode-backwards">
           <div className="flex items-center justify-between px-4">
             <div className="space-y-1">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Mission Portfolio</h3>
-              <p className="text-xl font-black tracking-tight uppercase">Assigned Deployments</p>
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Project Portfolio</h3>
+              <p className="text-xl font-black tracking-tight uppercase">Assigned Projects</p>
             </div>
             <div className="h-10 w-10 rounded-2xl glass-panel flex items-center justify-center border-primary/10">
               <span className="font-black text-primary text-sm">{projects?.length || 0}</span>
@@ -182,7 +183,7 @@ const UserProfile = ({ userId, onMessageClick }: UserProfileProps) => {
                     <div className="flex items-center justify-between pt-4 border-t border-primary/5">
                        <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Status Matrix</span>
                        <span className="text-[10px] font-black text-primary uppercase tracking-tighter bg-primary/5 px-2 py-0.5 rounded-lg border border-primary/10">
-                         {project.status || "Deployed"}
+                         {project.status || "Active"}
                        </span>
                     </div>
                   </div>
@@ -193,7 +194,7 @@ const UserProfile = ({ userId, onMessageClick }: UserProfileProps) => {
                 <div className="p-4 bg-muted/5 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 border border-primary/5">
                    <Folder className="h-6 w-6 text-muted-foreground/30" />
                 </div>
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-40">No active mission protocols detected</p>
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-40">No active projects found</p>
               </div>
             )}
           </div>

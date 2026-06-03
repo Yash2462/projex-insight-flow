@@ -117,6 +117,16 @@ const ProjectDetails = () => {
     },
   });
 
+  const { data: issuePage, isLoading: isIssuesLoading } = useQuery({
+    queryKey: ["projectIssues", projectId],
+    queryFn: async () => {
+      const response = await issueAPI.getIssueByProjectId(projectId, 0, 100);
+      return response.data.data;
+    },
+  });
+
+  const projectIssues = issuePage?.content || [];
+
   const { data: userRole } = useQuery({
     queryKey: ["projectRole", projectId],
     queryFn: async () => {
@@ -133,7 +143,7 @@ const ProjectDetails = () => {
   const deleteIssueMutation = useMutation({
     mutationFn: (id: number) => issueAPI.deleteIssue(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["projectIssues", projectId] });
       toast({ title: "Success", description: "Issue archived" });
     },
   });
@@ -141,28 +151,28 @@ const ProjectDetails = () => {
   const reorderIssuesMutation = useMutation({
     mutationFn: (issueOrders: { id: number; index: number; status: string }[]) => issueAPI.reorderIssues(issueOrders),
     onMutate: async (newOrders) => {
-      await queryClient.cancelQueries({ queryKey: ["project", projectId] });
-      const previousProject = queryClient.getQueryData(["project", projectId]);
+      await queryClient.cancelQueries({ queryKey: ["projectIssues", projectId] });
+      const previousIssues = queryClient.getQueryData(["projectIssues", projectId]);
       
-      queryClient.setQueryData(["project", projectId], (old: any) => {
+      queryClient.setQueryData(["projectIssues", projectId], (old: any) => {
         if (!old) return old;
-        const updatedIssues = old.issues.map((issue: any) => {
+        const updatedIssues = old.content.map((issue: any) => {
           const newOrder = newOrders.find(o => o.id === issue.id);
           if (newOrder) {
             return { ...issue, orderIndex: newOrder.index, status: newOrder.status };
           }
           return issue;
         });
-        return { ...old, issues: updatedIssues };
+        return { ...old, content: updatedIssues };
       });
       
-      return { previousProject };
+      return { previousIssues };
     },
     onError: (err, newOrders, context) => {
-      queryClient.setQueryData(["project", projectId], context?.previousProject);
+      queryClient.setQueryData(["projectIssues", projectId], context?.previousIssues);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["projectIssues", projectId] });
     },
   });
 
@@ -178,7 +188,7 @@ const ProjectDetails = () => {
   const updateIssueStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) => issueAPI.updateIssue(id, { status }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["projectIssues", projectId] });
       toast({ title: "Task Moved" });
     },
   });
@@ -186,8 +196,8 @@ const ProjectDetails = () => {
   const createIssueMutation = useMutation({
     mutationFn: (data: any) => issueAPI.createIssue(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
-      toast({ title: "Task Deployed" });
+      queryClient.invalidateQueries({ queryKey: ["projectIssues", projectId] });
+      toast({ title: "Task Created" });
       setIssueModalOpen(false);
       setNewIssue({ title: "", description: "", priority: "MEDIUM", dueDate: "", status: "TODO" });
     },
@@ -222,13 +232,14 @@ const ProjectDetails = () => {
   const dynamicColumns = useMemo(() => {
     if (!project?.statuses || project.statuses.length === 0) {
       return [
-        { id: "TODO", title: "Todo" },
-        { id: "IN_PROGRESS", title: "In Progress" },
-        { id: "REVIEW", title: "Review" },
-        { id: "DONE", title: "Done" },
+      { id: "TODO", title: "To Do" },
+      { id: "IN_PROGRESS", title: "In Progress" },
+      { id: "REVIEW", title: "Review" },
+      { id: "DONE", title: "Done" }
       ];
     }
-    return project.statuses.map(status => ({
+
+    return project.statuses.map((status: string) => ({
       id: status,
       title: (status || "").replace(/_/g, ' ').toLowerCase().split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ')
     }));
@@ -247,8 +258,9 @@ const ProjectDetails = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col md:ml-64">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-screen">
       {/* High-End Responsive Header */}
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-primary/5 px-4 md:px-10 py-3 md:py-8 animate-in fade-in slide-in-from-top-4 duration-500">
+      <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-primary/5 px-4 md:px-10 py-3 md:py-8 animate-in fade-in slide-in-from-top-4 duration-500">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
           <div className="flex items-center gap-3 md:gap-4 min-w-0">
             <div className="p-2.5 md:p-4 bg-primary/10 rounded-xl md:rounded-2xl shadow-sm ring-1 ring-primary/5 shrink-0">
@@ -348,7 +360,6 @@ const ProjectDetails = () => {
           <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none md:hidden" />
           <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none md:hidden" />
           
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="overflow-x-auto no-scrollbar scroll-smooth flex">
               <TabsList className="bg-muted/10 p-1 rounded-[1.25rem] inline-flex w-max md:w-auto shadow-inner border border-primary/5 mb-1">
                 {[
@@ -369,18 +380,16 @@ const ProjectDetails = () => {
                 ))}
               </TabsList>
             </div>
-          </Tabs>
         </div>
       </header>
 
       {/* Main Responsive Content Hub */}
-      <main className="flex-1 p-4 md:px-10 md:py-8 max-w-7xl mx-auto w-full">
-        <Tabs value={activeTab} className="h-full">
+      <main className="flex-1 p-4 md:px-10 md:py-8 max-w-7xl mx-auto w-full flex flex-col">
           {/* Board - Smooth Horizontal Scroll */}
-          <TabsContent value="kanban" className="mt-0 outline-none h-full">
+          <TabsContent value="kanban" className="mt-0 outline-none flex-1">
             <KanbanBoard 
               columns={dynamicColumns}
-              issues={project.issues || []}
+              issues={projectIssues}
               onDeleteIssue={(id) => {
                 if (!canManage) return;
                 if(confirm("Terminate this task?")) deleteIssueMutation.mutate(id);
@@ -409,7 +418,7 @@ const ProjectDetails = () => {
           {/* Timeline - Full Width */}
           <TabsContent value="timeline" className="mt-0 outline-none animate-in fade-in duration-500">
             <CalendarView 
-              issues={project.issues || []}
+              issues={projectIssues}
               onViewIssue={(issue) => {
                 setSelectedIssueForComments(issue);
                 setSelectedIssueTab("overview");
@@ -428,7 +437,7 @@ const ProjectDetails = () => {
                 <Card className="border border-primary/5 shadow-sm bg-card/40 backdrop-blur-sm rounded-[2rem] overflow-hidden group">
                   <CardContent className="p-8">
                     <p className="text-foreground/80 leading-relaxed whitespace-pre-wrap font-medium text-sm md:text-base">
-                      {project.description || "No mission brief provided for this project."}
+                      {project.description || "No project description provided for this project."}
                     </p>
                     <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-primary/5">
                       {project.tags?.map((tag, i) => (
@@ -444,7 +453,7 @@ const ProjectDetails = () => {
               <div className="space-y-8">
                   <div className="flex items-center gap-2 text-primary">
                     <UserIcon className="h-4 w-4" />
-                    <h3 className="font-black text-xs uppercase tracking-widest">Lead Agent</h3>
+                    <h3 className="font-black text-xs uppercase tracking-widest">Project Lead</h3>
                   </div>
                   <Card className="border border-primary/5 shadow-sm bg-card/40 backdrop-blur-sm rounded-[2rem] overflow-hidden">
                     <CardContent className="p-6">
@@ -465,10 +474,8 @@ const ProjectDetails = () => {
           </TabsContent>
 
           {/* Intel (Chat) - Viewport Filling */}
-          <TabsContent value="chat" className="mt-0 outline-none h-full min-h-[60vh] md:min-h-[700px]">
-            <Card className="border border-primary/5 shadow-elegant h-full overflow-hidden rounded-[2.5rem] bg-card/30 backdrop-blur-xl">
-              <ProjectChat projectId={project.id} projectName={project.name} teamMembers={project.team || []} />
-            </Card>
+          <TabsContent value="chat" className="mt-0 outline-none flex-1 data-[state=active]:flex flex-col min-h-[calc(100vh-250px)]">
+            <ProjectChat projectId={project.id} projectName={project.name} teamMembers={project.team || []} />
           </TabsContent>
 
           {/* Roster (Team) - Responsive Grid */}
@@ -493,10 +500,11 @@ const ProjectDetails = () => {
                 ))}
               </div>
           </TabsContent>
-        </Tabs>
       </main>
+      </Tabs>
 
       {/* Modals are handled via the same Dialog system as before, ensuring consistency */}
+
       <Dialog open={issueModalOpen} onOpenChange={setIssueModalOpen}>
         <DialogContent className="w-[calc(100vw-32px)] sm:max-w-md bg-card/95 backdrop-blur-2xl border-primary/10 shadow-2xl rounded-[2rem] p-0 overflow-hidden animate-in zoom-in-95 duration-300">
           <div className="p-6 md:p-8 space-y-6">
@@ -506,7 +514,7 @@ const ProjectDetails = () => {
             </DialogHeader>
             <div className="space-y-5">
               <div className="space-y-2">
-                <Label className="text-xs font-black uppercase text-primary ml-1 tracking-widest">Mission Name</Label>
+                <Label className="text-xs font-black uppercase text-primary ml-1 tracking-widest">Task Title</Label>
                 <Input value={newIssue.title} onChange={e => setNewIssue({...newIssue, title: e.target.value})} className="bg-background/50 border-primary/5 h-12 rounded-xl font-bold" />
               </div>
               <div className="space-y-2">
@@ -527,7 +535,7 @@ const ProjectDetails = () => {
                 </div>
               </div>
             </div>
-            <Button onClick={handleCreateIssue} variant="hero" className="w-full h-14 rounded-2xl font-black uppercase text-xs">Deploy Mission</Button>
+            <Button onClick={handleCreateIssue} variant="hero" className="w-full h-14 rounded-2xl font-black uppercase text-xs">Create Task</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -542,7 +550,7 @@ const ProjectDetails = () => {
             <DialogDescription className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] opacity-60">Authorise new unit access</DialogDescription>
           </DialogHeader>
           <div className="space-y-6">
-            <Input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="agent@mission.control" className="h-14 rounded-[1.25rem] bg-muted/20 border-primary/5 text-center font-bold" />
+            <Input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="colleague@company.com" className="h-14 rounded-[1.25rem] bg-muted/20 border-primary/5 text-center font-bold" />
             <Button onClick={() => inviteUserMutation.mutate({ email: inviteEmail, projectId })} disabled={inviteUserMutation.isPending} className="w-full h-14 bg-primary text-primary-foreground font-black uppercase tracking-widest rounded-2xl shadow-glow">
               {inviteUserMutation.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : "Dispatch Invite"}
             </Button>

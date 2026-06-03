@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -24,7 +24,9 @@ import {
   Tag,
   LayoutGrid,
   ArrowRight,
-  ChevronDown
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { projectAPI, userAPI, Project, Issue } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
@@ -47,7 +49,22 @@ import {
 
 const Projects = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [page, setPage] = useState(0);
+  const pageSize = 9;
+
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedSearch, selectedCategory]);
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -63,21 +80,20 @@ const Projects = () => {
     },
   });
 
-  const { data: projects, isLoading } = useQuery({
-    queryKey: ["projects"],
+  const { data: projectPage, isLoading } = useQuery({
+    queryKey: ["projects", page, selectedCategory, debouncedSearch],
     queryFn: async () => {
-      const response = await projectAPI.getProjects();
-      return response.data.data || [];
+      const response = await projectAPI.getProjects({
+        page,
+        size: pageSize,
+        category: selectedCategory === "All" ? undefined : selectedCategory,
+        keyword: debouncedSearch || undefined
+      });
+      return response.data.data;
     },
   });
 
-  const categories = useMemo(() => {
-    const cats = new Set<string>(["All"]);
-    projects?.forEach((p: Project) => {
-      if (p.category) cats.add(p.category);
-    });
-    return Array.from(cats);
-  }, [projects]);
+  const projects = projectPage?.content || [];
 
   // Mutations
   const deleteMutation = useMutation({
@@ -88,17 +104,27 @@ const Projects = () => {
     },
   });
 
-  const filteredProjects = projects?.filter((p: Project) => {
-    const matchesSearch = (p.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-                         (p.description?.toLowerCase() || "").includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "All" || p.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  }) || [];
+  // Use server-side filtered projects directly
+  const filteredProjects = projects;
+
+  // In a real app, this should be a separate API call or a fixed list
+  const categories = useMemo(() => {
+    const cats = new Set<string>(["All", "Development", "Design", "Marketing", "Research"]);
+    projects?.forEach((p: Project) => {
+      if (p.category) cats.add(p.category);
+    });
+    return Array.from(cats);
+  }, [projects]);
 
   const calculateProgress = (project: Project) => {
     if (!project.issues || project.issues.length === 0) return 0;
     const completed = project.issues.filter((i: Issue) => i.status?.toLowerCase() === "done").length;
     return Math.round((completed / project.issues.length) * 100);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -147,7 +173,10 @@ const Projects = () => {
               {categories.map((cat) => (
                 <DropdownMenuItem 
                   key={cat} 
-                  onClick={() => setSelectedCategory(cat)}
+                  onClick={() => {
+                    setSelectedCategory(cat);
+                    setPage(0);
+                  }}
                   className={`rounded-xl px-4 py-3 font-bold text-[10px] uppercase tracking-widest cursor-pointer ${
                     selectedCategory === cat ? "bg-primary/10 text-primary" : ""
                   }`}
@@ -167,121 +196,164 @@ const Projects = () => {
             ))}
           </div>
         ) : filteredProjects.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProjects.map((project: Project) => (
-              <Card
-                key={project.id}
-                className="group relative border-0 shadow-elegant bg-gradient-to-br from-card to-card/50 hover:shadow-glow transition-all duration-500 overflow-hidden"
-              >
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Badge variant="outline" className="bg-primary/5 text-primary border-primary/10 capitalize rounded-md">
-                          {project.category || "General"}
-                        </Badge>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProjects.map((project: Project) => (
+                <Card
+                  key={project.id}
+                  className="group relative border-0 shadow-elegant bg-gradient-to-br from-card to-card/50 hover:shadow-glow transition-all duration-500 overflow-hidden"
+                >
+                  <CardHeader className="pb-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="outline" className="bg-primary/5 text-primary border-primary/10 capitalize rounded-md">
+                            {project.category || "General"}
+                          </Badge>
+                        </div>
+                        <CardTitle className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
+                          {project.name}
+                        </CardTitle>
+                        <CardDescription className="line-clamp-2 mt-2 h-10">
+                          {project.description || "No description provided."}
+                        </CardDescription>
                       </div>
-                      <CardTitle className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
-                        {project.name}
-                      </CardTitle>
-                      <CardDescription className="line-clamp-2 mt-2 h-10">
-                        {project.description || "No description provided."}
-                      </CardDescription>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Progress */}
-                  <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs font-medium">
-                        <span className="text-muted-foreground">Project Completion</span>
-                        <span className="text-foreground">{calculateProgress(project)}%</span>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Progress */}
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs font-medium">
+                          <span className="text-muted-foreground">Project Completion</span>
+                          <span className="text-foreground">{calculateProgress(project)}%</span>
+                        </div>
+                        <Progress value={calculateProgress(project)} className="h-1.5 bg-primary/10" />
+                    </div>
+
+                    {/* Metadata */}
+                    <div className="flex items-center justify-between pt-2">
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
+                          <Users className="h-3.5 w-3.5" />
+                          {project.team?.length || 0}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <Folder className="h-3.5 w-3.5" />
+                          {project.issues?.length || 0}
+                        </span>
                       </div>
-                      <Progress value={calculateProgress(project)} className="h-1.5 bg-primary/10" />
-                  </div>
+                      <div className="flex gap-1">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button asChild size="sm" variant="ghost" className="h-9 w-9 p-0 rounded-xl hover:bg-primary/10 text-primary transition-all" aria-label="View Project">
+                                <Link to={`/projects/${project.id}`}><Eye className="h-4.5 w-4.5" /></Link>
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent className="rounded-xl font-bold text-[10px] uppercase tracking-widest bg-card border-primary/10">
+                              View Workspace
+                            </TooltipContent>
+                          </Tooltip>
+                          
+                          {project.owner?.id === profile?.id && (
+                            <>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    className="h-9 w-9 p-0 rounded-xl hover:bg-primary/10 text-primary transition-all"
+                                    aria-label="Edit Project"
+                                    onClick={() => {
+                                      setSelectedProject(project);
+                                      setIsEditModalOpen(true);
+                                    }}
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent className="rounded-xl font-bold text-[10px] uppercase tracking-widest bg-card border-primary/10">
+                                  Edit Project
+                                </TooltipContent>
+                              </Tooltip>
 
-                  {/* Metadata */}
-                  <div className="flex items-center justify-between pt-2">
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1.5">
-                        <Users className="h-3.5 w-3.5" />
-                        {project.team?.length || 0}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Folder className="h-3.5 w-3.5" />
-                        {project.issues?.length || 0}
-                      </span>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    className="h-9 w-9 p-0 rounded-xl hover:bg-destructive/10 text-destructive group-hover:opacity-100 transition-all"
+                                    aria-label="Delete Project"
+                                    onClick={() => {
+                                      if(window.confirm("Are you sure you want to archive this project? It will no longer be visible in your active workspace.")) {
+                                        deleteMutation.mutate(project.id);
+                                      }
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent className="rounded-xl font-bold text-[10px] uppercase tracking-widest bg-destructive text-destructive-foreground">
+                                  Archive Project
+                                </TooltipContent>
+                              </Tooltip>
+                            </>
+                          )}
+                        </TooltipProvider>
+                      </div>
                     </div>
-                    <div className="flex gap-1">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button asChild size="sm" variant="ghost" className="h-9 w-9 p-0 rounded-xl hover:bg-primary/10 text-primary transition-all" aria-label="View Project">
-                              <Link to={`/projects/${project.id}`}><Eye className="h-4.5 w-4.5" /></Link>
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent className="rounded-xl font-bold text-[10px] uppercase tracking-widest bg-card border-primary/10">
-                            View Workspace
-                          </TooltipContent>
-                        </Tooltip>
-                        
-                        {project.owner?.id === profile?.id && (
-                          <>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost" 
-                                  className="h-9 w-9 p-0 rounded-xl hover:bg-primary/10 text-primary transition-all"
-                                  aria-label="Edit Project"
-                                  onClick={() => {
-                                    setSelectedProject(project);
-                                    setIsEditModalOpen(true);
-                                  }}
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent className="rounded-xl font-bold text-[10px] uppercase tracking-widest bg-card border-primary/10">
-                                Edit Project
-                              </TooltipContent>
-                            </Tooltip>
 
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost" 
-                                  className="h-9 w-9 p-0 rounded-xl hover:bg-destructive/10 text-destructive group-hover:opacity-100 transition-all"
-                                  aria-label="Delete Project"
-                                  onClick={() => {
-                                    if(window.confirm("Are you sure you want to archive this project? It will no longer be visible in your active workspace.")) {
-                                      deleteMutation.mutate(project.id);
-                                    }
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent className="rounded-xl font-bold text-[10px] uppercase tracking-widest bg-destructive text-destructive-foreground">
-                                Archive Project
-                              </TooltipContent>
-                            </Tooltip>
-                          </>
-                        )}
-                      </TooltipProvider>
-                    </div>
-                  </div>
+                    <Button asChild variant="outline" className="w-full mt-4 border-primary/10 hover:border-primary/30 rounded-xl">
+                      <Link to={`/projects/${project.id}`}>
+                        Open Workspace <ArrowRight className="h-4 w-4 ml-2" />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
 
-                  <Button asChild variant="outline" className="w-full mt-4 border-primary/10 hover:border-primary/30 rounded-xl">
-                    <Link to={`/projects/${project.id}`}>
-                      Open Workspace <ArrowRight className="h-4 w-4 ml-2" />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+            {/* Pagination Controls */}
+            {projectPage && projectPage.totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-12 pb-8">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handlePageChange(page - 1)}
+                  disabled={projectPage.first}
+                  className="rounded-xl border-primary/10 hover:bg-primary/5 transition-all"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                
+                <div className="flex items-center gap-1 mx-2">
+                  {[...Array(projectPage.totalPages)].map((_, i) => (
+                    <Button
+                      key={i}
+                      variant={page === i ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => handlePageChange(i)}
+                      className={`h-9 w-9 rounded-xl font-black text-[10px] tracking-widest transition-all ${
+                        page === i ? "shadow-glow" : "hover:bg-primary/5 text-muted-foreground"
+                      }`}
+                    >
+                      {i + 1}
+                    </Button>
+                  ))}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handlePageChange(page + 1)}
+                  disabled={projectPage.last}
+                  className="rounded-xl border-primary/10 hover:bg-primary/5 transition-all"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-24 bg-card/40 rounded-3xl border-2 border-dashed border-primary/10">
             <Folder className="h-16 w-16 text-muted-foreground/60 mx-auto mb-4" />

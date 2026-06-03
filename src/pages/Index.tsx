@@ -82,8 +82,7 @@ const Index = () => {
                 <Zap className="text-white h-5 w-5 fill-current" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-black tracking-tighter text-foreground leading-none">PROJEX</span>
-                <span className="text-[10px] font-bold text-primary tracking-widest uppercase mt-0.5">Insight Flow</span>
+                <span className="text-2xl font-black tracking-tighter text-foreground leading-none">PROJEX</span>
               </div>
             </Link>
             
@@ -115,7 +114,7 @@ const Index = () => {
                 Accelerate Your <span className="italic">Impact</span>
               </h1>
               <p className="text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto font-medium leading-relaxed">
-                Elevate your team with a project management experience that feels like magic. ProjeX Insight Flow transforms chaos into clarity.
+                Elevate your team with a project management experience that feels like magic. ProjeX transforms chaos into clarity.
               </p>
             </div>
             
@@ -128,7 +127,7 @@ const Index = () => {
               </Link>
               <Button size="lg" variant="outline" className="h-16 px-10 rounded-[2rem] border-primary/10 font-black uppercase tracking-[0.15em] text-xs hover:bg-primary/5 transition-all">
                 <Play className="h-4 w-4 mr-3 fill-current" />
-                Live Transmission
+                Watch Demo
               </Button>
             </div>
 
@@ -288,7 +287,7 @@ const Index = () => {
           
           <div className="pt-12 border-t border-primary/5 flex flex-col md:flex-row justify-between items-center gap-6">
             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-40">
-              &copy; 2026 PROJEX SYSTEMS. ALL TRANSMISSIONS SECURED.
+              &copy; 2026 PROJEX SYSTEMS. ALL RIGHTS RESERVED.
             </p>
             <div className="flex gap-8">
               <a href="#" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Privacy</a>

@@ -94,8 +94,7 @@ const ForgotPassword = () => {
           <Zap className="text-white h-5 w-5 fill-current" />
         </div>
         <div className="flex flex-col">
-          <span className="text-xl font-black tracking-tighter text-foreground leading-none">PROJEX</span>
-          <span className="text-[10px] font-bold text-primary tracking-widest uppercase mt-0.5">Insight Flow</span>
+          <span className="text-2xl font-black tracking-tighter text-foreground leading-none">PROJEX</span>
         </div>
       </Link>
 
@@ -153,7 +152,7 @@ const ForgotPassword = () => {
                 ) : (
                   <Send className="h-4 w-4 mr-2" />
                 )}
-                Request Transmission
+                Send Reset Link
               </Button>
             </form>
           ) : (

@@ -190,7 +190,7 @@ const Login = () => {
                       AUTHENTICATING...
                     </>
                   ) : (
-                    "SIGN IN TO HUB"
+                    "SIGN IN"
                   )}
                 </Button>
               </div>

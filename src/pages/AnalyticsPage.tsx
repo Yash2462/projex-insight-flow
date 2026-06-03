@@ -42,8 +42,12 @@ const AnalyticsDashboard = () => {
   const { data: projects = [], isLoading: isProjectsLoading } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
-      const response = await projectAPI.getProjects();
-      return response.data.data || [];
+      const response = await projectAPI.getProjects({ size: 100 });
+      const data = response.data.data;
+      if (data && typeof data === 'object' && 'content' in data) {
+        return (data as any).content || [];
+      }
+      return Array.isArray(data) ? data : [];
     },
   });
 

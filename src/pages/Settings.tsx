@@ -197,7 +197,7 @@ const Settings = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <h3 className="text-xl font-black tracking-tight uppercase">{fullName || "Operative"}</h3>
+                  <h3 className="text-xl font-black tracking-tight uppercase">{fullName || "User"}</h3>
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-50">{profile?.email}</p>
                 </div>
 
@@ -236,7 +236,7 @@ const Settings = () => {
                       />
                     </div>
                     <div className="space-y-3">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Mission Brief (Bio)</Label>
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">User Bio</Label>
                       <Textarea
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
@@ -287,10 +287,10 @@ const Settings = () => {
 
               <div className="space-y-8">
                 {[
-                  { label: "Direct Uplink (Email)", desc: "Synchronize all mission updates to your primary email node", state: emailNotifs, setter: setEmailNotifs },
-                  { label: "Project Pulse", desc: "Real-time alerts for architectural changes and deployment updates", state: projectNotifs, setter: setProjectNotifs },
-                  { label: "Operative Comms", desc: "Immediate notification for direct encrypted messages", state: messageNotifs, setter: setMessageNotifs },
-                  { label: "Mission Allocation", desc: "Sensory feedback when assigned to new operational tasks", state: taskNotifs, setter: setTaskNotifs }
+                  { label: "Email Notifications", desc: "Receive updates directly to your inbox", state: emailNotifs, setter: setEmailNotifs },
+                  { label: "Project Alerts", desc: "Real-time alerts for project structure and status changes", state: projectNotifs, setter: setProjectNotifs },
+                  { label: "Direct Messages", desc: "Immediate notification for direct encrypted messages", state: messageNotifs, setter: setMessageNotifs },
+                  { label: "Task Assignment", desc: "Sensory feedback when assigned to new project tasks", state: taskNotifs, setter: setTaskNotifs }
                 ].map((item, i) => (
                   <div key={i} className="flex items-center justify-between group">
                     <div className="space-y-1">

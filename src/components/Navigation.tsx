@@ -104,7 +104,11 @@ const Navigation = () => {
     queryKey: ["projects"],
     queryFn: async () => {
       const response = await userAPI.getProjectByTeam();
-      return response.data.data || [];
+      const data = response.data.data;
+      if (data && typeof data === 'object' && 'content' in data) {
+        return (data as any).content || [];
+      }
+      return Array.isArray(data) ? data : [];
     },
     enabled: !!profile,
   });
@@ -182,7 +186,7 @@ const Navigation = () => {
       {/* Sidebar */}
       <nav
         className={`
-          fixed inset-y-0 left-0 z-[60] w-72 md:w-64 bg-card/40 backdrop-blur-2xl border-r border-primary/5 transform transition-all duration-500 ease-in-out
+          fixed inset-y-0 left-0 z-40 w-72 md:w-64 bg-card/40 backdrop-blur-2xl border-r border-primary/5 transform transition-all duration-500 ease-in-out
           ${
             isMobileMenuOpen
               ? "translate-x-0"
@@ -198,8 +202,7 @@ const Navigation = () => {
                 <Zap className="text-white h-5 w-5 fill-current" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-black tracking-tighter text-foreground leading-none">PROJEX</span>
-                <span className="text-xs font-bold text-primary tracking-widest uppercase mt-0.5">Insight Flow</span>
+                <span className="text-2xl font-black tracking-tighter text-foreground leading-none">PROJEX</span>
               </div>
             </Link>
 
@@ -213,9 +216,11 @@ const Navigation = () => {
                     Switch Theme
                   </TooltipContent>
                 </Tooltip>
+              </TooltipProvider>
 
-                {/* Notification Bell */}
-                <DropdownMenu>
+              {/* Notification Bell */}
+              <DropdownMenu>
+                <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <DropdownMenuTrigger asChild>
@@ -234,11 +239,13 @@ const Navigation = () => {
                       Notifications
                     </TooltipContent>
                   </Tooltip>
-                  <DropdownMenuContent 
-                    align="end" 
-                    side="bottom" 
-                    className="w-[calc(100vw-32px)] md:w-80 p-0 bg-card/90 backdrop-blur-xl border-primary/10 shadow-2xl rounded-2xl overflow-hidden mt-2 animate-in fade-in slide-in-from-top-2 duration-300"
-                  >
+                </TooltipProvider>
+                
+                <DropdownMenuContent 
+                  align="end" 
+                  side="bottom" 
+                  className="w-[calc(100vw-32px)] md:w-80 p-0 bg-card/90 backdrop-blur-xl border-primary/10 shadow-2xl rounded-2xl overflow-hidden mt-2 animate-in fade-in slide-in-from-top-2 duration-300 z-[70]"
+                >
                   <div className="p-4 bg-background/50 flex items-center justify-between">
                     <DropdownMenuLabel className="font-bold text-sm">Notifications</DropdownMenuLabel>
                     {notifications.length > 0 && (
@@ -303,7 +310,6 @@ const Navigation = () => {
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
-              </TooltipProvider>
             </div>
           </div>
 
@@ -466,7 +472,7 @@ const Navigation = () => {
           </CommandGroup>
 
           <CommandGroup heading="Projects" className="px-2 text-xs font-medium text-muted-foreground mt-2">
-            {projects.filter((p:any) => !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase())).map((proj: any) => (
+            {Array.isArray(projects) && projects.filter((p:any) => !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase())).map((proj: any) => (
               <CommandItem
                 key={proj.id}
                 onSelect={() => {

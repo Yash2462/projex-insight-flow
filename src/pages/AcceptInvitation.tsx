@@ -166,15 +166,15 @@ const AcceptInvitation = () => {
           </div>
           
           <CardTitle className="text-2xl md:text-3xl font-black tracking-tight">
-            {status === 'pending' && 'Processing Hub Invitation'}
-            {status === 'success' && 'Welcome to the Mission!'}
+            {status === 'pending' && 'Processing Invitation'}
+            {status === 'success' && 'Welcome to the Project!'}
             {status === 'error' && 'Invitation Failure'}
           </CardTitle>
           
           <CardDescription className="font-medium opacity-60">
             {status === 'pending' && 'We\'re synchronizing your access to the workspace...'}
             {status === 'success' && projectInfo && `You've successfully joined ${projectInfo.name}`}
-            {status === 'error' && 'We encountered an error during your deployment'}
+            {status === 'error' && 'We encountered an error accepting invitation'}
           </CardDescription>
         </CardHeader>
 

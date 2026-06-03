@@ -75,7 +75,7 @@ const Signup = () => {
           </div>
           <CardTitle className="text-3xl font-black tracking-tight animate-in fade-in slide-in-from-top-4 duration-700 delay-100 fill-mode-backwards">Create account</CardTitle>
           <CardDescription className="font-medium opacity-60 animate-in fade-in slide-in-from-top-4 duration-700 delay-200 fill-mode-backwards">
-            Join the ProjeX network and start your first mission
+            Join the ProjeX network and start your first project
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 md:p-8 pt-4">
@@ -186,7 +186,7 @@ const Signup = () => {
 
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-700 fill-mode-backwards">
               <Button type="submit" className="w-full h-12 text-sm font-black rounded-xl transition-all active:scale-[0.98] shadow-glow" variant="hero" disabled={isLoading}>
-                {isLoading ? "DEPLOYING ACCOUNT..." : "CREATE HUB IDENTITY"}
+                {isLoading ? "CREATING ACCOUNT..." : "CREATE ACCOUNT"}
               </Button>
             </div>
 

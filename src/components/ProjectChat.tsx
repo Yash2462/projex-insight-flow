@@ -150,7 +150,7 @@ const ProjectChat = ({ projectId, projectName, teamMembers = [] }: ProjectChatPr
   };
 
   return (
-    <Card className="h-full border-0 shadow-lg bg-card/40 backdrop-blur-sm flex flex-col overflow-hidden md:rounded-[2rem]">
+    <Card className="flex-1 w-full border-0 shadow-lg bg-card/40 backdrop-blur-sm flex flex-col overflow-hidden md:rounded-[2rem] h-full min-h-[calc(100vh-250px)]">
       <CardHeader className="p-3 md:p-6 pb-3 md:pb-4 border-b bg-background/50">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 md:gap-3 text-sm md:text-lg truncate">
@@ -222,7 +222,7 @@ const ProjectChat = ({ projectId, projectName, teamMembers = [] }: ProjectChatPr
           </div>
         </ScrollArea>
 
-        <div className="p-4 bg-background/50 border-t">
+        <div className="p-4 bg-background/50 border-t shrink-0">
           <form onSubmit={handleSendMessage} className="flex gap-2">
             <Input
               value={newMessage}

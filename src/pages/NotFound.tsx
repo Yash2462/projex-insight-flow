@@ -33,8 +33,7 @@ const NotFound = () => {
           <Zap className="text-white h-6 w-6 fill-current" />
         </div>
         <div className="flex flex-col">
-          <span className="text-2xl font-black tracking-tighter text-foreground leading-none">PROJEX</span>
-          <span className="text-xs font-bold text-primary tracking-widest uppercase mt-0.5">Insight Flow</span>
+          <span className="text-3xl font-black tracking-tighter text-foreground leading-none">PROJEX</span>
         </div>
       </Link>
 
@@ -69,7 +68,7 @@ const NotFound = () => {
             <Button asChild variant="outline" className="flex-1 h-14 rounded-2xl border-primary/10 bg-primary/5 hover:bg-primary/10 font-black uppercase tracking-widest text-[10px] transition-all">
               <Link to="/">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Abort Mission
+                Return to Home
               </Link>
             </Button>
           </div>
