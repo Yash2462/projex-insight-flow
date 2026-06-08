@@ -71,6 +71,8 @@ import {
 
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 
+import { ProjectDetailsSkeleton } from "@/components/PageSkeletons";
+
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -154,9 +156,9 @@ const ProjectDetails = () => {
       await queryClient.cancelQueries({ queryKey: ["projectIssues", projectId] });
       const previousIssues = queryClient.getQueryData(["projectIssues", projectId]);
       
-      queryClient.setQueryData(["projectIssues", projectId], (old: any) => {
+      queryClient.setQueryData(["projectIssues", projectId], (old: { content: Issue[] }) => {
         if (!old) return old;
-        const updatedIssues = old.content.map((issue: any) => {
+        const updatedIssues = old.content.map((issue: Issue) => {
           const newOrder = newOrders.find(o => o.id === issue.id);
           if (newOrder) {
             return { ...issue, orderIndex: newOrder.index, status: newOrder.status };
@@ -194,14 +196,14 @@ const ProjectDetails = () => {
   });
 
   const createIssueMutation = useMutation({
-    mutationFn: (data: any) => issueAPI.createIssue(data),
+    mutationFn: (data: Partial<Issue>) => issueAPI.createIssue(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projectIssues", projectId] });
       toast({ title: "Task Created" });
       setIssueModalOpen(false);
       setNewIssue({ title: "", description: "", priority: "MEDIUM", dueDate: "", status: "TODO" });
     },
-    onError: (error: any) => {
+    onError: (error: Error & { response?: { data?: { message?: string } } }) => {
        toast({ title: "Creation Failed", description: error.response?.data?.message || "Check your input", variant: "destructive" });
     }
   });
@@ -248,12 +250,7 @@ const ProjectDetails = () => {
   const { subscribe, isConnected } = useWebSocket(projectId);
 
   if (isProjectLoading || !project) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-primary opacity-60" />
-        <p className="text-xs font-black uppercase tracking-[0.3em] opacity-60">Decrypting Workspace</p>
-      </div>
-    );
+    return <ProjectDetailsSkeleton />;
   }
 
   return (

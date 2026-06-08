@@ -36,6 +36,8 @@ import { Button } from "@/components/ui/button";
 
 const COLORS = ["#6366f1", "#8b5cf6", "#ec4899", "#f43f5e", "#10b981", "#f59e0b"];
 
+import { AnalyticsSkeleton } from "@/components/PageSkeletons";
+
 const AnalyticsDashboard = () => {
   const navigate = useNavigate();
 
@@ -45,7 +47,7 @@ const AnalyticsDashboard = () => {
       const response = await projectAPI.getProjects({ size: 100 });
       const data = response.data.data;
       if (data && typeof data === 'object' && 'content' in data) {
-        return (data as any).content || [];
+        return (data as { content: Project[] }).content || [];
       }
       return Array.isArray(data) ? data : [];
     },
@@ -60,11 +62,7 @@ const AnalyticsDashboard = () => {
   });
 
   if (isProjectsLoading || isStatsLoading) {
-    return (
-      <div className="min-h-screen bg-background p-6 md:ml-64 flex items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
-      </div>
-    );
+    return <AnalyticsSkeleton />;
   }
 
   // Process aggregate data

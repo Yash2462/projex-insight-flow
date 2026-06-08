@@ -47,6 +47,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+import { ProjectCardSkeleton } from "@/components/PageSkeletons";
+
 const Projects = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -192,7 +194,7 @@ const Projects = () => {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
-              <Card key={i} className="animate-pulse h-[300px] border-0 bg-muted/30" />
+              <ProjectCardSkeleton key={i} />
             ))}
           </div>
         ) : filteredProjects.length > 0 ? (

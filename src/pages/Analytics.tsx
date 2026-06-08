@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Issue, User } from "@/services/types";
 import { useParams, useNavigate } from "react-router-dom";
 import { projectAPI, dashboardAPI } from "@/services/api";
 import { 
@@ -34,6 +35,8 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+import { AnalyticsSkeleton } from "@/components/PageSkeletons";
 
 const Analytics = () => {
   const chartColors = [
@@ -78,11 +81,7 @@ const Analytics = () => {
   });
 
   if (isProjectLoading || isCountsLoading || isIssuesLoading) {
-    return (
-      <div className="min-h-screen bg-background p-6 md:ml-64 flex items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
-      </div>
-    );
+    return <AnalyticsSkeleton />;
   }
 
   if (!project) {
@@ -100,29 +99,29 @@ const Analytics = () => {
   // Process data for charts
   const statusData = project.statuses?.map((status: string) => ({
     name: status.replace(/_/g, ' '),
-    value: projectIssues.filter((i: any) => i.status === status).length || 0
+    value: projectIssues.filter((i: Issue) => i.status === status).length || 0
   })) || [];
 
   const priorityData = [
-    { name: 'High', value: projectIssues.filter((i: any) => i.priority === 'HIGH').length || 0 },
-    { name: 'Medium', value: projectIssues.filter((i: any) => i.priority === 'MEDIUM').length || 0 },
-    { name: 'Low', value: projectIssues.filter((i: any) => i.priority === 'LOW').length || 0 },
+    { name: 'High', value: projectIssues.filter((i: Issue) => i.priority === 'HIGH').length || 0 },
+    { name: 'Medium', value: projectIssues.filter((i: Issue) => i.priority === 'MEDIUM').length || 0 },
+    { name: 'Low', value: projectIssues.filter((i: Issue) => i.priority === 'LOW').length || 0 },
   ];
 
-  const teamData = project.team?.map((member: any) => ({
+  const teamData = project.team?.map((member: User) => ({
     name: member.fullName.split(' ')[0],
-    assigned: projectIssues.filter((i: any) => i.assignee?.id === member.id).length || 0,
-    completed: projectIssues.filter((i: any) => i.assignee?.id === member.id && i.status === 'DONE').length || 0,
+    assigned: projectIssues.filter((i: Issue) => i.assignee?.id === member.id).length || 0,
+    completed: projectIssues.filter((i: Issue) => i.assignee?.id === member.id && i.status === 'DONE').length || 0,
   })) || [];
 
-  const timeData = projectIssues.filter((i: any) => i.estimatedHours > 0 || i.loggedHours > 0).map((issue: any) => ({
+  const timeData = projectIssues.filter((i: Issue) => i.estimatedHours > 0 || i.loggedHours > 0).map((issue: Issue) => ({
     name: issue.title.substring(0, 15) + (issue.title.length > 15 ? '...' : ''),
     estimated: issue.estimatedHours,
     actual: issue.loggedHours,
   })).slice(0, 8) || [];
 
-  const totalEstimated = projectIssues.reduce((acc: number, i: any) => acc + (i.estimatedHours || 0), 0) || 0;
-  const totalLogged = projectIssues.reduce((acc: number, i: any) => acc + (i.loggedHours || 0), 0) || 0;
+  const totalEstimated = projectIssues.reduce((acc: number, i: Issue) => acc + (i.estimatedHours || 0), 0) || 0;
+  const totalLogged = projectIssues.reduce((acc: number, i: Issue) => acc + (i.loggedHours || 0), 0) || 0;
 
   return (
     <div className="min-h-screen bg-background md:ml-64 relative overflow-hidden">
@@ -156,7 +155,7 @@ const Analytics = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { title: "Total Scope", value: projectIssues.length || 0, icon: TrendingUp, color: "text-blue-500", bg: "bg-blue-500/10" },
-            { title: "Resolved", value: projectIssues.filter((i: any) => i.status === 'DONE').length || 0, icon: CheckCircle2, color: "text-green-500", bg: "bg-green-500/10" },
+            { title: "Resolved", value: projectIssues.filter((i: Issue) => i.status === 'DONE').length || 0, icon: CheckCircle2, color: "text-green-500", bg: "bg-green-500/10" },
             { title: "Project Time", value: `${totalLogged}h / ${totalEstimated}h`, icon: Clock, color: "text-orange-500", bg: "bg-orange-500/10" },
             { title: "Team Load", value: project.team?.length || 0, icon: Users, color: "text-purple-500", bg: "bg-purple-500/10" },
           ].map((stat, i) => (
