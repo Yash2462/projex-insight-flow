@@ -6,19 +6,15 @@ import {
   ResponsiveContainer, 
   Tooltip, 
   Legend,
-  BarChart,
-  Bar,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
-  CartesianGrid,
-  LineChart,
-  Line,
-  AreaChart,
-  Area
+  CartesianGrid
 } from "recharts";
 import { ProjectCounts } from "@/services/api";
-import { Badge } from "@/components/ui/badge";
-import { Zap, TrendingUp, AlertTriangle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TrendingUp, AlertTriangle } from "lucide-react";
 
 interface DashboardChartsProps {
   counts: ProjectCounts | undefined;
@@ -41,13 +37,13 @@ const DashboardCharts = ({ counts, isLoading }: DashboardChartsProps) => {
         {[...Array(2)].map((_, i) => (
           <Card key={i} className="glass-panel h-[400px] rounded-[2rem] border-primary/5">
             <CardHeader className="space-y-3">
-              <div className="h-7 w-40 bg-muted/40 rounded-xl animate-pulse"></div>
-              <div className="h-4 w-60 bg-muted/20 rounded-lg animate-pulse"></div>
+              <Skeleton className="h-7 w-40 rounded-xl" />
+              <Skeleton className="h-4 w-60 rounded-lg" />
             </CardHeader>
             <CardContent className="h-[250px] flex items-center justify-center relative">
-              <div className="h-40 w-40 rounded-full border-[12px] border-muted/20 animate-pulse"></div>
+              <Skeleton className="h-40 w-40 rounded-full border-[12px] border-transparent" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="h-12 w-12 bg-muted/30 rounded-full animate-ping"></div>
+                <Skeleton className="h-12 w-12 rounded-full" />
               </div>
             </CardContent>
           </Card>

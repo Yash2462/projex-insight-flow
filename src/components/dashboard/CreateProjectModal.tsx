@@ -60,7 +60,7 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
   });
 
   const mutation = useMutation({
-    mutationFn: (projectData: any) => projectAPI.createProject(projectData),
+    mutationFn: (projectData: Partial<Project>) => projectAPI.createProject(projectData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });

@@ -51,7 +51,7 @@ const EditProjectModal = ({ open, onOpenChange, project }: EditProjectModalProps
   }, [project, open]);
 
   const mutation = useMutation({
-    mutationFn: (data: any) => projectAPI.updateProject(project.id, data),
+    mutationFn: (data: Partial<Project>) => projectAPI.updateProject(project.id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["project", project.id] });

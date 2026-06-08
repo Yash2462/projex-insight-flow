@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Folder, Users, AlertCircle, CheckCircle, TrendingUp } from "lucide-react";
+import { Folder, Users, AlertCircle, CheckCircle } from "lucide-react";
 import { DashboardStatistics } from "@/services/api";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DashboardStatsProps {
   stats: DashboardStatistics | undefined;
@@ -45,16 +46,16 @@ const DashboardStats = ({ stats, isLoading }: DashboardStatsProps) => {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[...Array(4)].map((_, i) => (
           <Card key={i} className="glass-panel h-32 rounded-[2rem] border-primary/5">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div className="h-4 w-20 bg-muted/40 rounded-lg animate-pulse"></div>
-              <div className="h-8 w-8 bg-muted/20 rounded-xl animate-pulse"></div>
+              <Skeleton className="h-4 w-20 rounded-lg" />
+              <Skeleton className="h-8 w-8 rounded-xl" />
             </CardHeader>
             <CardContent>
-              <div className="h-8 w-12 bg-muted/30 rounded-lg mb-2 animate-pulse"></div>
-              <div className="h-3 w-24 bg-muted/10 rounded-full animate-pulse"></div>
+              <Skeleton className="h-8 w-12 rounded-lg mb-2" />
+              <Skeleton className="h-3 w-24 rounded-full" />
             </CardContent>
           </Card>
         ))}
