@@ -47,7 +47,7 @@ const Signup = () => {
       } else {
         navigate("/login"); // fallback: redirect to login after signup
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Signup error:", err);
       setError(err.response?.data?.message || "Signup failed. Try again.");
     } finally {

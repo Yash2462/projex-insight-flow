@@ -40,7 +40,7 @@ const ForgotPassword = () => {
         description: "Please check your email for the verification code.",
       });
       setStep(2);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
         description: error.response?.data?.message || "Failed to send OTP. Please try again.",
@@ -70,7 +70,7 @@ const ForgotPassword = () => {
         description: "Your password has been reset successfully.",
       });
       navigate("/login");
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
         description: error.response?.data?.message || "Failed to reset password. Please try again.",

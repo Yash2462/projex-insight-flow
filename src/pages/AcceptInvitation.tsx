@@ -21,7 +21,7 @@ const AcceptInvitation = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<'pending' | 'success' | 'error' | 'invalid'>('pending');
-  const [projectInfo, setProjectInfo] = useState<any>(null);
+  const [projectInfo, setProjectInfo] = useState<Record<string, unknown> | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   const token = searchParams.get('token');
@@ -71,7 +71,7 @@ const AcceptInvitation = () => {
           }
         }, 3000);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to accept invitation:', error);
       
       setStatus('error');

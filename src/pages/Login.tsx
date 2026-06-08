@@ -71,7 +71,7 @@ const Login = () => {
       } else {
         navigate("/dashboard");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Login error:", err);
       setError(
         err.response?.data?.message || "Invalid email or password. Try again."
