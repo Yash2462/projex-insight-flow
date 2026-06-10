@@ -226,7 +226,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
   });
 
   const updateIssueMutation = useMutation({
-    mutationFn: (data: any) => issueAPI.updateIssue(issueId, data),
+    mutationFn: (data: Partial<Issue>) => issueAPI.updateIssue(issueId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["issue", issueId] });
     },
@@ -336,14 +336,14 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
         <div className="max-w-4xl mx-auto h-full">
             {/* Overview */}
             <TabsContent value="overview" className="m-0 p-5 md:p-8 pt-0 md:pt-0 space-y-8 outline-none animate-in fade-in duration-300">
-              {attachments.filter((a: any) => a.fileType.startsWith('image/')).length > 0 && (
+              {attachments.filter((a: Attachment) => a.fileType.startsWith('image/')).length > 0 && (
                 <div className="space-y-4 pt-4">
                   <div className="flex items-center gap-2 text-primary px-1">
                     <FileImage className="h-3.5 w-3.5" />
                     <h3 className="font-black text-[10px] uppercase tracking-[0.2em]">Strategic Assets</h3>
                   </div>
                   <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
-                    {attachments.filter((a: any) => a.fileType.startsWith('image/')).slice(0, 5).map((file: Attachment) => (
+                    {attachments.filter((a: Attachment) => a.fileType.startsWith('image/')).slice(0, 5).map((file: Attachment) => (
                       <div 
                         key={file.id} 
                         className="h-24 md:h-40 min-w-[140px] md:min-w-[200px] rounded-[2rem] border border-primary/5 bg-card overflow-hidden cursor-pointer hover:border-primary/20 transition-all shadow-sm"
@@ -357,13 +357,13 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                         />
                       </div>
                     ))}
-                    {attachments.filter((a: any) => a.fileType.startsWith('image/')).length > 5 && (
+                    {attachments.filter((a: Attachment) => a.fileType.startsWith('image/')).length > 5 && (
                       <button 
                         onClick={() => setActiveTab("attachments")}
                         className="h-24 md:h-40 min-w-[100px] rounded-[2rem] bg-muted/20 border border-dashed border-primary/10 flex flex-col items-center justify-center gap-1 group"
                       >
                         <Plus className="h-4 w-4 text-primary opacity-60 group-hover:scale-110 transition-transform" />
-                        <span className="text-[7px] font-black uppercase opacity-60">+{attachments.filter((a: any) => a.fileType.startsWith('image/')).length - 5} More</span>
+                        <span className="text-[7px] font-black uppercase opacity-60">+{attachments.filter((a: Attachment) => a.fileType.startsWith('image/')).length - 5} More</span>
                       </button>
                     )}
                   </div>
@@ -404,7 +404,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                             </SelectTrigger>
                             <SelectContent className="rounded-xl border-primary/10">
                               <SelectItem value="0">Unassigned</SelectItem>
-                              {project?.team?.map((member: any) => (
+                              {project?.team?.map((member: User) => (
                                 <SelectItem key={member.id} value={member.id.toString()}>{member.fullName}</SelectItem>
                               ))}
                             </SelectContent>

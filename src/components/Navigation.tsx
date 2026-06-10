@@ -106,7 +106,7 @@ const Navigation = () => {
       const response = await userAPI.getProjectByTeam();
       const data = response.data.data;
       if (data && typeof data === 'object' && 'content' in data) {
-        return (data as any).content || [];
+        return (data as { content: Notification[] }).content || [];
       }
       return Array.isArray(data) ? data : [];
     },
@@ -130,7 +130,7 @@ const Navigation = () => {
     if (isConnected && profile?.email) {
       subscribe(`/user/${profile.email}/queue/notifications`, (notification) => {
         // Update notification cache
-        queryClient.setQueryData(["notifications"], (prev: any) => [notification, ...(prev || [])]);
+        queryClient.setQueryData(["notifications"], (prev: Notification[]) => [notification, ...(prev || [])]);
       });
     }
   }, [isConnected, profile?.email, subscribe, queryClient]);
@@ -411,7 +411,7 @@ const Navigation = () => {
                   decoding="async"
                 />
                 <AvatarFallback className="bg-primary/5 text-primary font-bold text-xs uppercase">
-                  {profile?.fullName?.split(' ').map((n:any) => n[0]).join('')}
+                  {profile?.fullName?.split(' ').map((n: string) => n[0]).join('')}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
@@ -472,7 +472,7 @@ const Navigation = () => {
           </CommandGroup>
 
           <CommandGroup heading="Projects" className="px-2 text-xs font-medium text-muted-foreground mt-2">
-            {Array.isArray(projects) && projects.filter((p:any) => !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase())).map((proj: any) => (
+            {Array.isArray(projects) && projects.filter((p: Project) => !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase())).map((proj: Project) => (
               <CommandItem
                 key={proj.id}
                 onSelect={() => {
@@ -490,7 +490,7 @@ const Navigation = () => {
 
           {issueResults.length > 0 && (
             <CommandGroup heading="Tasks" className="px-2 text-xs font-medium text-muted-foreground mt-2">
-              {issueResults.map((issue: any) => (
+              {issueResults.map((issue: Issue) => (
                 <CommandItem
                   key={issue.id}
                   onSelect={() => {

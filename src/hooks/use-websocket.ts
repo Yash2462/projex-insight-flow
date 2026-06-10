@@ -6,7 +6,7 @@ const SOCKET_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/w
 
 export interface WebSocketMessage {
   type: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export const useWebSocket = (projectId?: number) => {

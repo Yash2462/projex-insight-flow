@@ -80,7 +80,7 @@ const Settings = () => {
   });
 
   const updatePreferencesMutation = useMutation({
-    mutationFn: (data: any) => userAPI.updatePreferences(data),
+    mutationFn: (data: Partial<User>) => userAPI.updatePreferences(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       toast({

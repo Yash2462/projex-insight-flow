@@ -17,7 +17,7 @@ import { subscriptionAPI, paymentAPI } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 
 const Subscription = () => {
-  const [currentSubscription, setCurrentSubscription] = useState<any>(null);
+  const [currentSubscription, setCurrentSubscription] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 

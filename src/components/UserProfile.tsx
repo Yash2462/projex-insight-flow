@@ -18,7 +18,7 @@ import { getAvatarUrl } from "@/lib/utils";
 
 interface UserProfileProps {
   userId: number;
-  onMessageClick?: (user: any) => void;
+  onMessageClick?: (user: User) => void;
 }
 
 const UserProfile = ({ userId, onMessageClick }: UserProfileProps) => {
@@ -37,8 +37,8 @@ const UserProfile = ({ userId, onMessageClick }: UserProfileProps) => {
       const response = await projectAPI.getProjects({ size: 100 });
       const projectList = response.data.data.content || [];
       // Filter projects where this user is a member or owner
-      return projectList.filter((p: any) => 
-        p.owner?.id === userId || p.team?.some((m: any) => m.id === userId)
+      return projectList.filter((p: Project) => 
+        p.owner?.id === userId || p.team?.some((m: User) => m.id === userId)
       );
     },
     enabled: !!userId,
@@ -163,7 +163,7 @@ const UserProfile = ({ userId, onMessageClick }: UserProfileProps) => {
                 <div key={i} className="h-28 rounded-[2rem] bg-muted/10 animate-pulse border border-primary/5" />
               ))
             ) : projects && projects.length > 0 ? (
-              projects.map((project: any) => (
+              projects.map((project: Project) => (
                 <Card 
                   key={project.id}
                   className="glass-panel hover-lift border-primary/5 rounded-[2rem] p-6 group cursor-pointer"
