@@ -5,7 +5,13 @@ import { ThemeProvider } from "./components/theme-provider";
 import { Toaster } from "./components/ui/toaster";
 import { useParams } from "react-router-dom";
 import Navigation from "./components/Navigation";
-import { Loader2 } from "lucide-react";
+import { 
+  AppLayoutSkeleton, 
+  DashboardSkeleton, 
+  ProjectsPageSkeleton, 
+  ProjectDetailsSkeleton, 
+  AnalyticsSkeleton 
+} from "./components/PageSkeletons";
 import "./index.css";
 
 // Lazy-loaded pages
@@ -26,13 +32,6 @@ const IssueDetail = lazy(() => import("./components/IssueDetail"));
 
 const queryClient = new QueryClient();
 
-// Page Loader
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-  </div>
-);
-
 const IssueDetailWrapper = () => {
   const { issueId } = useParams();
   if (!issueId) return null;
@@ -44,90 +43,105 @@ const App = () => {
     <ThemeProvider defaultTheme="light" storageKey="projex-theme">
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route 
-                path="/dashboard" 
-                element={
-                  <>
-                    <Navigation />
+          <Routes>
+            <Route path="/" element={<Suspense fallback={<AppLayoutSkeleton />}><Index /></Suspense>} />
+            <Route path="/login" element={<Suspense fallback={<AppLayoutSkeleton />}><Login /></Suspense>} />
+            <Route path="/signup" element={<Suspense fallback={<AppLayoutSkeleton />}><Signup /></Suspense>} />
+            <Route path="/forgot-password" element={<Suspense fallback={<AppLayoutSkeleton />}><ForgotPassword /></Suspense>} />
+            
+            <Route 
+              path="/dashboard" 
+              element={
+                <>
+                  <Navigation />
+                  <Suspense fallback={<DashboardSkeleton />}>
                     <Dashboard />
-                  </>
-                } 
-              />
-              <Route 
-                path="/projects" 
-                element={
-                  <>
-                    <Navigation />
+                  </Suspense>
+                </>
+              } 
+            />
+            <Route 
+              path="/projects" 
+              element={
+                <>
+                  <Navigation />
+                  <Suspense fallback={<ProjectsPageSkeleton />}>
                     <Projects />
-                  </>
-                } 
-              />
-              <Route 
-                path="/subscription" 
-                element={
-                  <>
-                    <Navigation />
+                  </Suspense>
+                </>
+              } 
+            />
+            <Route 
+              path="/subscription" 
+              element={
+                <>
+                  <Navigation />
+                  <Suspense fallback={<AppLayoutSkeleton />}>
                     <Subscription />
-                  </>
-                } 
-              />
-              <Route 
-                path="/analytics" 
-                element={
-                  <>
-                    <Navigation />
+                  </Suspense>
+                </>
+              } 
+            />
+            <Route 
+              path="/analytics" 
+              element={
+                <>
+                  <Navigation />
+                  <Suspense fallback={<AnalyticsSkeleton />}>
                     <AnalyticsPage />
-                  </>
-                } 
-              />
-              <Route 
-                path="/settings" 
-                element={
-                  <>
-                    <Navigation />
+                  </Suspense>
+                </>
+              } 
+            />
+            <Route 
+              path="/settings" 
+              element={
+                <>
+                  <Navigation />
+                  <Suspense fallback={<AppLayoutSkeleton />}>
                     <Settings />
-                  </>
-                } 
-              />
-              <Route 
-                path="/projects/:id" 
-                element={
-                  <>
-                    <Navigation />
+                  </Suspense>
+                </>
+              } 
+            />
+            <Route 
+              path="/projects/:id" 
+              element={
+                <>
+                  <Navigation />
+                  <Suspense fallback={<ProjectDetailsSkeleton />}>
                     <ProjectDetails />
-                  </>
-                } 
-              />
-              <Route 
-                path="/projects/:id/analytics" 
-                element={
-                  <>
-                    <Navigation />
+                  </Suspense>
+                </>
+              } 
+            />
+            <Route 
+              path="/projects/:id/analytics" 
+              element={
+                <>
+                  <Navigation />
+                  <Suspense fallback={<AnalyticsSkeleton />}>
                     <Analytics />
-                  </>
-                } 
-              />
-              <Route 
-                path="/projects/:projectId/issues/:issueId" 
-                element={
-                  <>
-                    <Navigation />
-                    <div className="md:ml-64 p-4 lg:p-8 min-h-screen bg-background">
+                  </Suspense>
+                </>
+              } 
+            />
+            <Route 
+              path="/projects/:projectId/issues/:issueId" 
+              element={
+                <>
+                  <Navigation />
+                  <div className="md:ml-64 p-4 lg:p-8 min-h-screen bg-background">
+                    <Suspense fallback={<AppLayoutSkeleton />}>
                       <IssueDetailWrapper />
-                    </div>
-                  </>
-                } 
-              />
-              <Route path="/accept_invitation" element={<AcceptInvitation />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
+                    </Suspense>
+                  </div>
+                </>
+              } 
+            />
+            <Route path="/accept_invitation" element={<Suspense fallback={<AppLayoutSkeleton />}><AcceptInvitation /></Suspense>} />
+            <Route path="*" element={<Suspense fallback={<AppLayoutSkeleton />}><NotFound /></Suspense>} />
+          </Routes>
           <Toaster />
         </BrowserRouter>
       </QueryClientProvider>
