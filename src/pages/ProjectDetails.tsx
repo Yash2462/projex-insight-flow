@@ -266,12 +266,12 @@ const ProjectDetails = () => {
             <div className="min-w-0">
               <h1 className="text-lg md:text-3xl font-black tracking-tight text-foreground truncate uppercase">{project.name}</h1>
               <div className="flex items-center gap-2 mt-0.5 md:mt-1.5 overflow-x-auto no-scrollbar">
-                <Badge variant="outline" className="bg-primary/5 text-primary border-primary/10 text-[9px] md:text-xs font-bold uppercase tracking-widest px-2 shrink-0">
+                <Badge variant="outline" className="bg-primary/5 text-primary border-primary/10 text-[10px] md:text-xs font-bold uppercase tracking-widest px-2 shrink-0">
                   {project.category || "General"}
                 </Badge>
                 <div className="flex items-center gap-1.5 shrink-0">
                   <Users className="h-2.5 w-2.5 md:h-3 md:w-3 text-muted-foreground opacity-60" />
-                  <span className="text-[9px] md:text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                  <span className="text-[10px] md:text-xs font-bold text-muted-foreground uppercase tracking-widest">
                     {project.team?.length || 0}
                   </span>
                 </div>
@@ -333,15 +333,15 @@ const ProjectDetails = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl shadow-2xl border-primary/10">
-                    <DropdownMenuItem onClick={() => navigate(`/projects/${projectId}/analytics`)} className="rounded-xl font-black text-[10px] uppercase py-4">
+                    <DropdownMenuItem onClick={() => navigate(`/projects/${projectId}/analytics`)} className="rounded-xl font-bold text-xs uppercase py-4">
                        <BarChart3 className="h-4 w-4 mr-4 text-primary" /> Project Analytics
                     </DropdownMenuItem>
                     {isOwner && (
                       <>
-                        <DropdownMenuItem onClick={() => setWorkflowModalOpen(true)} className="rounded-xl font-black text-[10px] uppercase py-4">
+                        <DropdownMenuItem onClick={() => setWorkflowModalOpen(true)} className="rounded-xl font-bold text-xs uppercase py-4">
                           <Settings className="h-4 w-4 mr-4 text-primary" /> Manage Workflow
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setInviteModalOpen(true)} className="rounded-xl font-black text-[10px] uppercase py-4">
+                        <DropdownMenuItem onClick={() => setInviteModalOpen(true)} className="rounded-xl font-bold text-xs uppercase py-4">
                           <UserPlus className="h-4 w-4 mr-4 text-primary" /> Invite Team
                         </DropdownMenuItem>
                       </>
@@ -431,7 +431,7 @@ const ProjectDetails = () => {
                    <Info className="h-4 w-4" />
                    <h3 className="font-black text-xs uppercase tracking-widest">Project Strategy</h3>
                 </div>
-                <Card className="border border-primary/5 shadow-sm bg-card/40 backdrop-blur-sm rounded-[2rem] overflow-hidden group">
+                <Card className="glass-panel rounded-[2rem] overflow-hidden group">
                   <CardContent className="p-8">
                     <p className="text-foreground/80 leading-relaxed whitespace-pre-wrap font-medium text-sm md:text-base">
                       {project.description || "No project description provided for this project."}
@@ -452,7 +452,7 @@ const ProjectDetails = () => {
                     <UserIcon className="h-4 w-4" />
                     <h3 className="font-black text-xs uppercase tracking-widest">Project Lead</h3>
                   </div>
-                  <Card className="border border-primary/5 shadow-sm bg-card/40 backdrop-blur-sm rounded-[2rem] overflow-hidden">
+                  <Card className="glass-panel rounded-[2rem] overflow-hidden">
                     <CardContent className="p-6">
                       <div className="flex items-center gap-4">
                         <Avatar className="h-12 w-12 md:h-14 md:w-14 border-2 border-background shadow-md ring-2 ring-primary/5">
@@ -488,7 +488,7 @@ const ProjectDetails = () => {
                         </Avatar>
                         <div className="min-w-0 flex-1">
                           <p className="font-black text-xs md:text-sm truncate group-hover:text-primary transition-colors">{member.fullName}</p>
-                          <p className="text-[9px] text-muted-foreground font-bold truncate opacity-60 uppercase tracking-widest">{member.email}</p>
+                          <p className="text-[10px] text-muted-foreground font-bold truncate opacity-80 uppercase tracking-widest">{member.email}</p>
                         </div>
                         <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0 text-primary" />
                       </div>
@@ -507,7 +507,7 @@ const ProjectDetails = () => {
           <div className="p-6 md:p-8 space-y-6">
             <DialogHeader>
               <DialogTitle className="text-xl md:text-2xl font-black tracking-tight uppercase">New Task</DialogTitle>
-              <DialogDescription className="text-[10px] md:text-xs font-bold uppercase tracking-widest opacity-60">Operational Planning</DialogDescription>
+              <DialogDescription className="text-xs md:text-sm font-bold uppercase tracking-widest opacity-80">Operational Planning</DialogDescription>
             </DialogHeader>
             <div className="space-y-5">
               <div className="space-y-2">
@@ -544,7 +544,7 @@ const ProjectDetails = () => {
                <UserPlus className="h-7 w-7 md:h-8 md:w-8 text-primary" />
             </div>
             <DialogTitle className="text-xl md:text-2xl font-black uppercase tracking-tight">Expand Team</DialogTitle>
-            <DialogDescription className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] opacity-60">Authorise new unit access</DialogDescription>
+            <DialogDescription className="text-xs md:text-sm font-bold uppercase tracking-[0.2em] opacity-80">Authorise new unit access</DialogDescription>
           </DialogHeader>
           <div className="space-y-6">
             <Input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="colleague@company.com" className="h-14 rounded-[1.25rem] bg-muted/20 border-primary/5 text-center font-bold" />
