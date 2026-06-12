@@ -80,8 +80,8 @@ const Dashboard = () => {
           <DashboardStats stats={stats} isLoading={isStatsLoading} />
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          <div className="xl:col-span-2 space-y-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-12">
             {/* Charts Section */}
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 fill-mode-backwards">
               <DashboardCharts counts={projectCounts} isLoading={isCountsLoading} />
