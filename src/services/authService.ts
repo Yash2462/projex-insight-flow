@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_URL } from './client';
+import apiClient, { API_URL } from './client';
 
 export const authAPI = {
   login: (data: { email: string; password: string; otp?: string }) =>
@@ -13,4 +13,6 @@ export const authAPI = {
 
   resetPassword: (data: { email: string; otp: string; newPassword: string }) =>
     axios.post(`${API_URL}/auth/reset-password`, data),
+
+  logout: () => apiClient.post('/auth/logout'),
 };
