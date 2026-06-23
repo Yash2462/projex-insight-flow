@@ -22,7 +22,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { userAPI, notificationAPI } from "@/services/api";
+import { userAPI, notificationAPI, authAPI } from "@/services/api";
 import { useWebSocket } from "@/hooks/use-websocket";
 import {
   DropdownMenu,
@@ -159,9 +159,16 @@ const Navigation = () => {
 
   const isActivePath = (path: string) => location.pathname === path;
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await authAPI.logout();
+    } catch (error) {
+      console.error("Error during logout", error);
+    } finally {
+      localStorage.removeItem("token");
+      queryClient.clear();
+      navigate("/login");
+    }
   };
 
   return (
