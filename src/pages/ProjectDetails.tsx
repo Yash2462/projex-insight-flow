@@ -73,6 +73,14 @@ import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 
 import { ProjectDetailsSkeleton } from "@/components/PageSkeletons";
 
+const BACKGROUND_OPTIONS = [
+  { id: 'default', color: '', label: 'Default' },
+  { id: 'blue', color: 'bg-blue-500/10 dark:bg-blue-900/20', label: 'Ocean Blue' },
+  { id: 'green', color: 'bg-emerald-500/10 dark:bg-emerald-900/20', label: 'Forest Green' },
+  { id: 'purple', color: 'bg-purple-500/10 dark:bg-purple-900/20', label: 'Royal Purple' },
+  { id: 'rose', color: 'bg-rose-500/10 dark:bg-rose-900/20', label: 'Sunset Rose' },
+];
+
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -101,6 +109,11 @@ const ProjectDetails = () => {
 
   const [selectedIssueForComments, setSelectedIssueForComments] = useState<Issue | null>(null);
   const [selectedIssueTab, setSelectedIssueTab] = useState("overview");
+  const [boardBg, setBoardBg] = useState(() => localStorage.getItem(`project-bg-${projectId}`) || 'default');
+
+  useEffect(() => {
+    localStorage.setItem(`project-bg-${projectId}`, boardBg);
+  }, [boardBg, projectId]);
 
   // Queries
   const { data: profile } = useQuery({
@@ -253,8 +266,10 @@ const ProjectDetails = () => {
     return <ProjectDetailsSkeleton />;
   }
 
+  const activeBg = BACKGROUND_OPTIONS.find(b => b.id === boardBg)?.color || '';
+
   return (
-    <div className="min-h-screen bg-background flex flex-col md:ml-64">
+    <div className={`min-h-screen bg-background flex flex-col md:ml-64 ${activeBg} transition-colors duration-500`}>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-screen">
       {/* High-End Responsive Header */}
       <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-primary/5 px-4 md:px-10 py-3 md:py-8 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -311,6 +326,26 @@ const ProjectDetails = () => {
                     <DropdownMenuItem onClick={() => setWorkflowModalOpen(true)} className="rounded-xl font-bold text-xs uppercase py-3 cursor-pointer">
                        <Settings className="h-4 w-4 mr-3 text-primary" /> Workflow Design
                     </DropdownMenuItem>
+                    
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="rounded-xl font-bold text-xs uppercase py-3 cursor-default flex-col items-start gap-3">
+                       <div className="flex items-center">
+                         <Layout className="h-4 w-4 mr-3 text-primary" /> Board Background
+                       </div>
+                       <div className="flex gap-2 w-full mt-2">
+                         {BACKGROUND_OPTIONS.map(bg => (
+                           <button 
+                             key={bg.id}
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               setBoardBg(bg.id);
+                             }}
+                             className={`h-6 w-6 rounded-full border-2 transition-all ${bg.id === 'default' ? 'bg-muted border-primary/20' : bg.color.split(' ')[0]} ${boardBg === bg.id ? 'border-primary scale-110 shadow-glow' : 'border-transparent hover:scale-105'}`}
+                             title={bg.label}
+                           />
+                         ))}
+                       </div>
+                    </DropdownMenuItem>
+
                     <DropdownMenuItem onClick={() => setInviteModalOpen(true)} className="rounded-xl font-bold text-xs uppercase py-3 cursor-pointer">
                        <UserPlus className="h-4 w-4 mr-3 text-primary" /> Add Operator
                     </DropdownMenuItem>

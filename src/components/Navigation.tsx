@@ -61,6 +61,9 @@ interface Notification {
 
 const Navigation = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    return localStorage.getItem("sidebar-collapsed") === "true";
+  });
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchOpenQuery] = useState("");
   const location = useLocation();
@@ -71,6 +74,17 @@ const Navigation = () => {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
+
+  // Handle global sidebar collapse class
+  useEffect(() => {
+    if (isSidebarCollapsed) {
+      document.body.classList.add("sidebar-collapsed");
+      localStorage.setItem("sidebar-collapsed", "true");
+    } else {
+      document.body.classList.remove("sidebar-collapsed");
+      localStorage.setItem("sidebar-collapsed", "false");
+    }
+  }, [isSidebarCollapsed]);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -173,13 +187,19 @@ const Navigation = () => {
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <div className="md:hidden fixed top-3 md:top-4 right-3 md:right-4 z-50 flex items-center gap-2">
+      {/* Mobile Menu Button & Desktop Toggle */}
+      <div className="fixed top-3 md:top-4 right-3 md:right-4 z-50 flex items-center gap-2 sidebar-toggle-btn transition-all duration-500">
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+          onClick={() => {
+            if (window.innerWidth < 768) {
+              setIsMobileMenuOpen(!isMobileMenuOpen);
+            } else {
+              setIsSidebarCollapsed(!isSidebarCollapsed);
+            }
+          }}
+          aria-label="Toggle menu"
           className="bg-card/90 backdrop-blur-md shadow-elegant rounded-xl border border-primary/10 h-10 w-10 md:h-11 md:w-11"
         >
           {isMobileMenuOpen ? (
