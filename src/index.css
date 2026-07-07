@@ -185,3 +185,7 @@
     scrollbar-width: none;
   }
 }
+body.sidebar-collapsed .md\:ml-64 { margin-left: 0 !important; }
+body.sidebar-collapsed nav.w-72.md\:w-64 { transform: translateX(-100%) !important; }
+body.sidebar-collapsed .sidebar-toggle-btn { left: 1rem !important; }
+
