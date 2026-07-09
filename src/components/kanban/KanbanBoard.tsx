@@ -3,6 +3,7 @@ import KanbanCard from "./KanbanCard";
 import { Badge } from "@/components/ui/badge";
 import { Plus, MoreHorizontal, AlertCircle, CheckCircle2, CircleDashed, PlayCircle, HelpCircle, Trash2, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
 import { Issue } from "@/services/api";
 import { triggerHaptic } from "@/lib/haptics";
@@ -229,14 +230,12 @@ const KanbanBoard = ({
                           {provided.placeholder}
                           
                           {columnIssues.length === 0 && !snapshot.isDraggingOver && (
-                            <div className="h-32 flex flex-col items-center justify-center border-2 border-dashed border-muted-foreground/5 rounded-2xl mb-4 bg-muted/[0.02]">
-                              <div className="p-3 bg-muted/5 rounded-full mb-3">
-                                <CircleDashed className="h-6 w-6 text-muted-foreground/20 animate-spin-slow" />
-                              </div>
-                              <p className="text-[11px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">
-                                No tasks here
-                              </p>
-                            </div>
+                            <EmptyState
+                              icon={CircleDashed}
+                              title="No tasks here"
+                              animate={false}
+                              className="h-32 p-4 mb-4 border-muted-foreground/5 rounded-2xl"
+                            />
                           )}
 
                           <Button 
