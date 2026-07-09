@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GlassCard } from "@/components/ui/glass-card";
 import { ErrorState } from "./ErrorState";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Project } from "@/services/types";
 
 interface ActiveWorkspacesProps {
@@ -66,9 +67,12 @@ export function ActiveWorkspaces({ projects, isLoading, isError, onRetry }: Acti
             </Link>
           ))
         ) : (
-          <div className="col-span-full p-12 text-center glass-panel rounded-[2rem] border-dashed border-2 border-primary/10">
-            <p className="text-muted-foreground font-black text-xs uppercase tracking-widest opacity-60">No active workspaces found</p>
-            <p className="text-[10px] text-muted-foreground mt-2">Initialize a new project to start tracking insights.</p>
+          <div className="col-span-full">
+            <EmptyState
+              icon={Briefcase}
+              title="No active workspaces"
+              description="Initialize a new project to start tracking insights."
+            />
           </div>
         )}
       </div>

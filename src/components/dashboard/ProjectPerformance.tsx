@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GlassCard } from "@/components/ui/glass-card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "./ErrorState";
 import { Project, Issue } from "@/services/types";
 
@@ -18,20 +19,16 @@ interface ProjectPerformanceProps {
 export function ProjectPerformance({ projects, isLoading, isError, onRetry }: ProjectPerformanceProps) {
   if (isError) {
     return (
-      <GlassCard className="p-12 flex flex-col items-center justify-center text-center space-y-4 border-dashed border-2">
-        <div className="p-4 bg-muted rounded-full">
-          <Layout className="h-8 w-8 text-muted-foreground" />
-        </div>
-        <div className="space-y-2">
-          <h3 className="font-bold text-xl">No projects found</h3>
-          <p className="text-muted-foreground max-w-[280px]">
-            You haven't created any projects yet. Start by creating your first workspace.
-          </p>
-        </div>
-        <Button variant="outline" onClick={onRetry} className="rounded-xl font-bold">
-          Refresh Dashboard
-        </Button>
-      </GlassCard>
+      <EmptyState 
+        icon={Layout}
+        title="No projects found"
+        description="You haven't created any projects yet. Start by creating your first workspace."
+        action={
+          <Button variant="outline" onClick={onRetry} className="rounded-xl font-bold">
+            Refresh Dashboard
+          </Button>
+        }
+      />
     );
   }
 
@@ -93,17 +90,11 @@ export function ProjectPerformance({ projects, isLoading, isError, onRetry }: Pr
             );
           })
         ) : (
-          <GlassCard className="p-12 flex flex-col items-center justify-center text-center space-y-4 border-dashed border-2 border-primary/10">
-            <div className="p-4 bg-primary/5 rounded-full">
-              <Layout className="h-8 w-8 text-primary" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="font-bold text-xl">Your dashboard is empty</h3>
-              <p className="text-muted-foreground max-w-[300px] mx-auto">
-                Once you create a project, its performance and task velocity will appear here.
-              </p>
-            </div>
-          </GlassCard>
+          <EmptyState 
+            icon={Layout}
+            title="Your dashboard is empty"
+            description="Once you create a project, its performance and task velocity will appear here."
+          />
         )}
       </div>
     </div>

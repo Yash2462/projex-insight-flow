@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Badge } from "@/components/ui/badge";
 import { ErrorState } from "./ErrorState";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Issue } from "@/services/types";
 
 interface ImmediateFocusProps {
@@ -93,9 +94,12 @@ export function ImmediateFocus({ issues, isLoading, isError, onRetry }: Immediat
             </GlassCard>
           ))
         ) : (
-          <div className="p-8 text-center glass-panel rounded-3xl border-dashed border-2 border-primary/10">
-            <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">No urgent assignments</p>
-          </div>
+          <EmptyState 
+            icon={CheckCircle2} 
+            title="No urgent assignments" 
+            description="You're all caught up on your high-priority tasks." 
+            className="py-12" 
+          />
         )}
       </div>
     </div>
