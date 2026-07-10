@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -377,11 +378,11 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                       <Layers className="h-3.5 w-3.5" />
                       <h3 className="font-black text-[10px] uppercase tracking-[0.2em]">Strategy Overview</h3>
                     </div>
-                    <Card className="border border-primary/5 bg-card border-primary/5 rounded-[2rem] shadow-sm relative overflow-hidden group">
-                      <p className="text-sm md:text-base font-medium leading-relaxed text-foreground/80 relative z-10 p-6">
+                    <GlassCard className="p-6 relative group border-primary/10 hover:border-primary/30 transition-all duration-500 shadow-sm hover:shadow-glow">
+                      <p className="text-sm md:text-base font-medium leading-relaxed text-foreground/80 relative z-10">
                         {issue?.description || "Awaiting task description."}
                       </p>
-                    </Card>
+                    </GlassCard>
                   </div>
                 </div>
 
@@ -391,7 +392,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                       <Activity className="h-3.5 w-3.5" />
                       <h3 className="font-black text-[10px] uppercase tracking-[0.2em]">Live Parameters</h3>
                     </div>
-                    <div className="p-5 bg-card border border-primary/5 rounded-[2rem] space-y-5 shadow-sm">
+                    <GlassCard className="p-5 space-y-5 shadow-sm border-primary/10 hover:border-primary/20 transition-all duration-500">
                       <div className="space-y-2">
                         <Label className="text-[8px] font-black uppercase opacity-60 ml-1">Assignee</Label>
                         {!isViewer ? (
@@ -432,7 +433,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                           {issue?.dueDate ? new Date(issue.dueDate).toLocaleDateString([], {month: 'short', day: 'numeric'}) : 'OPEN'}
                         </span>
                       </div>
-                    </div>
+                    </GlassCard>
                   </div>
 
                   <div className="space-y-4">
@@ -440,7 +441,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                       <TrendingUp className="h-3.5 w-3.5" />
                       <h3 className="font-black text-[10px] uppercase tracking-[0.2em]">Efficiency</h3>
                     </div>
-                    <div className="p-5 bg-card border border-primary/5 rounded-[2rem] space-y-5 shadow-sm">
+                    <GlassCard className="p-5 space-y-5 shadow-sm border-primary/10 hover:border-primary/20 transition-all duration-500">
                        <div className="space-y-3">
                           <div className="flex justify-between text-[10px] font-black uppercase">
                              <span className="opacity-60">Intensity</span>
@@ -467,7 +468,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                           </Button>
                         </div>
                        )}
-                    </div>
+                    </GlassCard>
                   </div>
                 </div>
               </div>
@@ -495,7 +496,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                     const done = issue.completedSubtasks?.includes(task);
                     return (
                       <div key={idx} className={`flex items-center gap-3 md:gap-5 p-4 md:p-5 rounded-xl md:rounded-[1.5rem] border transition-all duration-300 ${
-                        done ? "bg-primary/[0.02] border-primary/5 opacity-40" : "bg-card border-primary/5 hover:border-primary/10 shadow-sm"
+                        done ? "bg-primary/[0.02] border-primary/5 opacity-40" : "glass-panel border-primary/10 hover:border-primary/30 hover:shadow-glow shadow-sm"
                       }`} onClick={() => !isViewer && toggleSubtaskMutation.mutate(task)}>
                         <Checkbox checked={done} className="h-5 w-5 md:h-6 md:w-6 rounded-lg border-primary/20 data-[state=checked]:bg-primary" />
                         <span className={`text-[12px] md:text-[14px] font-bold leading-snug transition-all ${done ? "line-through text-muted-foreground" : ""}`}>{task}</span>
@@ -519,7 +520,7 @@ const IssueDetail = ({ issueId, issueName, onClose, isFullPage = false, initialT
                     const isImg = file.fileType.startsWith('image/');
                     const fullUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}${file.fileUrl}`;
                     return (
-                      <div key={file.id} className="group relative bg-card border border-primary/5 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-glow transition-all duration-500">
+                      <div key={file.id} className="group relative glass-panel border border-primary/10 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-glow hover:border-primary/30 transition-all duration-500">
                         <div className="aspect-square relative overflow-hidden bg-muted/10">
                           {isImg ? (
                             <img src={fullUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
