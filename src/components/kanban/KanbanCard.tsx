@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { GlassCard } from "@/components/ui/glass-card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, MessageSquare, MoreVertical, CheckSquare, Trash2, Paperclip, Maximize2 } from "lucide-react";
@@ -62,13 +62,17 @@ const KanbanCard = ({ issue, index, onDelete, onViewComments }: KanbanCardProps)
           className={`mb-3 outline-none transition-all duration-300 ${snapshot.isDragging ? "rotate-3 scale-105" : ""}`}
           onClick={() => onViewComments(issue, "overview")}
         >
-          <Card className={`group relative border border-primary/5 shadow-sm hover-lift hover:border-primary/20 transition-all duration-500 bg-card rounded-2xl overflow-hidden cursor-pointer ${snapshot.isDragging ? "shadow-glow shadow-primary/20 ring-4 ring-primary/10 border-primary/40 z-50 bg-white/90 backdrop-blur-md" : ""}`}>
+          <GlassCard 
+            className={`group border shadow-sm hover-lift hover:border-primary/30 transition-all duration-500 cursor-pointer ${
+              snapshot.isDragging ? "shadow-glow shadow-primary/30 ring-4 ring-primary/20 border-primary/50 z-50 !scale-105 bg-background/80" : "border-primary/10"
+            } rounded-[1.25rem]`}
+          >
             {/* Soft Glow based on priority */}
-            <div className={`absolute top-0 left-0 w-full h-1 opacity-80 ${
-              issue.priority === "HIGH" ? "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" : issue.priority === "MEDIUM" ? "bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]" : "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"
+            <div className={`absolute top-0 left-0 w-full h-1.5 opacity-90 transition-all duration-700 group-hover:h-full group-hover:opacity-[0.04] ${
+              issue.priority === "HIGH" ? "bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.6)]" : issue.priority === "MEDIUM" ? "bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.6)]" : "bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.6)]"
             }`} />
             
-            <CardContent className="p-4 pt-5">
+            <div className="p-4 pt-5 relative z-10">
               <div className="flex justify-between items-start mb-2.5 gap-3">
                 <h4 className="text-[13px] font-bold text-foreground leading-snug flex-1 group-hover:text-primary transition-colors duration-300 line-clamp-2">
                   {issue.title}
@@ -146,8 +150,8 @@ const KanbanCard = ({ issue, index, onDelete, onViewComments }: KanbanCardProps)
                   </Avatar>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </GlassCard>
         </div>
       )}
     </Draggable>
